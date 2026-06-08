@@ -32,7 +32,7 @@
 
 ## Current Goal
 
-Next step is preparing for IMPLEMENTATION phase approval.
+Next step is moving the manual Unity implementation process into the LangGraph workflow.
 
 Programmer should write draft files into:
 
@@ -134,3 +134,17 @@ PROTOTYPE_PLAN
 - `SampleScene` wiring completed for AIPrototype objects
 - Post-scene Unity batchmode validation passed with return code 0
 - Automated `SampleScene` validation passed with return code 0
+
+## Remaining Workflow Gap
+
+Unity implementation currently works, but it is not yet a reusable graph stage.
+
+Need to add:
+
+- `tools/unity_tool.py`
+- Unity implementation nodes in `app/main_graph.py`
+- Unity state fields in `app/state.py`
+- Unity implementer prompt/rules
+- Unity QA routing and human gate
+- Unity log parser tests
+- Git strategy for root repo versus nested `STDProject`
