@@ -165,3 +165,4 @@ Checkpoint date: 2026-06-09
 - Unity QA gate returned `CLEAN_PASS`.
 - Root repo points `game_project/STDProject` to Unity commit `95421bb`.
 - Unity copy plan is now idempotent and reports `UNCHANGED` instead of rewriting identical target files.
+- Production readiness checklist added at `workspace/reports/production_readiness_checklist.md`.
