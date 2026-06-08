@@ -72,6 +72,44 @@ Implementation readiness plan:
 workspace/reports/implementation_readiness_plan.md
 ```
 
+Implementation patch preview package:
+
+```text
+workspace/patches/IMPLEMENTATION_PATCH_PLAN.md
+workspace/patches/InteractSystem_IMPLEMENTATION_PREVIEW.cs
+workspace/patches/InteractableObject_IMPLEMENTATION_PREVIEW.cs
+```
+
+Implementation test report:
+
+```text
+workspace/reports/implementation_test_report.md
+```
+
+Real Unity project marker:
+
+```text
+workspace/reports/REAL_UNITY_PROJECT.md
+```
+
+STDProject implementation test report:
+
+```text
+workspace/reports/stdproject_implementation_test_report.md
+```
+
+Unity cache fix report:
+
+```text
+workspace/reports/unity_cache_fix_report.md
+```
+
+Unity 6000.4 validation report:
+
+```text
+workspace/reports/stdproject_6000_4_validation_report.md
+```
+
 ## Current Phase
 
 ```text
@@ -80,8 +118,19 @@ PROTOTYPE_PLAN
 
 ## Do Not Do Yet
 
-- Do not import GLB into Unity automatically
-- Do not write C# files into Unity project
+- Do not modify scenes or prefabs automatically
 - Do not modify ProjectSettings
 - Do not commit/push
-- Do not run Unity validation yet
+- Do not claim Unity batchmode validation until a complete Unity project skeleton exists
+- Use `game_project/STDProject` as the real Unity project target for future implementation work
+- Do not commit Unity cache folders such as `Library/`, `Temp/`, `Logs/`, or generated solution/project files
+
+## Latest Validation
+
+- Unity version updated to `6000.4.9f1`
+- Implementation compile validation passed
+- Full UPM validation passed
+- Full Unity batchmode validation passed with return code 0
+- `SampleScene` wiring completed for AIPrototype objects
+- Post-scene Unity batchmode validation passed with return code 0
+- Automated `SampleScene` validation passed with return code 0

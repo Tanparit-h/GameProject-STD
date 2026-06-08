@@ -5,5 +5,19 @@ __pycache__/
 
 workspace/logs/
 
+# Unity generated cache/build folders
+game_project/**/Library/
+game_project/**/Temp/
+game_project/**/Logs/
+game_project/**/Obj/
+game_project/**/Build/
+game_project/**/Builds/
+game_project/**/*.csproj
+game_project/**/*.sln
+game_project/**/*.slnx
+game_project/**/.vs/
+game_project/**/.vscode/
+game_project/**/UserSettings/
+
 .DS_Store
 Thumbs.db
