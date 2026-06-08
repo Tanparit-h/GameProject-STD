@@ -166,3 +166,4 @@ Checkpoint date: 2026-06-09
 - Root repo points `game_project/STDProject` to Unity commit `95421bb`.
 - Unity copy plan is now idempotent and reports `UNCHANGED` instead of rewriting identical target files.
 - Production readiness checklist added at `workspace/reports/production_readiness_checklist.md`.
+- Remaining dirty Unity state is audited at `workspace/reports/unity_dirty_state_audit.md`.
