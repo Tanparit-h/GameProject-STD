@@ -58,7 +58,7 @@ def main() -> int:
     unity_clean, unity_output = git_clean(UNITY_PROJECT)
     checks.append(("unity git clean", unity_clean, unity_output))
 
-    tests_ok, tests_output = run_command([sys.executable, "-m", "unittest", "test_unity_tool.py"], PROJECT_ROOT)
+    tests_ok, tests_output = run_command([sys.executable, "-m", "unittest", "discover", "-p", "test_*.py"], PROJECT_ROOT)
     checks.append(("root unit tests", tests_ok, tests_output))
 
     unity_validation = run_unity_batchmode(log_name="unity_release_gate_validation.log")

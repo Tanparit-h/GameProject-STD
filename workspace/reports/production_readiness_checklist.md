@@ -23,7 +23,7 @@ The AI Office workflow can run through Manager, Designer, Creator, Programmer, Q
 Root tests:
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest test_unity_tool.py
+.\.venv\Scripts\python.exe -m unittest discover -p "test_*.py"
 ```
 
 Release gate:
