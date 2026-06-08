@@ -1,0 +1,10 @@
+Read AGENTS.md, PROJECT_STATUS.md, CODEX_TASK.md, and NEXT_STEPS.md.
+
+Creator Blender export now works.
+
+Implement CODEX_TASK.md.
+
+Important:
+- Write programmer draft files only into workspace/programmer_outputs.
+- Show proposed changes before applying.
+- Do not commit.

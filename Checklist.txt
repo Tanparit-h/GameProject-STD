@@ -1,0 +1,10 @@
+[ / ] ollama list เห็น qwen3:14b
+[ / ] ollama run qwen3:14b ตอบได้
+[ / ] PowerShell /api/generate ได้ OLLAMA_OK
+[ / ] PowerShell /api/chat ได้ CHAT_OK
+[ / ] python test_ollama_raw.py ได้ PYTHON_OLLAMA_OK
+[ / ] python test_autogen_ollama.py ได้ C# code
+[ / ] python test_autogen_team_ollama.py มี designer/reviewer คุยกัน
+[ / ] python benchmark_ollama.py ได้ tokens/sec
+[ / ] python test_langgraph_mock.py ผ่าน
+[ / ] python -m app.main_graph สร้าง latest_report.md ได้
