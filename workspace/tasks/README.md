@@ -26,3 +26,13 @@ $env:AI_STUDIO_TASK_FILE='workspace/tasks/interaction_vertical_slice.json'
 ```
 
 `AI_STUDIO_PHASE` and `AI_STUDIO_FEATURE_REQUEST` still work as overrides when no task file is provided.
+
+## Approval Records
+
+Approval decisions are recorded as JSON Lines:
+
+```text
+workspace/approvals/approval_log.jsonl
+```
+
+Each record includes timestamp, task id, phase, decision, owner, and reason.

@@ -7,6 +7,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE_DIR = PROJECT_ROOT / "workspace"
 REPORTS_DIR = WORKSPACE_DIR / "reports"
 TASKS_DIR = WORKSPACE_DIR / "tasks"
+APPROVAL_LOG = WORKSPACE_DIR / "approvals" / "approval_log.jsonl"
 UNITY_PROJECT = PROJECT_ROOT / "game_project" / "STDProject"
 
 
@@ -30,6 +31,9 @@ def collect_status() -> dict[str, object]:
 
     report_files = sorted(path.name for path in REPORTS_DIR.glob("*.md")) if REPORTS_DIR.exists() else []
     task_files = sorted(path.name for path in TASKS_DIR.glob("*.json")) if TASKS_DIR.exists() else []
+    approval_count = 0
+    if APPROVAL_LOG.exists():
+        approval_count = len([line for line in APPROVAL_LOG.read_text(encoding="utf-8").splitlines() if line.strip()])
 
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -48,6 +52,7 @@ def collect_status() -> dict[str, object]:
         ),
         "reports": report_files,
         "tasks": task_files,
+        "approval_count": approval_count,
     }
 
 
@@ -72,6 +77,7 @@ def write_report_index(status: dict[str, object]) -> Path:
 - Unity status: `{status["unity_status"]}`
 - Latest report exists: `{status["latest_report_exists"]}`
 - Latest report clean: `{status["latest_report_clean"]}`
+- Approval records: `{status["approval_count"]}`
 
 ## Task Queue
 

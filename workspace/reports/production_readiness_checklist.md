@@ -75,6 +75,7 @@ print(run_unity_batchmode(extra_args=['-executeMethod', 'AIPrototypeSceneValidat
 - QA still mixes LLM reports with deterministic guards; more deterministic validators are needed for Creator output.
 - No push/PR/release packaging workflow has been run.
 - No multi-feature regression suite exists yet.
+- Approval records are file-based JSONL, not yet surfaced in a UI.
 
 ## Release Gate
 

@@ -15,6 +15,7 @@ class ReportIndexTests(unittest.TestCase):
             "unity_status",
             "reports",
             "tasks",
+            "approval_count",
         ]:
             self.assertIn(key, status)
 
