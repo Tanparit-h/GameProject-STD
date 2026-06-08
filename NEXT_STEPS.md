@@ -128,7 +128,7 @@ Add tests that do not require changing Unity scenes unless explicitly enabled:
 - Dry-run test for file copy plan.
 - Optional integration test for Unity batchmode when `UNITY_PROJECT` exists.
 
-Status: complete for current scope. `test_unity_tool.py` uses `unittest`, so it runs without installing pytest.
+Status: complete for current scope. `test_unity_tool.py` uses `unittest`, so it runs without installing pytest. Current tests also cover idempotent Unity copy planning.
 
 ## Next Step G: IMPLEMENTATION Approval Run
 

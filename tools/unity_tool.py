@@ -118,6 +118,26 @@ def build_copy_plan(project_path: str | Path | None = None) -> list[tuple[Path, 
     return plan
 
 
+def _transform_unity_script(source: Path) -> str:
+    content = source.read_text(encoding="utf-8", errors="replace")
+    content = content.replace("InteractSystem_Draft", "InteractSystem")
+    content = content.replace("InteractableObject_Draft", "InteractableObject")
+    return content.replace(
+        "// PROTOTYPE_PLAN draft only. Do not place this file in Unity Assets yet.\n",
+        "",
+    )
+
+
+def _target_matches_source(source: Path, target: Path) -> bool:
+    if not target.exists():
+        return False
+
+    if source.suffix.lower() == ".cs":
+        return target.read_text(encoding="utf-8", errors="replace") == _transform_unity_script(source)
+
+    return source.read_bytes() == target.read_bytes()
+
+
 def apply_copy_plan(dry_run: bool = True, project_path: str | Path | None = None) -> str:
     plan = build_copy_plan(project_path)
     lines = ["UNITY_COPY_PLAN", f"Dry run: {dry_run}"]
@@ -133,19 +153,16 @@ def apply_copy_plan(dry_run: bool = True, project_path: str | Path | None = None
         if not _inside(target, project / "Assets"):
             raise PermissionError(f"Blocked target outside Unity Assets: {target}")
 
-        lines.append(f"{source} -> {target}")
+        if _target_matches_source(source, target):
+            lines.append(f"UNCHANGED: {source} -> {target}")
+            continue
+
+        lines.append(f"COPY: {source} -> {target}")
 
         if not dry_run:
             target.parent.mkdir(parents=True, exist_ok=True)
             if source.suffix.lower() == ".cs":
-                content = source.read_text(encoding="utf-8", errors="replace")
-                content = content.replace("InteractSystem_Draft", "InteractSystem")
-                content = content.replace("InteractableObject_Draft", "InteractableObject")
-                content = content.replace(
-                    "// PROTOTYPE_PLAN draft only. Do not place this file in Unity Assets yet.\n",
-                    "",
-                )
-                target.write_text(content, encoding="utf-8")
+                target.write_text(_transform_unity_script(source), encoding="utf-8")
             else:
                 shutil.copy2(source, target)
 

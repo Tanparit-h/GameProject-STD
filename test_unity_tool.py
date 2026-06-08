@@ -4,6 +4,8 @@ import unittest
 from tools.unity_tool import (
     PROJECT_ROOT,
     apply_copy_plan,
+    CREATOR_EXPORT_DIR,
+    PROGRAMMER_OUTPUT_DIR,
     parse_unity_log,
     parse_unity_result_text,
     validate_unity_project_path,
@@ -60,6 +62,20 @@ class UnityToolTests(unittest.TestCase):
 
         self.assertIn("UNITY_COPY_PLAN", result)
         self.assertIn("Dry run: True", result)
+
+    def test_apply_copy_plan_marks_existing_targets_unchanged(self):
+        project = PROJECT_ROOT / "game_project" / "STDProject"
+        if not project.exists():
+            self.skipTest("STDProject is not present in this checkout")
+
+        source = PROGRAMMER_OUTPUT_DIR / "InteractSystem_Draft.cs"
+        target = project / "Assets" / "Scripts" / "AIPrototype" / "InteractSystem.cs"
+        if not source.exists() or not target.exists():
+            self.skipTest("InteractSystem draft or Unity target is not present")
+
+        result = apply_copy_plan(dry_run=True, project_path=project)
+
+        self.assertIn("UNCHANGED:", result)
 
 
 if __name__ == "__main__":
