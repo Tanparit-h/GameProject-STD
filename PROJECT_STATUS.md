@@ -154,3 +154,4 @@ Checkpoint date: 2026-06-09
 - Unity stage generated a dry-run copy plan only
 - Unity validation, scene setup, and scene validation were skipped because current phase is `PROTOTYPE_PLAN`
 - No Unity project files were written by the workflow during this checkpoint
+- `app.main_graph` now reads `AI_STUDIO_PHASE` and `AI_STUDIO_FEATURE_REQUEST` from environment variables, with safe defaults

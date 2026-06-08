@@ -134,7 +134,7 @@ Status: complete for current scope. `test_unity_tool.py` uses `unittest`, so it 
 
 Blocked until explicit human approval:
 
-- Switch phase from `PROTOTYPE_PLAN` to `IMPLEMENTATION`
+- Switch phase from `PROTOTYPE_PLAN` to `IMPLEMENTATION`, for example by setting `AI_STUDIO_PHASE=IMPLEMENTATION`
 - Apply approved assets/scripts into `game_project/STDProject`
 - Run Unity batchmode validation
 - Run scene setup and scene validation

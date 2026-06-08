@@ -1,4 +1,5 @@
 import asyncio
+import os
 import re
 from pathlib import Path
 from langgraph.graph import StateGraph, END
@@ -1331,16 +1332,20 @@ def build_graph():
 
 async def main():
     app = build_graph()
-
-    result = await app.ainvoke({
-        "feature_request": """
+    default_feature_request = """
 สร้างระบบ prototype:
 Player กด E เพื่อ interact กับ object ใกล้ตัว
 ต้องมี asset placeholder สำหรับ object ที่ interact ได้
 ยังไม่ต้องแก้ Unity project จริง
 ขอ design spec, asset plan, implementation plan, และ QA checklist
-""",
-        "phase": "PROTOTYPE_PLAN",
+"""
+
+    feature_request = os.getenv("AI_STUDIO_FEATURE_REQUEST", default_feature_request)
+    phase = os.getenv("AI_STUDIO_PHASE", "PROTOTYPE_PLAN")
+
+    result = await app.ainvoke({
+        "feature_request": feature_request,
+        "phase": phase,
         "manager_output": "",
         "designer_output": "",
         "creator_required": True,
