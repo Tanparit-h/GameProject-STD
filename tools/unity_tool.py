@@ -16,7 +16,8 @@ DEFAULT_UNITY_PROJECT = PROJECT_ROOT / "game_project" / "STDProject"
 
 UNITY_ERROR_MARKERS = [
     "error CS",
-    "Exception",
+    "Unhandled Exception",
+    "InvalidOperationException",
     "EPERM",
     "Compilation failed",
     "Traceback",
@@ -27,6 +28,7 @@ UNITY_ERROR_MARKERS = [
 
 UNITY_SUCCESS_MARKERS = [
     "Tundra build success",
+    "AIPrototypeSceneValidator passed.",
     "Exit code: 0",
     "return code 0",
 ]

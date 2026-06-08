@@ -35,6 +35,16 @@ class UnityToolTests(unittest.TestCase):
         self.assertIs(result["passed"], True)
         self.assertEqual(result["return_code"], 0)
 
+    def test_parse_unity_log_ignores_named_pipe_shutdown_warning(self):
+        result = parse_unity_log(
+            "Exception occured while accepting client connection: "
+            "System.IO.IOException: The pipe is being closed.\n"
+            "AIPrototypeSceneValidator passed.",
+            return_code=0,
+        )
+
+        self.assertIs(result["passed"], True)
+
     def test_validate_unity_project_rejects_path_outside_game_project(self):
         ok, message, _ = validate_unity_project_path(PROJECT_ROOT)
 
