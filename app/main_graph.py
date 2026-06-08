@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 import re
 from pathlib import Path
@@ -1367,6 +1368,15 @@ Player กด E เพื่อ interact กับ object ใกล้ตัว
 
     feature_request = os.getenv("AI_STUDIO_FEATURE_REQUEST", default_feature_request)
     phase = os.getenv("AI_STUDIO_PHASE", "PROTOTYPE_PLAN")
+    task_file = os.getenv("AI_STUDIO_TASK_FILE")
+
+    if task_file:
+        task_path = Path(task_file)
+        if not task_path.is_absolute():
+            task_path = ROOT / task_path
+        task_data = json.loads(task_path.read_text(encoding="utf-8"))
+        feature_request = task_data.get("request", feature_request)
+        phase = task_data.get("phase", phase)
 
     result = await app.ainvoke({
         "feature_request": feature_request,

@@ -46,6 +46,13 @@ $env:AI_STUDIO_PHASE='IMPLEMENTATION'
 .\.venv\Scripts\python.exe -m app.main_graph
 ```
 
+Task-file workflow:
+
+```powershell
+$env:AI_STUDIO_TASK_FILE='workspace/tasks/interaction_vertical_slice.json'
+.\.venv\Scripts\python.exe -m app.main_graph
+```
+
 Scene validation only:
 
 ```powershell
