@@ -26,6 +26,8 @@ Files:
 
 No Unity project modification yet.
 
+Status: done.
+
 ## Next Step B: QA Checks Programmer Files
 
 QA should check:
@@ -36,6 +38,8 @@ QA should check:
 - Logic handles multiple objects by closest priority
 - Mock UI feedback exists
 - Blender asset is treated as visual reference only
+
+Status: current next step.
 
 ## Next Step C: Human Gate
 

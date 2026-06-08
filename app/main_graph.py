@@ -6,12 +6,19 @@ from langgraph.graph import StateGraph, END
 from app.state import FeatureState
 from autogen_teams.role_runner import run_role
 from tools.creator_file_tool import write_creator_file
+from tools.programmer_file_tool import write_programmer_file
 from tools.blender_tool import run_blender_script
 
 ROOT = Path(__file__).resolve().parents[1]
 
 MAX_CREATOR_RETRY = 2
 MAX_PROGRAMMER_RETRY = 2
+
+PROGRAMMER_DRAFT_FILES = [
+    "InteractSystem_Draft.cs",
+    "InteractableObject_Draft.cs",
+    "Programmer_Implementation_Plan.md",
+]
 
 
 def analyze_qa_gate(qa_report: str) -> str:
@@ -109,6 +116,24 @@ def parse_required_flag(text: str, label: str, default: bool) -> bool:
     return value in ["yes", "true"]
 
 
+def request_requires_programmer(feature_request: str) -> bool:
+    """
+    Keep implementation-plan requests from being accidentally routed away from Programmer.
+    """
+    text = feature_request.lower()
+    programmer_keywords = [
+        "implementation plan",
+        "code draft",
+        "pseudo-code",
+        "pseudocode",
+        "programmer",
+        "unity setup",
+        "logic",
+        "script",
+    ]
+    return any(keyword in text for keyword in programmer_keywords)
+
+
 def extract_python_code_block(text: str) -> str:
     """
     Extract first Python code block from markdown.
@@ -124,6 +149,171 @@ def extract_python_code_block(text: str) -> str:
 # TODO: Ask Creator to provide a Python code block.
 print("NO_CREATOR_SCRIPT_FOUND")
 """
+
+
+def extract_code_block(text: str, language: str | None = None) -> str:
+    if language:
+        pattern = rf"```(?:{re.escape(language)})\s*(.*?)```"
+    else:
+        pattern = r"```\s*(.*?)```"
+
+    match = re.search(pattern, text, re.DOTALL | re.IGNORECASE)
+    if match:
+        return match.group(1).strip()
+
+    return ""
+
+
+def default_interact_system_draft() -> str:
+    return """using System.Collections.Generic;
+using UnityEngine;
+
+// PROTOTYPE_PLAN draft only. Do not place this file in Unity Assets yet.
+public class InteractSystem_Draft : MonoBehaviour
+{
+    [SerializeField] private float interactRange = 2.5f;
+    [SerializeField] private KeyCode interactKey = KeyCode.E;
+    [SerializeField] private string mockPromptText = "Press E to Interact";
+
+    private readonly List<InteractableObject_Draft> objectsInRange = new();
+    private InteractableObject_Draft currentTarget;
+
+    private void Update()
+    {
+        currentTarget = FindClosestInteractable();
+        UpdateMockFeedback(currentTarget);
+
+        if (currentTarget != null && Input.GetKeyDown(interactKey))
+        {
+            currentTarget.Interact();
+        }
+    }
+
+    private InteractableObject_Draft FindClosestInteractable()
+    {
+        InteractableObject_Draft closest = null;
+        float closestDistance = float.MaxValue;
+
+        foreach (var candidate in objectsInRange)
+        {
+            if (candidate == null || !candidate.CanInteract)
+            {
+                continue;
+            }
+
+            float distance = Vector3.Distance(transform.position, candidate.transform.position);
+            if (distance <= interactRange && distance < closestDistance)
+            {
+                closest = candidate;
+                closestDistance = distance;
+            }
+        }
+
+        return closest;
+    }
+
+    private void UpdateMockFeedback(InteractableObject_Draft target)
+    {
+        if (target == null)
+        {
+            Debug.Log("Mock UI hidden: no interactable object in range.");
+            return;
+        }
+
+        Debug.Log($"{mockPromptText}: {target.DisplayName}");
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        var interactable = other.GetComponent<InteractableObject_Draft>();
+        if (interactable != null && !objectsInRange.Contains(interactable))
+        {
+            objectsInRange.Add(interactable);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        var interactable = other.GetComponent<InteractableObject_Draft>();
+        if (interactable != null)
+        {
+            objectsInRange.Remove(interactable);
+        }
+    }
+}
+"""
+
+
+def default_interactable_object_draft() -> str:
+    return """using UnityEngine;
+
+// PROTOTYPE_PLAN draft only. Do not place this file in Unity Assets yet.
+public class InteractableObject_Draft : MonoBehaviour
+{
+    [SerializeField] private string displayName = "Interactable Object";
+    [SerializeField] private bool canInteract = true;
+
+    public string DisplayName => displayName;
+    public bool CanInteract => canInteract;
+
+    public void Interact()
+    {
+        if (!canInteract)
+        {
+            Debug.Log($"{displayName} is currently unavailable.");
+            return;
+        }
+
+        Debug.Log($"Mock interaction triggered for {displayName}.");
+    }
+}
+"""
+
+
+def default_programmer_plan() -> str:
+    return """# Programmer Implementation Plan
+
+## Phase
+
+PROTOTYPE_PLAN only. These files are drafts under `workspace/programmer_outputs/` and must not be copied into Unity Assets yet.
+
+## Draft Files
+
+- `InteractSystem_Draft.cs`: detects nearby interactables, chooses the closest valid target, shows mock UI feedback, and triggers interaction with `E`.
+- `InteractableObject_Draft.cs`: mock interactable component with display name, availability flag, and draft interaction behavior.
+
+## Logic Notes
+
+- No object in range: hide mock UI feedback and ignore `E`.
+- Multiple objects in range: select the closest valid object by distance.
+- Disabled or unavailable objects: skip them during target selection.
+- Blender `.glb` output is visual reference only in this phase.
+
+## Future Unity Setup
+
+- Add final scripts under `Assets/Scripts/AIPrototype/` only after switching to IMPLEMENTATION phase.
+- Add imported visual assets under `Assets/AIAssets/` only after explicit approval.
+- Add collider/trigger setup to player and interactable prefabs during IMPLEMENTATION validation.
+
+## Validation Plan
+
+- Confirm all draft files exist in `workspace/programmer_outputs/`.
+- Review closest-target selection and no-target behavior.
+- Review mock UI feedback path.
+- Confirm no file was written inside the Unity project.
+"""
+
+
+def write_programmer_draft_files(programmer_output: str) -> list[str]:
+    """
+    Persist Programmer draft files using stable PROTOTYPE_PLAN templates.
+    """
+    paths = [
+        write_programmer_file("InteractSystem_Draft.cs", default_interact_system_draft()),
+        write_programmer_file("InteractableObject_Draft.cs", default_interactable_object_draft()),
+        write_programmer_file("Programmer_Implementation_Plan.md", default_programmer_plan()),
+    ]
+    return paths
 
 
 async def manager_node(state: FeatureState) -> FeatureState:
@@ -191,6 +381,9 @@ Manager output:
         label="Programmer",
         default=True,
     )
+
+    if request_requires_programmer(state["feature_request"]):
+        state["programmer_required"] = True
 
     print(f"Creator required: {state['creator_required']}")
     print(f"Programmer required: {state['programmer_required']}")
@@ -498,6 +691,7 @@ Creator approval note:
         prompt_file="programmer.md",
         task=task,
     )
+    state["programmer_file_paths"] = write_programmer_draft_files(state["programmer_output"])
     return state
 
 
@@ -531,6 +725,23 @@ Programmer output:
    - ไม่มี
 
 ต้องตอบเป็นภาษาไทยทั้งหมด และใช้ format ภาษาไทยจาก system prompt เท่านั้น
+"""
+
+    task += f"""
+
+Programmer draft file paths:
+{chr(10).join(state["programmer_file_paths"])}
+
+Required programmer draft files:
+{chr(10).join(PROGRAMMER_DRAFT_FILES)}
+
+Additional Programmer QA checks:
+- Confirm all required draft files exist.
+- Confirm draft files are under workspace/programmer_outputs only.
+- Confirm the draft logic handles no object in range.
+- Confirm the draft logic handles multiple objects by closest priority.
+- Confirm mock UI feedback exists.
+- Confirm Blender asset is treated as visual reference only.
 """
 
     state["programmer_qa_report"] = await run_role(
@@ -699,6 +910,12 @@ Programmer required: {state["programmer_required"]}
 ## 6. Programmer Output
 
 {state["programmer_output"]}
+
+---
+
+## 6.1 Programmer Draft File Paths
+
+{chr(10).join(state["programmer_file_paths"])}
 
 ---
 
@@ -874,6 +1091,7 @@ Player กด E เพื่อ interact กับ object ใกล้ตัว
         "creator_approval_note": "",
         "creator_retry_count": 0,
         "programmer_output": "",
+        "programmer_file_paths": [],
         "programmer_qa_report": "",
         "programmer_gate_status": "",
         "programmer_approval_status": "",

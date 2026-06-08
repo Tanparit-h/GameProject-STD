@@ -20,6 +20,7 @@ class FeatureState(TypedDict):
     creator_retry_count: int
 
     programmer_output: str
+    programmer_file_paths: list[str]
     programmer_qa_report: str
     programmer_gate_status: str
     programmer_approval_status: str

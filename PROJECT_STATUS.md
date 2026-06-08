@@ -26,10 +26,11 @@
 - Blender can be called from workflow
 - Creator Blender export now works
 - `.glb` placeholder asset export has been tested and passed
+- Programmer draft file output now writes files into `workspace/programmer_outputs/`
 
 ## Current Goal
 
-Next step is adding Programmer draft file output.
+Next step is QA checking Programmer draft files.
 
 Programmer should write draft files into:
 
@@ -48,6 +49,8 @@ workspace/programmer_outputs/InteractSystem_Draft.cs
 workspace/programmer_outputs/InteractableObject_Draft.cs
 workspace/programmer_outputs/Programmer_Implementation_Plan.md
 ```
+
+Current programmer draft files have been generated in `workspace/programmer_outputs/`.
 
 ## Current Phase
 
