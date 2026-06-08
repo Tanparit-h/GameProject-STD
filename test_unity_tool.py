@@ -5,6 +5,7 @@ from tools.unity_tool import (
     PROJECT_ROOT,
     apply_copy_plan,
     parse_unity_log,
+    parse_unity_result_text,
     validate_unity_project_path,
 )
 
@@ -22,6 +23,17 @@ class UnityToolTests(unittest.TestCase):
 
         self.assertIs(result["passed"], False)
         self.assertIn("error CS", result["error_markers"])
+
+    def test_parse_unity_result_text_reads_exit_code(self):
+        result = parse_unity_result_text(
+            "UNITY_BATCHMODE_RESULT\n"
+            "Exit code: 0\n"
+            "Passed: True\n"
+            "Success markers: Tundra build success, return code 0"
+        )
+
+        self.assertIs(result["passed"], True)
+        self.assertEqual(result["return_code"], 0)
 
     def test_validate_unity_project_rejects_path_outside_game_project(self):
         ok, message, _ = validate_unity_project_path(PROJECT_ROOT)

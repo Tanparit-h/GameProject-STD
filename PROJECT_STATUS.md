@@ -36,9 +36,9 @@
 
 ## Current Goal
 
-Next step is preparing the workflow for an explicit IMPLEMENTATION phase run after human approval.
+Next step is hardening the implementation workflow for repeatable production-style runs.
 
-The graph now creates a dry-run Unity copy plan in `PROTOTYPE_PLAN` and skips real Unity modification, batchmode validation, scene setup, and scene validation.
+The graph can now run `IMPLEMENTATION`, apply approved assets/scripts to `STDProject`, run Unity validation, run scene setup, run scene validation, and produce a clean QA gate.
 
 ## Desired Files
 
@@ -111,7 +111,7 @@ workspace/reports/stdproject_6000_4_validation_report.md
 ## Current Phase
 
 ```text
-PROTOTYPE_PLAN
+IMPLEMENTATION validated
 ```
 
 ## Do Not Do Yet
@@ -135,13 +135,13 @@ PROTOTYPE_PLAN
 
 ## Remaining Workflow Gap
 
-Unity implementation is now represented as a reusable graph stage, but real apply/scene setup remains gated by phase and approval.
+Unity implementation is represented as a reusable graph stage and has passed an approved IMPLEMENTATION run.
 
 Need to add:
 
-- Git strategy for root repo versus nested `STDProject`
 - Expand Unity workflow tests beyond the current standard-library unit tests
-- IMPLEMENTATION phase approval path and commit strategy
+- Production readiness checklist for repeated features
+- Handling strategy for unrelated dirty Unity project changes before push/release
 - Git strategy is documented at `workspace/reports/git_strategy.md`; root and nested Unity commits remain separate
 
 ## Latest Automation Checkpoint
@@ -155,3 +155,12 @@ Checkpoint date: 2026-06-09
 - Unity validation, scene setup, and scene validation were skipped because current phase is `PROTOTYPE_PLAN`
 - No Unity project files were written by the workflow during this checkpoint
 - `app.main_graph` now reads `AI_STUDIO_PHASE` and `AI_STUDIO_FEATURE_REQUEST` from environment variables, with safe defaults
+
+## Latest Implementation Checkpoint
+
+- `AI_STUDIO_PHASE=IMPLEMENTATION python -m app.main_graph` passed.
+- Unity batchmode validation passed with exit code 0.
+- Unity scene setup passed with exit code 0.
+- Unity scene validation passed with exit code 0.
+- Unity QA gate returned `CLEAN_PASS`.
+- Root repo points `game_project/STDProject` to Unity commit `95421bb`.

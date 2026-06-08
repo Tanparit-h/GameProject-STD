@@ -78,6 +78,20 @@ def parse_unity_log(log_text: str, return_code: int | None = None) -> dict[str, 
     }
 
 
+def parse_unity_result_text(result_text: str) -> dict[str, object]:
+    return_code: int | None = None
+    for line in result_text.splitlines():
+        if line.startswith("Exit code:"):
+            value = line.split(":", 1)[1].strip()
+            try:
+                return_code = int(value)
+            except ValueError:
+                return_code = None
+            break
+
+    return parse_unity_log(result_text, return_code)
+
+
 def build_copy_plan(project_path: str | Path | None = None) -> list[tuple[Path, Path]]:
     ok, message, project = validate_unity_project_path(project_path)
     if not ok:

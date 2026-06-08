@@ -18,7 +18,7 @@ Completed:
 
 ## Current Gap
 
-The latest Unity implementation stage now exists as an automated graph node, but real Unity apply is still gated behind an explicit IMPLEMENTATION phase.
+The Unity implementation stage now exists as an automated graph node and has passed an approved IMPLEMENTATION run.
 
 To make the AI Office workflow truly reusable, the graph needs a dedicated Unity implementation stage that can:
 
@@ -140,7 +140,7 @@ Blocked until explicit human approval:
 - Run scene setup and scene validation
 - Commit nested Unity repo changes according to chosen git strategy
 
-Status: approval required, skipped during unattended checkpoint.
+Status: complete. Latest IMPLEMENTATION run passed Unity validation, scene setup, and scene validation.
 
 ## Next Step F: Git Strategy
 

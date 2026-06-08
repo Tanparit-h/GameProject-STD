@@ -12,6 +12,7 @@ from tools.blender_tool import run_blender_script
 from tools.unity_tool import (
     apply_copy_plan,
     get_unity_project_path,
+    parse_unity_result_text,
     run_unity_batchmode,
     validate_unity_project_path,
 )
@@ -937,6 +938,30 @@ Unity scene validation result:
         task=task,
     )
     state["unity_gate_status"] = analyze_qa_gate(state["unity_qa_report"])
+    validation = parse_unity_result_text(state["unity_validation_result"])
+    scene_setup = parse_unity_result_text(state["unity_scene_setup_result"])
+    scene_validation = parse_unity_result_text(state["unity_scene_validation_result"])
+
+    if state["phase"] == "IMPLEMENTATION":
+        deterministic_results = [validation, scene_setup, scene_validation]
+        if all(result["passed"] for result in deterministic_results):
+            state["unity_gate_status"] = "CLEAN_PASS"
+            state["unity_qa_report"] += (
+                "\n\n---\n\n"
+                "Deterministic Unity QA: PASS\n"
+                "- Batchmode validation passed.\n"
+                "- Scene setup passed.\n"
+                "- Scene validation passed.\n"
+            )
+        else:
+            state["unity_gate_status"] = "NEED_USER_GATE"
+            state["unity_qa_report"] += (
+                "\n\n---\n\n"
+                "Deterministic Unity QA: FAIL\n"
+                f"- Batchmode validation passed: {validation['passed']}\n"
+                f"- Scene setup passed: {scene_setup['passed']}\n"
+                f"- Scene validation passed: {scene_validation['passed']}\n"
+            )
     return state
 
 
