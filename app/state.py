@@ -27,4 +27,15 @@ class FeatureState(TypedDict):
     programmer_approval_note: str
     programmer_retry_count: int
 
+    unity_project_path: str
+    unity_implementation_result: str
+    unity_validation_result: str
+    unity_scene_setup_result: str
+    unity_scene_validation_result: str
+    unity_qa_report: str
+    unity_gate_status: str
+    unity_approval_status: str
+    unity_approval_note: str
+    unity_retry_count: int
+
     final_status: str

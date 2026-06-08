@@ -29,18 +29,16 @@
 - Programmer draft file output now writes files into `workspace/programmer_outputs/`
 - Programmer draft files passed QA for `PROTOTYPE_PLAN`
 - Human Gate approved continuing after Programmer QA
+- Unity automation tool module added for project validation, dry-run copy planning, batchmode execution, and log parsing
+- Unity implementation stage added to LangGraph with safe `PROTOTYPE_PLAN` skips
+- Human approval gates no longer block unattended workflow runs; failed QA retries automatically up to retry limit
+- Programmer draft file QA now has deterministic file/path/logic checks in addition to LLM QA
 
 ## Current Goal
 
-Next step is moving the manual Unity implementation process into the LangGraph workflow.
+Next step is preparing the workflow for an explicit IMPLEMENTATION phase run after human approval.
 
-Programmer should write draft files into:
-
-```text
-workspace/programmer_outputs/
-```
-
-No Unity project modifications yet.
+The graph now creates a dry-run Unity copy plan in `PROTOTYPE_PLAN` and skips real Unity modification, batchmode validation, scene setup, and scene validation.
 
 ## Desired Files
 
@@ -137,14 +135,21 @@ PROTOTYPE_PLAN
 
 ## Remaining Workflow Gap
 
-Unity implementation currently works, but it is not yet a reusable graph stage.
+Unity implementation is now represented as a reusable graph stage, but real apply/scene setup remains gated by phase and approval.
 
 Need to add:
 
-- `tools/unity_tool.py`
-- Unity implementation nodes in `app/main_graph.py`
-- Unity state fields in `app/state.py`
-- Unity implementer prompt/rules
-- Unity QA routing and human gate
-- Unity log parser tests
 - Git strategy for root repo versus nested `STDProject`
+- More formal test runner dependency setup for pytest
+- IMPLEMENTATION phase approval path and commit strategy
+
+## Latest Automation Checkpoint
+
+Checkpoint date: 2026-06-09
+
+- `python -m app.main_graph` was run through `.venv`
+- Creator QA failed once due to generated Blender script, then unattended retry passed
+- Programmer QA passed with deterministic file checks
+- Unity stage generated a dry-run copy plan only
+- Unity validation, scene setup, and scene validation were skipped because current phase is `PROTOTYPE_PLAN`
+- No Unity project files were written by the workflow during this checkpoint

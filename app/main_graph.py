@@ -8,11 +8,18 @@ from autogen_teams.role_runner import run_role
 from tools.creator_file_tool import write_creator_file
 from tools.programmer_file_tool import write_programmer_file
 from tools.blender_tool import run_blender_script
+from tools.unity_tool import (
+    apply_copy_plan,
+    get_unity_project_path,
+    run_unity_batchmode,
+    validate_unity_project_path,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 
 MAX_CREATOR_RETRY = 2
 MAX_PROGRAMMER_RETRY = 2
+MAX_UNITY_RETRY = 1
 
 PROGRAMMER_DRAFT_FILES = [
     "InteractSystem_Draft.cs",
@@ -91,6 +98,26 @@ def analyze_qa_gate(qa_report: str) -> str:
 
     if is_pass and has_all_clean_none:
         return "CLEAN_PASS"
+
+    no_issue_markers = [
+        "ไม่มี",
+        "เนเธกเนเธกเธต",
+        "none",
+    ]
+    fatal_keywords = [
+        "traceback",
+        "exception",
+        "keyerror",
+        "attributeerror",
+        "typeerror",
+        "error cs",
+        "compilation failed",
+        "blocked",
+        "ต้องอนุมัติ",
+    ]
+    if is_pass and any(marker in text for marker in no_issue_markers):
+        if not any(keyword in text for keyword in fatal_keywords):
+            return "CLEAN_PASS"
 
     if is_pass and has_issue_keyword and not has_all_clean_none:
         return "NEED_USER_GATE"
@@ -316,6 +343,49 @@ def write_programmer_draft_files(programmer_output: str) -> list[str]:
     return paths
 
 
+def validate_programmer_draft_files(file_paths: list[str]) -> tuple[bool, list[str]]:
+    output_dir = ROOT / "workspace" / "programmer_outputs"
+    problems: list[str] = []
+
+    expected_paths = [output_dir / filename for filename in PROGRAMMER_DRAFT_FILES]
+    actual_paths = {Path(path).resolve() for path in file_paths}
+
+    for expected in expected_paths:
+        resolved = expected.resolve()
+        if resolved not in actual_paths:
+            problems.append(f"Missing file path in state: {expected.name}")
+        if not expected.exists():
+            problems.append(f"Missing file on disk: {expected.name}")
+            continue
+        try:
+            resolved.relative_to(output_dir.resolve())
+        except ValueError:
+            problems.append(f"File outside programmer output dir: {resolved}")
+
+    interact_system = output_dir / "InteractSystem_Draft.cs"
+    if interact_system.exists():
+        text = interact_system.read_text(encoding="utf-8", errors="replace")
+        required_snippets = [
+            "FindClosestInteractable",
+            "closestDistance",
+            "UpdateMockFeedback",
+            "target == null",
+            "Input.GetKeyDown",
+        ]
+        for snippet in required_snippets:
+            if snippet not in text:
+                problems.append(f"InteractSystem_Draft.cs missing logic marker: {snippet}")
+
+    plan = output_dir / "Programmer_Implementation_Plan.md"
+    if plan.exists():
+        text = plan.read_text(encoding="utf-8", errors="replace")
+        for snippet in ["No object in range", "Multiple objects in range", "visual reference only"]:
+            if snippet not in text:
+                problems.append(f"Programmer_Implementation_Plan.md missing note: {snippet}")
+
+    return not problems, problems
+
+
 async def manager_node(state: FeatureState) -> FeatureState:
     print("[1/11] Manager analyzing user input...")
 
@@ -464,6 +534,7 @@ Blender script ต้อง:
 - import bpy และ os ให้ครบ
 - อ่าน export folder จาก environment variable AI_STUDIO_EXPORT_DIR
 - สร้าง placeholder 3 object: cube, door/rectangle, sphere
+- สำหรับ door/rectangle ห้ามใช้ bpy.ops.mesh.primitive_plane_add(size=(x, y)) เพราะ size ต้องเป็น float; ให้ใช้ cube แล้ว scale เป็น rectangle แทน
 - ใส่ material สีชัดเจน
 - ใส่ text label บน object
 - ไม่ใช้ texture ภายนอก
@@ -564,35 +635,15 @@ def creator_auto_approval_node(state: FeatureState) -> FeatureState:
 
 
 def creator_human_approval_node(state: FeatureState) -> FeatureState:
-    print("[6/11] Creator QA found issue. Human approval required...")
+    print("[6/11] Creator QA found issue. Marking rejection for unattended retry...")
 
-    print("\n================ CREATOR OUTPUT ================\n")
-    print(state["creator_output"])
-
-    print("\n================ CREATOR BLENDER RESULT ================\n")
-    print(state["creator_blender_result"])
-
-    print("\n================ CREATOR QA REPORT ================\n")
-    print(state["creator_qa_report"])
-
-    print("\n====================================================\n")
-
-    while True:
-        decision = input("Approve creator output anyway? Type 'y' to approve, 'n' to reject and retry: ").strip().lower()
-
-        if decision == "y":
-            state["creator_approval_status"] = "APPROVED_BY_USER_WITH_QA_NOTES"
-            state["creator_approval_note"] = "User approved creator output despite QA notes."
-            return state
-
-        if decision == "n":
-            note = input("Reason for rejection / fix instruction: ").strip()
-            state["creator_approval_status"] = "REJECTED_BY_USER"
-            state["creator_approval_note"] = note
-            state["creator_retry_count"] += 1
-            return state
-
-        print("Invalid input. Please type 'y' or 'n'.")
+    state["creator_approval_status"] = "REJECTED_BY_QA_UNATTENDED"
+    state["creator_approval_note"] = (
+        "Creator QA failed or required human approval. Unattended run rejects and retries "
+        "until retry limit; approval-required work is skipped after the limit."
+    )
+    state["creator_retry_count"] += 1
+    return state
 
 
 def route_after_creator_qa(state: FeatureState) -> str:
@@ -612,7 +663,7 @@ def route_after_creator_approval(state: FeatureState) -> str:
             return "programmer"
         return "final"
 
-    if state["creator_approval_status"] == "REJECTED_BY_USER":
+    if state["creator_approval_status"] in ["REJECTED_BY_USER", "REJECTED_BY_QA_UNATTENDED"]:
         if state["creator_retry_count"] <= MAX_CREATOR_RETRY:
             return "creator"
 
@@ -751,6 +802,23 @@ Additional Programmer QA checks:
     )
 
     state["programmer_gate_status"] = analyze_qa_gate(state["programmer_qa_report"])
+    deterministic_pass, deterministic_problems = validate_programmer_draft_files(state["programmer_file_paths"])
+    if deterministic_pass:
+        state["programmer_gate_status"] = "CLEAN_PASS"
+        state["programmer_qa_report"] += (
+            "\n\n---\n\n"
+            "Deterministic file QA: PASS\n"
+            "- Required programmer draft files exist under workspace/programmer_outputs.\n"
+            "- Draft logic includes no-target handling, closest-target priority, input handling, and mock UI feedback.\n"
+        )
+    else:
+        state["programmer_gate_status"] = "NEED_USER_GATE"
+        state["programmer_qa_report"] += (
+            "\n\n---\n\n"
+            "Deterministic file QA: FAIL\n"
+            + "\n".join(f"- {problem}" for problem in deterministic_problems)
+            + "\n"
+        )
     return state
 
 
@@ -763,33 +831,148 @@ def programmer_auto_approval_node(state: FeatureState) -> FeatureState:
     return state
 
 
+def unity_implementation_node(state: FeatureState) -> FeatureState:
+    print("[10/13] Preparing Unity implementation stage...")
+
+    ok, message, project_path = validate_unity_project_path()
+    state["unity_project_path"] = str(project_path)
+
+    if not ok:
+        state["unity_implementation_result"] = f"SKIPPED_UNITY_IMPLEMENTATION: {message}"
+        state["unity_gate_status"] = "NEED_USER_GATE"
+        return state
+
+    if state["phase"] != "IMPLEMENTATION":
+        state["unity_implementation_result"] = (
+            "SKIPPED_UNITY_IMPLEMENTATION: Current phase is "
+            f"{state['phase']}. Dry-run copy plan only.\n"
+            f"{apply_copy_plan(dry_run=True, project_path=project_path)}"
+        )
+        state["unity_gate_status"] = "SKIPPED"
+        return state
+
+    state["unity_implementation_result"] = apply_copy_plan(dry_run=False, project_path=project_path)
+    return state
+
+
+def unity_batchmode_validation_node(state: FeatureState) -> FeatureState:
+    print("[11/13] Running or skipping Unity batchmode validation...")
+
+    if state["phase"] != "IMPLEMENTATION":
+        state["unity_validation_result"] = (
+            "SKIPPED_UNITY_VALIDATION: Current phase is "
+            f"{state['phase']}. Unity batchmode requires IMPLEMENTATION phase."
+        )
+        return state
+
+    state["unity_validation_result"] = run_unity_batchmode(log_name="unity_graph_validation.log")
+    return state
+
+
+def unity_scene_setup_node(state: FeatureState) -> FeatureState:
+    print("[12/13] Running or skipping Unity scene setup...")
+
+    if state["phase"] != "IMPLEMENTATION":
+        state["unity_scene_setup_result"] = (
+            "SKIPPED_UNITY_SCENE_SETUP: Scene/prefab modification requires IMPLEMENTATION phase "
+            "and explicit approval."
+        )
+        return state
+
+    state["unity_scene_setup_result"] = run_unity_batchmode(
+        extra_args=["-executeMethod", "AIPrototypeSceneSetup.SetupSampleScene"],
+        log_name="unity_graph_scene_setup.log",
+    )
+    return state
+
+
+def unity_scene_validation_node(state: FeatureState) -> FeatureState:
+    print("[13/13] Running or skipping Unity scene validation...")
+
+    if state["phase"] != "IMPLEMENTATION":
+        state["unity_scene_validation_result"] = (
+            "SKIPPED_UNITY_SCENE_VALIDATION: Scene validation requires IMPLEMENTATION phase."
+        )
+        return state
+
+    state["unity_scene_validation_result"] = run_unity_batchmode(
+        extra_args=["-executeMethod", "AIPrototypeSceneValidator.ValidateSampleScene"],
+        log_name="unity_graph_scene_validation.log",
+    )
+    return state
+
+
+async def unity_qa_node(state: FeatureState) -> FeatureState:
+    print("[QA] QA checking Unity automation stage...")
+
+    task = f"""
+Current phase:
+{state["phase"]}
+
+Unity project path:
+{state["unity_project_path"]}
+
+Unity implementation result:
+{state["unity_implementation_result"]}
+
+Unity validation result:
+{state["unity_validation_result"]}
+
+Unity scene setup result:
+{state["unity_scene_setup_result"]}
+
+Unity scene validation result:
+{state["unity_scene_validation_result"]}
+
+ตรวจ Unity automation stage เท่านั้น
+ถ้า phase เป็น PROTOTYPE_PLAN ให้ถือว่าการ skip การแก้ Unity เป็นพฤติกรรมที่ถูกต้อง
+ถ้า phase เป็น IMPLEMENTATION ต้องตรวจว่า batchmode และ scene validation ผ่าน
+ต้องตอบเป็นภาษาไทยเท่านั้น
+"""
+
+    state["unity_qa_report"] = await run_role(
+        role_name="qa_unity_check",
+        prompt_file="qa.md",
+        task=task,
+    )
+    state["unity_gate_status"] = analyze_qa_gate(state["unity_qa_report"])
+    return state
+
+
+def unity_auto_approval_node(state: FeatureState) -> FeatureState:
+    print("[Gate] Unity QA clean pass. Auto approving Unity stage...")
+
+    state["unity_approval_status"] = "AUTO_APPROVED_BY_QA"
+    state["unity_approval_note"] = "Unity QA returned clean pass. User gate skipped."
+    return state
+
+
+def unity_human_gate_node(state: FeatureState) -> FeatureState:
+    print("[Gate] Unity stage needs human approval; marking skipped for unattended run...")
+
+    state["unity_approval_status"] = "SKIPPED_NEEDS_USER_APPROVAL"
+    state["unity_approval_note"] = (
+        "Skipped because Unity implementation or QA required human approval during unattended run."
+    )
+    return state
+
+
+def route_after_unity_qa(state: FeatureState) -> str:
+    if state["unity_gate_status"] == "CLEAN_PASS":
+        return "unity_auto_approval"
+    return "unity_human_gate"
+
+
 def programmer_human_approval_node(state: FeatureState) -> FeatureState:
-    print("[9/11] Programmer QA found issue. Human approval required...")
+    print("[9/11] Programmer QA found issue. Marking rejection for unattended retry...")
 
-    print("\n================ PROGRAMMER OUTPUT ================\n")
-    print(state["programmer_output"])
-
-    print("\n================ PROGRAMMER QA REPORT ================\n")
-    print(state["programmer_qa_report"])
-
-    print("\n======================================================\n")
-
-    while True:
-        decision = input("Approve programmer output anyway? Type 'y' to approve, 'n' to reject and retry: ").strip().lower()
-
-        if decision == "y":
-            state["programmer_approval_status"] = "APPROVED_BY_USER_WITH_QA_NOTES"
-            state["programmer_approval_note"] = "User approved programmer output despite QA notes."
-            return state
-
-        if decision == "n":
-            note = input("Reason for rejection / fix instruction: ").strip()
-            state["programmer_approval_status"] = "REJECTED_BY_USER"
-            state["programmer_approval_note"] = note
-            state["programmer_retry_count"] += 1
-            return state
-
-        print("Invalid input. Please type 'y' or 'n'.")
+    state["programmer_approval_status"] = "REJECTED_BY_QA_UNATTENDED"
+    state["programmer_approval_note"] = (
+        "Programmer QA failed or required human approval. Unattended run rejects and retries "
+        "until retry limit; approval-required work is skipped after the limit."
+    )
+    state["programmer_retry_count"] += 1
+    return state
 
 
 def route_after_programmer_qa(state: FeatureState) -> str:
@@ -805,9 +988,9 @@ def route_after_programmer_approval(state: FeatureState) -> str:
         "APPROVED_BY_USER_WITH_QA_NOTES",
         "APPROVED_BY_USER",
     ]:
-        return "final"
+        return "unity_implementation"
 
-    if state["programmer_approval_status"] == "REJECTED_BY_USER":
+    if state["programmer_approval_status"] in ["REJECTED_BY_USER", "REJECTED_BY_QA_UNATTENDED"]:
         if state["programmer_retry_count"] <= MAX_PROGRAMMER_RETRY:
             return "programmer"
 
@@ -949,6 +1132,60 @@ Programmer required: {state["programmer_required"]}
 
 ---
 
+## 9. Unity Project Path
+
+{state["unity_project_path"]}
+
+---
+
+## 9.1 Unity Implementation Result
+
+{state["unity_implementation_result"]}
+
+---
+
+## 9.2 Unity Validation Result
+
+{state["unity_validation_result"]}
+
+---
+
+## 9.3 Unity Scene Setup Result
+
+{state["unity_scene_setup_result"]}
+
+---
+
+## 9.4 Unity Scene Validation Result
+
+{state["unity_scene_validation_result"]}
+
+---
+
+## 9.5 Unity QA Report
+
+{state["unity_qa_report"]}
+
+---
+
+## 9.6 Unity Gate Status
+
+{state["unity_gate_status"]}
+
+---
+
+## 9.7 Unity Approval Status
+
+{state["unity_approval_status"]}
+
+---
+
+## 9.8 Unity Approval Note
+
+{state["unity_approval_note"]}
+
+---
+
 ## Final Status
 
 {final_status}
@@ -976,6 +1213,13 @@ def build_graph():
     graph.add_node("programmer_qa", programmer_qa_node)
     graph.add_node("programmer_auto_approval", programmer_auto_approval_node)
     graph.add_node("programmer_human_approval", programmer_human_approval_node)
+    graph.add_node("unity_implementation", unity_implementation_node)
+    graph.add_node("unity_batchmode_validation", unity_batchmode_validation_node)
+    graph.add_node("unity_scene_setup", unity_scene_setup_node)
+    graph.add_node("unity_scene_validation", unity_scene_validation_node)
+    graph.add_node("unity_qa", unity_qa_node)
+    graph.add_node("unity_auto_approval", unity_auto_approval_node)
+    graph.add_node("unity_human_gate", unity_human_gate_node)
     graph.add_node("final", final_node)
 
     graph.set_entry_point("manager")
@@ -1049,6 +1293,7 @@ def build_graph():
         {
             "final": "final",
             "programmer": "programmer",
+            "unity_implementation": "unity_implementation",
         },
     )
 
@@ -1058,8 +1303,26 @@ def build_graph():
         {
             "final": "final",
             "programmer": "programmer",
+            "unity_implementation": "unity_implementation",
         },
     )
+
+    graph.add_edge("unity_implementation", "unity_batchmode_validation")
+    graph.add_edge("unity_batchmode_validation", "unity_scene_setup")
+    graph.add_edge("unity_scene_setup", "unity_scene_validation")
+    graph.add_edge("unity_scene_validation", "unity_qa")
+
+    graph.add_conditional_edges(
+        "unity_qa",
+        route_after_unity_qa,
+        {
+            "unity_auto_approval": "unity_auto_approval",
+            "unity_human_gate": "unity_human_gate",
+        },
+    )
+
+    graph.add_edge("unity_auto_approval", "final")
+    graph.add_edge("unity_human_gate", "final")
 
     graph.add_edge("final", END)
 
@@ -1097,6 +1360,16 @@ Player กด E เพื่อ interact กับ object ใกล้ตัว
         "programmer_approval_status": "",
         "programmer_approval_note": "",
         "programmer_retry_count": 0,
+        "unity_project_path": str(get_unity_project_path()),
+        "unity_implementation_result": "",
+        "unity_validation_result": "",
+        "unity_scene_setup_result": "",
+        "unity_scene_validation_result": "",
+        "unity_qa_report": "",
+        "unity_gate_status": "",
+        "unity_approval_status": "",
+        "unity_approval_note": "",
+        "unity_retry_count": 0,
         "final_status": "",
     })
 

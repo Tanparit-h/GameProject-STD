@@ -18,7 +18,7 @@ Completed:
 
 ## Current Gap
 
-The latest Unity implementation was completed by Codex tool actions, not by an automated graph node.
+The latest Unity implementation stage now exists as an automated graph node, but real Unity apply is still gated behind an explicit IMPLEMENTATION phase.
 
 To make the AI Office workflow truly reusable, the graph needs a dedicated Unity implementation stage that can:
 
@@ -47,7 +47,7 @@ Responsibilities:
 - Parse Unity logs for `error CS`, `Exception`, `EPERM`, `Compilation failed`, `Tundra build success`, and return code evidence.
 - Keep logs in `workspace/logs/`.
 
-Status: next task.
+Status: complete.
 
 ## Next Step B: Add Unity Implementer Graph Nodes
 
@@ -79,7 +79,7 @@ State fields to add:
 - `unity_approval_status`
 - `unity_retry_count`
 
-Status: pending.
+Status: complete.
 
 ## Next Step C: Add Unity Role/Prompt Rules
 
@@ -99,7 +99,7 @@ Rules:
 - QA must check both compile validation and scene validation.
 - QA remains Thai-only.
 
-Status: pending.
+Status: complete.
 
 ## Next Step D: Convert Manual Scene Setup Into Workflow Asset
 
@@ -117,7 +117,7 @@ Workflow should be able to:
 - Execute `AIPrototypeSceneValidator.ValidateSampleScene`.
 - Report pass/fail automatically.
 
-Status: pending.
+Status: partially complete. Existing editor scripts can be executed by graph nodes in IMPLEMENTATION phase; generation of new editor scripts remains future work.
 
 ## Next Step E: Add Tests For Workflow Automation
 
@@ -128,7 +128,19 @@ Add tests that do not require changing Unity scenes unless explicitly enabled:
 - Dry-run test for file copy plan.
 - Optional integration test for Unity batchmode when `UNITY_PROJECT` exists.
 
-Status: pending.
+Status: partially complete. `test_unity_tool.py` was added, and lightweight assertions pass. `pytest` is not installed in the current Python or `.venv`.
+
+## Next Step G: IMPLEMENTATION Approval Run
+
+Blocked until explicit human approval:
+
+- Switch phase from `PROTOTYPE_PLAN` to `IMPLEMENTATION`
+- Apply approved assets/scripts into `game_project/STDProject`
+- Run Unity batchmode validation
+- Run scene setup and scene validation
+- Commit nested Unity repo changes according to chosen git strategy
+
+Status: approval required, skipped during unattended checkpoint.
 
 ## Next Step F: Git Strategy
 
