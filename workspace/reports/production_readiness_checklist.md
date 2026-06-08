@@ -26,6 +26,12 @@ Root tests:
 .\.venv\Scripts\python.exe -m unittest test_unity_tool.py
 ```
 
+Release gate:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.release_gate
+```
+
 Prototype plan workflow:
 
 ```powershell
@@ -64,6 +70,7 @@ Before declaring production-ready:
 
 - Resolve or intentionally commit/revert unrelated Unity dirty changes.
 - Run root unit tests.
+- Run release gate.
 - Run IMPLEMENTATION workflow from a clean root and clean Unity submodule.
 - Run final scene validation.
 - Confirm `workspace/reports/latest_report.md` has `Unity Gate Status: CLEAN_PASS`.

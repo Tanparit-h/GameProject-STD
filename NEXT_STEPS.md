@@ -21,6 +21,7 @@ Completed:
 The Unity implementation stage now exists as an automated graph node and has passed an approved IMPLEMENTATION run.
 
 The remaining production blocker is unrelated dirty Unity project state that must be reviewed before push/release. See `workspace/reports/unity_dirty_state_audit.md`.
+That dirty Unity state has now been committed separately; the next gate is running the release gate from a clean tree.
 
 To make the AI Office workflow truly reusable, the graph needs a dedicated Unity implementation stage that can:
 
