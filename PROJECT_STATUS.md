@@ -167,3 +167,10 @@ Checkpoint date: 2026-06-09
 - Unity copy plan is now idempotent and reports `UNCHANGED` instead of rewriting identical target files.
 - Production readiness checklist added at `workspace/reports/production_readiness_checklist.md`.
 - Remaining dirty Unity state is audited at `workspace/reports/unity_dirty_state_audit.md`.
+
+## Latest Release Gate
+
+- Unity dirty state was committed separately in `STDProject`.
+- Root repo points to the cleaned `STDProject` submodule commit.
+- `python -m tools.release_gate` passed.
+- Release gate verified root git clean, Unity git clean, root unit tests, Unity batchmode validation, Unity scene validation, and latest report markers.
