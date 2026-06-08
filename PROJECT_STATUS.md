@@ -142,6 +142,7 @@ Need to add:
 - Git strategy for root repo versus nested `STDProject`
 - Expand Unity workflow tests beyond the current standard-library unit tests
 - IMPLEMENTATION phase approval path and commit strategy
+- Git strategy is documented at `workspace/reports/git_strategy.md`; root and nested Unity commits remain separate
 
 ## Latest Automation Checkpoint
 

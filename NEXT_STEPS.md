@@ -161,7 +161,7 @@ Recommended for now:
 - Commit Unity implementation work inside `STDProject`.
 - Commit workflow/reports in root repo.
 
-Status: pending human decision.
+Status: documented in `workspace/reports/git_strategy.md`; final structural changes still require human approval.
 
 ## Latest Saved Commits
 
