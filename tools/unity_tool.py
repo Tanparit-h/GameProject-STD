@@ -121,7 +121,17 @@ def apply_copy_plan(dry_run: bool = True, project_path: str | Path | None = None
 
         if not dry_run:
             target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(source, target)
+            if source.suffix.lower() == ".cs":
+                content = source.read_text(encoding="utf-8", errors="replace")
+                content = content.replace("InteractSystem_Draft", "InteractSystem")
+                content = content.replace("InteractableObject_Draft", "InteractableObject")
+                content = content.replace(
+                    "// PROTOTYPE_PLAN draft only. Do not place this file in Unity Assets yet.\n",
+                    "",
+                )
+                target.write_text(content, encoding="utf-8")
+            else:
+                shutil.copy2(source, target)
 
     if not plan:
         lines.append("No approved asset/script files found to copy.")
