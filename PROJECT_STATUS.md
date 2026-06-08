@@ -140,7 +140,7 @@ Unity implementation is now represented as a reusable graph stage, but real appl
 Need to add:
 
 - Git strategy for root repo versus nested `STDProject`
-- More formal test runner dependency setup for pytest
+- Expand Unity workflow tests beyond the current standard-library unit tests
 - IMPLEMENTATION phase approval path and commit strategy
 
 ## Latest Automation Checkpoint
