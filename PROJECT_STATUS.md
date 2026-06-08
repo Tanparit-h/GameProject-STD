@@ -174,3 +174,4 @@ Checkpoint date: 2026-06-09
 - Root repo points to the cleaned `STDProject` submodule commit.
 - `python -m tools.release_gate` passed.
 - Release gate verified root git clean, Unity git clean, root unit tests, Unity batchmode validation, Unity scene validation, and latest report markers.
+- Dashboard/report index support added through `tools.report_index`.

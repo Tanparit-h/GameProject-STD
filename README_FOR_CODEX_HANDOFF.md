@@ -1,33 +1,45 @@
 # Codex Handoff Package
 
-Copy these files into:
+Workspace:
 
 ```text
-D:\AIStudio\ai-game-studio\
+D:\AIStudio\ai-game-studio
 ```
 
-Then run Codex from that folder and paste the content of `CODEX_PROMPT.txt`.
+Read first:
 
-Recommended command:
+```text
+AGENTS.md
+PROJECT_STATUS.md
+NEXT_STEPS.md
+CODEX_TASK.md
+workspace/reports/production_readiness_checklist.md
+workspace/reports/index.md
+```
+
+Current milestone:
+
+- First AI Game Studio Unity vertical slice is release-gate clean.
+- Root repo and `game_project/STDProject` submodule are expected to stay clean between checkpoints.
+- Continue productization work unless a user-level decision is required.
+
+Recommended validation:
 
 ```powershell
 cd D:\AIStudio\ai-game-studio
-codex
+.\.venv\Scripts\python.exe -m unittest discover -p "test_*.py"
+.\.venv\Scripts\python.exe -m tools.release_gate
 ```
 
-Then paste:
+Useful workflow commands:
 
-```text
-Read AGENTS.md, PROJECT_STATUS.md, CODEX_TASK.md, and NEXT_STEPS.md.
+```powershell
+$env:AI_STUDIO_PHASE='PROTOTYPE_PLAN'
+.\.venv\Scripts\python.exe -m app.main_graph
 
-Creator Blender export now works.
+$env:AI_STUDIO_PHASE='IMPLEMENTATION'
+.\.venv\Scripts\python.exe -m app.main_graph
 
-Implement CODEX_TASK.md.
-
-Important:
-- Do not modify Unity project.
-- Do not write into game_project/MyUnityGame/Assets.
-- Write programmer draft files only into workspace/programmer_outputs.
-- Show proposed changes before applying.
-- Do not commit.
+$env:AI_STUDIO_TASK_FILE='workspace/tasks/interaction_vertical_slice.json'
+.\.venv\Scripts\python.exe -m app.main_graph
 ```

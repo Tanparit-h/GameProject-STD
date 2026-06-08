@@ -32,6 +32,12 @@ Release gate:
 .\.venv\Scripts\python.exe -m tools.release_gate
 ```
 
+Dashboard index:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.report_index
+```
+
 Prototype plan workflow:
 
 ```powershell

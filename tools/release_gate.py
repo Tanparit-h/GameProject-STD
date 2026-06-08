@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 from tools.unity_tool import parse_unity_result_text, run_unity_batchmode
+from tools.report_index import collect_status
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 UNITY_PROJECT = PROJECT_ROOT / "game_project" / "STDProject"
@@ -49,6 +50,15 @@ def latest_report_clean() -> tuple[bool, str]:
     return True, "latest report clean"
 
 
+def dashboard_index_clean() -> tuple[bool, str]:
+    status = collect_status()
+    if not status["latest_report_clean"]:
+        return False, "dashboard status says latest report is not clean"
+    if status["unity_status"] != "clean":
+        return False, f"dashboard status says Unity is dirty: {status['unity_status']}"
+    return True, "dashboard status clean"
+
+
 def main() -> int:
     checks: list[tuple[str, bool, str]] = []
 
@@ -74,6 +84,9 @@ def main() -> int:
 
     report_ok, report_output = latest_report_clean()
     checks.append(("latest report clean", report_ok, report_output))
+
+    dashboard_ok, dashboard_output = dashboard_index_clean()
+    checks.append(("dashboard status clean", dashboard_ok, dashboard_output))
 
     print("# Release Gate Report")
     print()

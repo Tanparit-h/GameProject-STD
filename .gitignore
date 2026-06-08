@@ -4,6 +4,8 @@ __pycache__/
 *.py[cod]
 
 workspace/logs/
+workspace/reports/index.md
+workspace/reports/status.json
 
 # Unity generated cache/build folders
 game_project/**/Library/
