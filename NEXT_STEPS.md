@@ -39,7 +39,7 @@ QA should check:
 - Mock UI feedback exists
 - Blender asset is treated as visual reference only
 
-Status: current next step.
+Status: done.
 
 ## Next Step C: Human Gate
 
@@ -48,6 +48,12 @@ If Programmer QA finds issues:
 - Ask user approval
 - If rejected, retry Programmer
 - If approved, continue
+
+Current QA status: clean pass, no issues found.
+
+Human approval status: approved to continue.
+
+Status: done.
 
 ## Next Step D: Future Implementation Phase
 
@@ -58,3 +64,11 @@ After programmer draft files are stable:
 - Copy `.glb` into `Assets/AIAssets`
 - Copy C# scripts into `Assets/Scripts/AIPrototype`
 - Run Unity batchmode validation
+
+Status: current next step, waiting for explicit IMPLEMENTATION phase approval before modifying Unity.
+
+Readiness plan:
+
+```text
+workspace/reports/implementation_readiness_plan.md
+```
