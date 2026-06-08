@@ -16,6 +16,7 @@ The AI Office workflow can run through Manager, Designer, Creator, Programmer, Q
 - Unity scene setup executes through `AIPrototypeSceneSetup.SetupSampleScene`.
 - Unity scene validation executes through `AIPrototypeSceneValidator.ValidateSampleScene`.
 - Unity copy plan is idempotent for unchanged files.
+- Creator exports have deterministic validation for `.glb` files and Blender log errors.
 - Root and Unity commits are kept separate through the `STDProject` submodule pointer.
 
 ## Repeatable Validation Commands
