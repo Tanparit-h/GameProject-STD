@@ -113,6 +113,7 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
             ],
             "TerraMageMeleeGestureController.cs": [
                 "BeginWeaponSwing",
+                "CurrentSwingDuration",
                 "EnsureWeaponSwingRoot",
                 "GetAnimatedWeaponRoot",
                 "PerformQuickAttack",
@@ -120,6 +121,7 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
                 "SphereCastNonAlloc",
                 "SetWeaponVisual",
                 "SetWeaponSwingRoot",
+                "swingActive",
                 "TryFindMeleeHit",
                 "UpdateWeaponSwing",
                 "weaponWheelUI",

@@ -43,6 +43,7 @@ namespace TerraMageTD
         private Quaternion swingTargetLocalRotation;
         private float swingTimer;
         private bool hasWeaponRestPose;
+        private bool swingActive;
 
         public TerraMageMeleeRangeProfile RangeProfile => GetCurrentWeapon().MeleeProfile;
         public float CurrentMeleeReach => Mathf.Max(0.5f, GetCurrentWeapon().MeleeReach);
@@ -243,6 +244,8 @@ namespace TerraMageTD
             swingRootRestLocalPosition = animatedRoot.localPosition;
             swingRootRestLocalRotation = animatedRoot.localRotation;
             swingTargetLocalRotation = swingRootRestLocalRotation;
+            swingTimer = 0f;
+            swingActive = false;
             hasWeaponRestPose = true;
         }
 
@@ -259,15 +262,22 @@ namespace TerraMageTD
                 CacheWeaponRestPose();
             }
 
-            swingTimer = Mathf.Max(0.01f, swingDuration);
+            swingTimer = CurrentSwingDuration();
+            swingActive = true;
             swingTargetLocalRotation = swingRootRestLocalRotation * GetSwingOffset(gesture);
         }
 
         private void UpdateWeaponSwing()
         {
+            if (!swingActive)
+            {
+                return;
+            }
+
             Transform animatedRoot = GetAnimatedWeaponRoot();
             if (animatedRoot == null || !hasWeaponRestPose)
             {
+                swingActive = false;
                 return;
             }
 
@@ -275,11 +285,12 @@ namespace TerraMageTD
             {
                 animatedRoot.localPosition = swingRootRestLocalPosition;
                 animatedRoot.localRotation = swingRootRestLocalRotation;
+                swingActive = false;
                 return;
             }
 
             swingTimer = Mathf.Max(0f, swingTimer - Time.deltaTime);
-            float normalizedTime = 1f - (swingTimer / Mathf.Max(0.01f, swingDuration));
+            float normalizedTime = 1f - (swingTimer / CurrentSwingDuration());
             float strikeWeight = Mathf.Sin(normalizedTime * Mathf.PI);
             animatedRoot.localPosition = swingRootRestLocalPosition + new Vector3(0f, 0.012f * strikeWeight, 0.08f * strikeWeight);
             animatedRoot.localRotation = Quaternion.Slerp(swingRootRestLocalRotation, swingTargetLocalRotation, strikeWeight);
@@ -310,6 +321,11 @@ namespace TerraMageTD
         private Transform GetAnimatedWeaponRoot()
         {
             return weaponSwingRoot != null ? weaponSwingRoot : weaponVisual;
+        }
+
+        private float CurrentSwingDuration()
+        {
+            return Mathf.Max(0.01f, swingDuration);
         }
 
         private static Quaternion GetSwingOffset(TerraMageMeleeGesture gesture)
