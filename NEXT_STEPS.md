@@ -2,7 +2,7 @@
 
 ## Current Status
 
-The AI Office prototype can create and validate a small Unity game feature end-to-end, but the Unity implementation stage is not yet fully inside the LangGraph workflow.
+The AI Office prototype can create, plan, implement, validate, and release-gate a small Unity game feature end-to-end.
 
 Completed:
 
@@ -15,13 +15,21 @@ Completed:
 - Unity `6000.4.9f1` full batchmode validation passed.
 - `SampleScene` was wired with `AIPrototype_Player`, `AIPrototype_Interactable`, and `AIPrototype_VisualReference`.
 - Automated Unity scene validation passed with return code `0`.
+- Release gate passes from a clean root repo and clean Unity submodule.
+- Task registry supports multiple work orders.
+- Office CLI can show status, generate dashboard artifacts, run release gate, and dry-run tasks.
 
 ## Current Gap
 
-The Unity implementation stage now exists as an automated graph node and has passed an approved IMPLEMENTATION run.
+The current system is release-gate clean for the first vertical slice, but it is still a prototype office rather than a full production product.
 
-The remaining production blocker is unrelated dirty Unity project state that must be reviewed before push/release. See `workspace/reports/unity_dirty_state_audit.md`.
-That dirty Unity state has now been committed separately, and the release gate passes from a clean tree.
+Remaining product gaps:
+
+- Product UI/dashboard beyond generated static HTML
+- More feature archetypes and regression scenes
+- Human-facing approval UX
+- Push/PR/release workflow after explicit approval
+- Better deterministic validation for role outputs beyond current guards
 
 To make the AI Office workflow truly reusable, the graph needs a dedicated Unity implementation stage that can:
 

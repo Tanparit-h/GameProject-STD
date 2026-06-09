@@ -33,6 +33,11 @@
 - Unity implementation stage added to LangGraph with safe `PROTOTYPE_PLAN` skips
 - Human approval gates no longer block unattended workflow runs; failed QA retries automatically up to retry limit
 - Programmer draft file QA now has deterministic file/path/logic checks in addition to LLM QA
+- Release gate script exists and passes from a clean tree
+- Task registry and task runner exist for multi-feature work orders
+- Approval records are stored in `workspace/approvals/approval_log.jsonl`
+- Static dashboard generator and Office CLI exist
+- Creator export validation is deterministic and part of release gate
 
 ## Current Goal
 
@@ -139,9 +144,9 @@ Unity implementation is represented as a reusable graph stage and has passed an 
 
 Need to add:
 
-- Expand Unity workflow tests beyond the current standard-library unit tests
-- Production readiness checklist for repeated features
-- Handling strategy for unrelated dirty Unity project changes before push/release
+- Product UI/dashboard beyond generated static HTML
+- More feature types beyond interaction/door-toggle prototypes
+- Push/PR/release packaging workflow after explicit approval
 - Git strategy is documented at `workspace/reports/git_strategy.md`; root and nested Unity commits remain separate
 
 ## Latest Automation Checkpoint
@@ -175,3 +180,5 @@ Checkpoint date: 2026-06-09
 - `python -m tools.release_gate` passed.
 - Release gate verified root git clean, Unity git clean, root unit tests, Unity batchmode validation, Unity scene validation, and latest report markers.
 - Dashboard/report index support added through `tools.report_index`.
+- Office CLI added through `tools.office`.
+- Door toggle task has been planned in `PROTOTYPE_PLAN` and marked `prototype_planned`.
