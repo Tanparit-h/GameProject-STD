@@ -129,6 +129,7 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
             ],
             "TerraMageWeaponWheelUI.cs": [
                 "CalculateSegmentSweep",
+                "CreateSegmentSprite",
                 "EquipHoveredSlot",
                 "MouseDelta",
                 "OpenWheelKey",

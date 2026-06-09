@@ -7,6 +7,10 @@ namespace TerraMageTD
     [DisallowMultipleComponent]
     public sealed class TerraMageWeaponWheelUI : MonoBehaviour
     {
+        private const int SegmentTextureSize = 192;
+        private const float SegmentInnerRadius = 0.2f;
+        private const float SegmentGapDegrees = 2f;
+
         [SerializeField] private TerraMageWeaponLoadout loadout;
         [SerializeField] private Canvas wheelCanvas;
         [SerializeField] private RectTransform wheelRoot;
@@ -115,7 +119,6 @@ namespace TerraMageTD
             {
                 TerraMageWeaponDefinition weapon = loadout.GetWeapon(slotIndex);
                 float centerAngle = GetSegmentCenterAngle(slotIndex, activeSlots);
-                float startAngle = centerAngle - (segmentSweep * 0.5f);
 
                 var segmentObject = new GameObject($"TerraMage_WeaponWheelSegment_{slotIndex}", typeof(RectTransform));
                 var segmentRect = segmentObject.GetComponent<RectTransform>();
@@ -124,11 +127,13 @@ namespace TerraMageTD
                 segmentRect.anchorMax = new Vector2(0.5f, 0.5f);
                 segmentRect.pivot = new Vector2(0.5f, 0.5f);
                 segmentRect.sizeDelta = new Vector2(wheelDiameter, wheelDiameter);
-                segmentRect.localRotation = Quaternion.Euler(0f, 0f, -startAngle);
 
                 var segmentImage = segmentObject.AddComponent<Image>();
                 segmentImage.type = Image.Type.Simple;
+                segmentImage.sprite = CreateSegmentSprite($"TerraMage_WeaponWheelSegmentSprite_{slotIndex}", centerAngle, segmentSweep);
                 segmentImage.color = weapon != null ? weapon.UiColor : defaultSlotColor;
+                segmentImage.preserveAspect = true;
+                segmentImage.raycastTarget = false;
                 segmentImages.Add(segmentImage);
 
                 var labelObject = new GameObject($"TerraMage_WeaponWheelLabel_{slotIndex}", typeof(RectTransform));
@@ -313,6 +318,56 @@ namespace TerraMageTD
                         : slotIndex == loadout.SelectedSlotIndex ? FontStyle.Italic : FontStyle.Normal;
                 }
             }
+        }
+
+        private static Sprite CreateSegmentSprite(string spriteName, float centerAngle, float segmentSweep)
+        {
+            var texture = new Texture2D(SegmentTextureSize, SegmentTextureSize, TextureFormat.RGBA32, false)
+            {
+                name = spriteName,
+                filterMode = FilterMode.Bilinear,
+                wrapMode = TextureWrapMode.Clamp,
+                hideFlags = HideFlags.HideAndDontSave
+            };
+
+            float halfSweep = Mathf.Max(1f, segmentSweep * 0.5f - SegmentGapDegrees);
+            float center = (SegmentTextureSize - 1) * 0.5f;
+            var pixels = new Color32[SegmentTextureSize * SegmentTextureSize];
+            var clear = new Color32(0, 0, 0, 0);
+            var solid = new Color32(255, 255, 255, 235);
+
+            for (int y = 0; y < SegmentTextureSize; y++)
+            {
+                for (int x = 0; x < SegmentTextureSize; x++)
+                {
+                    float normalizedX = (x - center) / center;
+                    float normalizedY = (y - center) / center;
+                    float radius = Mathf.Sqrt((normalizedX * normalizedX) + (normalizedY * normalizedY));
+                    int pixelIndex = x + (y * SegmentTextureSize);
+
+                    if (radius < SegmentInnerRadius || radius > 1f)
+                    {
+                        pixels[pixelIndex] = clear;
+                        continue;
+                    }
+
+                    float angle = NormalizeAngle(Mathf.Atan2(normalizedY, normalizedX) * Mathf.Rad2Deg);
+                    float delta = Mathf.Abs(Mathf.DeltaAngle(angle, centerAngle));
+                    pixels[pixelIndex] = delta <= halfSweep ? solid : clear;
+                }
+            }
+
+            texture.SetPixels32(pixels);
+            texture.Apply(false, true);
+
+            var sprite = Sprite.Create(
+                texture,
+                new Rect(0f, 0f, SegmentTextureSize, SegmentTextureSize),
+                new Vector2(0.5f, 0.5f),
+                SegmentTextureSize);
+            sprite.name = spriteName;
+            sprite.hideFlags = HideFlags.HideAndDontSave;
+            return sprite;
         }
 
         private void ClearRootChildren()
