@@ -13,6 +13,8 @@ Extend Terra Mage with a weapon wheel that switches between two demo weapons, th
 - `TerraMageAimTargetMotion.cs`
 - `TerraMageAimTargetVisibility.cs`
 - `TerraMageMaterialSystem.cs`
+- `TerraMageDamageable.cs`
+- `TerraMageProjectile.cs`
 - `TerraMageMeleeGestureController.cs`
 - `TerraMageActionBuildController.cs`
 - `TerraMageWeaponDefinition.cs`
@@ -32,9 +34,10 @@ Extend Terra Mage with a weapon wheel that switches between two demo weapons, th
 
 ## Combat Integration
 
-- Melee attacks debug only when the weapon sweep hits an object.
-- Ranged attacks debug the target currently aimed through the center crosshair.
-- scene validation checks that weapon selection changes melee/range behavior.
+- Melee attacks animate first, then apply damage during the middle of the swing.
+- Ranged attacks launch a physical `Shard Sling` projectile from the center crosshair.
+- Aim targets receive `TerraMageDamageable` for health, hit flash, and knockback feedback.
+- scene validation checks damageable targets, projectile class availability, and melee/range behavior.
 
 ## Validation Target
 

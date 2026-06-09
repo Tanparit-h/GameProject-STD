@@ -34,6 +34,12 @@ public static class TerraMageFirstSceneValidator
             throw new InvalidOperationException("TerraMageActionBuildController must have an aim camera reference.");
         }
 
+        if (!typeof(TerraMageProjectile).IsSubclassOf(typeof(MonoBehaviour))
+            || !typeof(TerraMageDamageable).IsSubclassOf(typeof(MonoBehaviour)))
+        {
+            throw new InvalidOperationException("Terra Mage combat damage and projectile classes must be available.");
+        }
+
         RequireObject("TerraMage_MockBody");
         RequireObject("TerraMage_MockHood");
         RequireObject("TerraMage_MockStaff");
@@ -199,6 +205,7 @@ public static class TerraMageFirstSceneValidator
     {
         var found = RequireObject(objectName);
         RequireComponent<TerraMageAimTarget>(found, objectName);
+        RequireComponent<TerraMageDamageable>(found, objectName);
         RequireComponent<Collider>(found, objectName);
         return found;
     }

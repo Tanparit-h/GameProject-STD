@@ -309,6 +309,7 @@ public static class TerraMageFirstSceneSetup
 
         var target = targetObject.AddComponent<TerraMageAimTarget>();
         target.Configure(objectName, tint);
+        targetObject.AddComponent<TerraMageDamageable>();
         return targetObject;
     }
 

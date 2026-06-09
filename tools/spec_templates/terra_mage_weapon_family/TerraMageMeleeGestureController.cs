@@ -34,6 +34,8 @@ namespace TerraMageTD
         [SerializeField] private LayerMask meleeHitMask = ~0;
         [SerializeField] private float meleeHitRadius = 0.12f;
         [SerializeField] private float swingDuration = 0.26f;
+        [SerializeField] private float meleeHitNormalizedTime = 0.52f;
+        [SerializeField] private float baseMeleeDamage = 8f;
 
         private Vector2 dragStart;
         private bool dragging;
@@ -44,6 +46,11 @@ namespace TerraMageTD
         private float swingTimer;
         private bool hasWeaponRestPose;
         private bool swingActive;
+        private bool pendingMeleeHit;
+        private bool pendingMeleeHitResolved;
+        private TerraMageMeleeGesture pendingMeleeGesture;
+        private string pendingMeleeWeaponName;
+        private float pendingMeleeDamage;
 
         public TerraMageMeleeRangeProfile RangeProfile => GetCurrentWeapon().MeleeProfile;
         public float CurrentMeleeReach => Mathf.Max(0.5f, GetCurrentWeapon().MeleeReach);
@@ -187,13 +194,6 @@ namespace TerraMageTD
             }
 
             BeginWeaponSwing(gesture);
-
-            if (!TryFindMeleeHit(out RaycastHit hit))
-            {
-                return false;
-            }
-
-            Debug.Log($"Terra Mage melee {gesture} hit {hit.collider.gameObject.name} with {weapon.DisplayName}");
             return true;
         }
 
@@ -265,6 +265,12 @@ namespace TerraMageTD
             swingTimer = CurrentSwingDuration();
             swingActive = true;
             swingTargetLocalRotation = swingRootRestLocalRotation * GetSwingOffset(gesture);
+            pendingMeleeHit = true;
+            pendingMeleeHitResolved = false;
+            pendingMeleeGesture = gesture;
+            TerraMageWeaponDefinition weapon = GetCurrentWeapon();
+            pendingMeleeWeaponName = weapon.DisplayName;
+            pendingMeleeDamage = baseMeleeDamage + (weapon.MeleeReach * 2f);
         }
 
         private void UpdateWeaponSwing()
@@ -291,9 +297,33 @@ namespace TerraMageTD
 
             swingTimer = Mathf.Max(0f, swingTimer - Time.deltaTime);
             float normalizedTime = 1f - (swingTimer / CurrentSwingDuration());
+            if (pendingMeleeHit && !pendingMeleeHitResolved && normalizedTime >= meleeHitNormalizedTime)
+            {
+                ResolvePendingMeleeHit();
+            }
+
             float strikeWeight = Mathf.Sin(normalizedTime * Mathf.PI);
             animatedRoot.localPosition = swingRootRestLocalPosition + new Vector3(0f, 0.012f * strikeWeight, 0.08f * strikeWeight);
             animatedRoot.localRotation = Quaternion.Slerp(swingRootRestLocalRotation, swingTargetLocalRotation, strikeWeight);
+        }
+
+        private void ResolvePendingMeleeHit()
+        {
+            pendingMeleeHitResolved = true;
+            pendingMeleeHit = false;
+            if (!TryFindMeleeHit(out RaycastHit hit))
+            {
+                return;
+            }
+
+            TerraMageDamageable damageable = hit.collider.GetComponentInParent<TerraMageDamageable>();
+            if (damageable != null)
+            {
+                Vector3 impulse = aimCamera != null ? aimCamera.transform.forward * pendingMeleeDamage : transform.forward * pendingMeleeDamage;
+                damageable.ApplyDamage(pendingMeleeDamage, hit.point, impulse, pendingMeleeWeaponName);
+            }
+
+            Debug.Log($"Terra Mage melee {pendingMeleeGesture} hit {hit.collider.gameObject.name} with {pendingMeleeWeaponName}");
         }
 
         private void EnsureWeaponSwingRoot()

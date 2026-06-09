@@ -15,6 +15,8 @@ namespace TerraMageTD
         [SerializeField] private TerraMageMeleeGestureController meleeGestureController;
         [SerializeField] private TerraMageWeaponWheelUI weaponWheelUI;
         [SerializeField] private TerraMageAimSystem aimSystem;
+        [SerializeField] private float projectileSpawnOffset = 0.45f;
+        [SerializeField] private float projectileScale = 0.14f;
 
         private TerraMageMaterialPayload heldPayload;
         private bool hasPayload;
@@ -136,7 +138,6 @@ namespace TerraMageTD
                 return;
             }
 
-            DebugRangedAimTarget();
             ThrowHeldMaterial();
         }
 
@@ -186,16 +187,62 @@ namespace TerraMageTD
 
         public void ThrowHeldMaterial()
         {
-            if (!hasPayload || aimCamera == null || CurrentAttackMode != TerraMageWeaponAttackMode.Ranged)
+            if (aimCamera == null || CurrentAttackMode != TerraMageWeaponAttackMode.Ranged)
             {
                 return;
             }
 
+            TerraMageWeaponDefinition weapon = GetCurrentWeapon();
+            TerraMageMaterialPayload payload = hasPayload
+                ? heldPayload
+                : TerraMageMaterialSystem.Compress(TerraMageMaterialSystem.CreateLooseEarth(aimCamera.transform.position), 1.6f);
             float throwForce = GetCurrentWeapon().SupportsRanged ? GetCurrentWeapon().RangedThrowForce : defaultThrowForce;
             Vector3 velocity = aimCamera.transform.forward * throwForce;
-            float damage = TerraMageMaterialSystem.CalculateImpactDamage(heldPayload, velocity, 1f);
-            Debug.Log($"Terra Mage threw {heldPayload.Kind} with {GetCurrentWeapon().DisplayName} for {damage:0.0} damage");
+            float damage = TerraMageMaterialSystem.CalculateImpactDamage(payload, velocity, 1f);
+            SpawnProjectile(payload, velocity, damage, weapon.DisplayName);
+            DebugRangedAimTarget();
+            Debug.Log($"Terra Mage launched {payload.Kind} with {weapon.DisplayName} for {damage:0.0} damage");
             hasPayload = false;
+        }
+
+        private void SpawnProjectile(TerraMageMaterialPayload payload, Vector3 velocity, float damage, string sourceName)
+        {
+            Vector3 spawnPosition = aimCamera.transform.position + aimCamera.transform.forward * projectileSpawnOffset;
+            GameObject projectileObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            projectileObject.name = $"TerraMage_Projectile_{payload.Kind}";
+            projectileObject.transform.position = spawnPosition;
+            projectileObject.transform.localScale = Vector3.one * Mathf.Max(0.04f, projectileScale);
+            TintProjectile(projectileObject, payload);
+
+            Rigidbody body = projectileObject.AddComponent<Rigidbody>();
+            body.mass = Mathf.Max(0.1f, payload.Mass);
+            body.useGravity = false;
+
+            TerraMageProjectile projectile = projectileObject.AddComponent<TerraMageProjectile>();
+            projectile.Launch(velocity, damage, sourceName);
+        }
+
+        private static void TintProjectile(GameObject projectileObject, TerraMageMaterialPayload payload)
+        {
+            Color tint = payload.Kind switch
+            {
+                TerraMageMaterialKind.MoltenGlass => new Color(1f, 0.42f, 0.15f, 1f),
+                TerraMageMaterialKind.Glass => new Color(0.72f, 0.95f, 1f, 1f),
+                TerraMageMaterialKind.Stone => new Color(0.45f, 0.48f, 0.52f, 1f),
+                TerraMageMaterialKind.PackedEarth => new Color(0.48f, 0.34f, 0.18f, 1f),
+                _ => new Color(0.62f, 0.48f, 0.28f, 1f),
+            };
+
+            foreach (Renderer rendererComponent in projectileObject.GetComponentsInChildren<Renderer>())
+            {
+                foreach (Material material in rendererComponent.materials)
+                {
+                    if (material != null && material.HasProperty("_Color"))
+                    {
+                        material.color = tint;
+                    }
+                }
+            }
         }
 
         private void DebugRangedAimTarget()
