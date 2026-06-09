@@ -26,7 +26,14 @@ def render_dashboard() -> str:
     status = collect_status()
     approvals = read_approvals()
 
-    tasks = "".join(f"<li>{escape(task)}</li>" for task in status["tasks"]) or "<li>none</li>"
+    tasks = "".join(
+        "<li>"
+        f"<strong>{h(task['id'])}</strong> "
+        f"<span class='pill neutral'>{h(task['status'])}</span> "
+        f"{h(task['phase'])} - {h(task['title'])}"
+        "</li>"
+        for task in status["task_details"]
+    ) or "<li>none</li>"
     reports = "".join(f"<li>{escape(report)}</li>" for report in status["reports"]) or "<li>none</li>"
     approval_rows = "".join(
         "<tr>"

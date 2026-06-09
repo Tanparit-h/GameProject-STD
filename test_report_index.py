@@ -19,6 +19,7 @@ class ReportIndexTests(unittest.TestCase):
             "reports",
             "tasks",
             "approval_count",
+            "task_details",
         ]:
             self.assertIn(key, status)
 
@@ -29,8 +30,21 @@ class ReportIndexTests(unittest.TestCase):
             "CLEAN_PASS\n"
             "ROLE_GRAPH_OK\n"
         )
+        original_exists = Path.exists
+        original_read_text = Path.read_text
+
+        def fake_exists(path):
+            if str(path) == "mock_report.md":
+                return True
+            return original_exists(path)
+
+        def fake_read_text(path, *args, **kwargs):
+            if str(path) == "mock_report.md":
+                return report
+            return original_read_text(path, *args, **kwargs)
+
         with patch.object(report_index, "LATEST_REPORT", Path("mock_report.md")):
-            with patch("pathlib.Path.exists", return_value=True), patch("pathlib.Path.read_text", return_value=report):
+            with patch("pathlib.Path.exists", fake_exists), patch("pathlib.Path.read_text", fake_read_text):
                 status = collect_status()
 
         self.assertTrue(status["latest_report_clean"])

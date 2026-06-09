@@ -2,6 +2,7 @@ import json
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
+from tools.task_registry import list_tasks
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE_DIR = PROJECT_ROOT / "workspace"
@@ -32,6 +33,7 @@ def collect_status() -> dict[str, object]:
 
     report_files = sorted(path.name for path in REPORTS_DIR.glob("*.md")) if REPORTS_DIR.exists() else []
     task_files = sorted(path.name for path in TASKS_DIR.glob("*.json")) if TASKS_DIR.exists() else []
+    task_details = list_tasks() if (TASKS_DIR / "task_registry.json").exists() else []
     approval_count = 0
     if APPROVAL_LOG.exists():
         approval_count = len([line for line in APPROVAL_LOG.read_text(encoding="utf-8").splitlines() if line.strip()])
@@ -53,6 +55,7 @@ def collect_status() -> dict[str, object]:
         ),
         "reports": report_files,
         "tasks": task_files,
+        "task_details": task_details,
         "approval_count": approval_count,
     }
 
@@ -65,7 +68,10 @@ def write_report_index(status: dict[str, object]) -> Path:
     status_path.write_text(json.dumps(status, indent=2), encoding="utf-8")
 
     reports = "\n".join(f"- `{name}`" for name in status["reports"])
-    tasks = "\n".join(f"- `{name}`" for name in status["tasks"]) or "- none"
+    tasks = "\n".join(
+        f"- `{task['id']}` `{task['status']}` `{task['phase']}` - {task['title']}"
+        for task in status["task_details"]
+    ) or "- none"
 
     content = f"""# AI Game Studio Dashboard Index
 

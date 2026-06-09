@@ -52,6 +52,26 @@ def validate_registry(path: Path = REGISTRY_PATH) -> tuple[bool, list[str]]:
     return not problems, problems
 
 
+def list_tasks(path: Path = REGISTRY_PATH) -> list[dict[str, str]]:
+    registry = load_registry(path)
+    tasks: list[dict[str, str]] = []
+    for entry in registry.get("tasks", []):
+        task_path = TASKS_DIR / entry.get("file", "")
+        task_data = {}
+        if task_path.exists():
+            task_data = json.loads(task_path.read_text(encoding="utf-8"))
+        tasks.append(
+            {
+                "id": entry.get("id", ""),
+                "file": entry.get("file", ""),
+                "status": entry.get("status", ""),
+                "phase": task_data.get("phase", ""),
+                "title": task_data.get("title", ""),
+            }
+        )
+    return tasks
+
+
 def main() -> int:
     ok, problems = validate_registry()
     print("TASK_REGISTRY_VALIDATION")

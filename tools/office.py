@@ -4,6 +4,7 @@ import sys
 
 from tools.dashboard import write_dashboard
 from tools.report_index import collect_status, write_report_index
+from tools.task_registry import list_tasks
 from tools.task_runner import run_task
 
 
@@ -25,6 +26,12 @@ def run_release_gate() -> int:
     return subprocess.call([sys.executable, "-m", "tools.release_gate"])
 
 
+def print_tasks() -> int:
+    for task in list_tasks():
+        print(f"{task['id']} | {task['status']} | {task['phase']} | {task['title']}")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="office", description="AI Game Studio office command center")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -32,6 +39,7 @@ def main() -> int:
     subparsers.add_parser("status")
     subparsers.add_parser("dashboard")
     subparsers.add_parser("release-gate")
+    subparsers.add_parser("tasks")
 
     task_parser = subparsers.add_parser("task")
     task_parser.add_argument("task_id")
@@ -49,6 +57,8 @@ def main() -> int:
         return 0
     if args.command == "release-gate":
         return run_release_gate()
+    if args.command == "tasks":
+        return print_tasks()
     if args.command == "task":
         print(run_task(args.task_id, dry_run=not args.run))
         return 0

@@ -1,6 +1,6 @@
 import unittest
 
-from tools.task_registry import validate_registry
+from tools.task_registry import list_tasks, validate_registry
 
 
 class TaskRegistryTests(unittest.TestCase):
@@ -8,6 +8,13 @@ class TaskRegistryTests(unittest.TestCase):
         ok, problems = validate_registry()
 
         self.assertTrue(ok, problems)
+
+    def test_list_tasks_includes_status(self):
+        tasks = list_tasks()
+
+        self.assertGreaterEqual(len(tasks), 1)
+        self.assertIn("status", tasks[0])
+        self.assertIn("title", tasks[0])
 
 
 if __name__ == "__main__":

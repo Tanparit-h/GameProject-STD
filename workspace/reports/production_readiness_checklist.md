@@ -53,6 +53,12 @@ Office CLI:
 .\.venv\Scripts\python.exe -m tools.office release-gate
 ```
 
+Office task list:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.office tasks
+```
+
 Prototype plan workflow:
 
 ```powershell
