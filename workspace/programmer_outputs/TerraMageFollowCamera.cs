@@ -32,12 +32,9 @@ namespace TerraMageTD
                 return;
             }
 
-            if (TerraMageInput.GetMouseButton(1))
-            {
-                yaw += TerraMageInput.GetAxisRaw("Mouse X") * mouseSensitivity * Time.deltaTime;
-                pitch -= TerraMageInput.GetAxisRaw("Mouse Y") * mouseSensitivity * Time.deltaTime;
-                pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
-            }
+            yaw += TerraMageInput.GetAxisRaw("Mouse X") * mouseSensitivity * Time.deltaTime;
+            pitch -= TerraMageInput.GetAxisRaw("Mouse Y") * mouseSensitivity * Time.deltaTime;
+            pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
         }
 
         private void LateUpdate()
