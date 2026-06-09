@@ -9,6 +9,7 @@ Use JSON for now so the workflow can parse tasks with the Python standard librar
 ```json
 {
   "id": "feature-interaction-v1",
+  "family": "interaction_vertical_slice",
   "phase": "IMPLEMENTATION",
   "title": "Player interaction vertical slice",
   "request": "Create and validate a real Unity vertical slice where the player presses E to interact with nearby objects.",
@@ -60,6 +61,8 @@ Run a registered task and return only the QA-complete Office response for Codex:
 ```
 
 Use response-only mode when Codex has already handed the task to Office AI and should wait for the final QA-reviewed handoff instead of reading every role log. The detailed report is still written to `workspace/reports/latest_report.md`; the compact handoff is written to `workspace/reports/codex_response.md`.
+
+Task files must declare a deterministic `family`. Unsupported families are blocked instead of falling back to a generic implementation. Use `.\.venv\Scripts\python.exe -m tools.office families` to inspect support status.
 
 ## Approval Records
 

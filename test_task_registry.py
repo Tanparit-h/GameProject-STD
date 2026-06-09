@@ -14,6 +14,8 @@ class TaskRegistryTests(unittest.TestCase):
 
         self.assertGreaterEqual(len(tasks), 1)
         self.assertIn("status", tasks[0])
+        self.assertIn("family", tasks[0])
+        self.assertIn("family_support", tasks[0])
         self.assertIn("title", tasks[0])
 
 

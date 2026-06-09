@@ -1,5 +1,6 @@
 {
   "id": "feature-quest-marker-v1",
+  "family": "quest_marker",
   "phase": "IMPLEMENTATION",
   "title": "Quest marker",
   "request": "Implement and validate a real Unity objective marker that points the player toward a target placeholder and updates when the target is reached. Include any required placeholder assets, implementation scripts, scene setup, scene validation, QA output, and reports.",

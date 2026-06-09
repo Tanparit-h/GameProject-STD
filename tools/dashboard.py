@@ -30,6 +30,8 @@ def render_dashboard() -> str:
         "<li>"
         f"<strong>{h(task['id'])}</strong> "
         f"<span class='pill neutral'>{h(task['status'])}</span> "
+        f"<span class='pill neutral'>{h(task['family'])}</span> "
+        f"<span class='pill {status_class(task['family_support'] == 'supported')}'>{h(task['family_support'])}</span> "
         f"{h(task['phase'])} - {h(task['title'])}"
         "</li>"
         for task in status["task_details"]

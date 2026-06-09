@@ -32,7 +32,7 @@ def build_release_notes() -> str:
     approvals = read_approvals()
 
     task_lines = "\n".join(
-        f"- `{task['id']}`: `{task['status']}` `{task['phase']}` - {task['title']}"
+        f"- `{task['id']}`: `{task['status']}` `{task['family']}` `{task['family_support']}` `{task['phase']}` - {task['title']}"
         for task in tasks
     )
     approval_lines = "\n".join(
@@ -59,11 +59,11 @@ Generated at: `{datetime.now(timezone.utc).isoformat()}`
 ## Included Capabilities
 
 - Release-gate-clean Unity vertical slice for player interaction.
-- Prototype-planned door toggle work order.
+- Deterministic task family registry with fail-closed blocking for unsupported families.
 - Multi-feature task registry.
 - Approval record log.
 - Static dashboard generator.
-- Office CLI for status, dashboard, release gate, and task dry-runs.
+- Office CLI for status, dashboard, release gate, task runs, family inspection, and family scaffolding.
 - Deterministic validation for creator exports, task registry, Unity logs, and latest reports.
 
 ## Task Status

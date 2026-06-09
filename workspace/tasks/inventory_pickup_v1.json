@@ -1,5 +1,6 @@
 {
   "id": "feature-inventory-pickup-v1",
+  "family": "inventory_pickup",
   "phase": "IMPLEMENTATION",
   "title": "Inventory pickup",
   "request": "Implement and validate a real Unity interaction where the player presses E near an item placeholder to collect it into a simple inventory list. Include any required placeholder assets, implementation scripts, scene setup, scene validation, QA output, and reports.",

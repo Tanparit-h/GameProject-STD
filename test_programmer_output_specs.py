@@ -4,6 +4,8 @@ from tempfile import TemporaryDirectory
 
 from app.main_graph import parse_required_flag
 from tools.programmer_output_specs import (
+    UnsupportedProgrammerFamilyError,
+    get_supported_programmer_family_keys,
     is_terra_mage_weapon_family_request,
     is_terra_mage_third_person_aim_request,
     select_programmer_output_spec,
@@ -23,6 +25,24 @@ class ProgrammerOutputSpecsTests(unittest.TestCase):
         self.assertIn("InteractableObject.cs", spec.file_contents)
         self.assertIn("AIPrototypeSceneSetup.cs", spec.file_contents)
         self.assertIn("AIPrototypeSceneValidator.cs", spec.file_contents)
+        self.assertEqual(spec.key, "interaction_vertical_slice")
+
+    def test_supported_family_keys_exclude_scaffold_only_entries(self):
+        supported = get_supported_programmer_family_keys()
+
+        self.assertIn("interaction_vertical_slice", supported)
+        self.assertIn("terra_mage_third_person_aim", supported)
+        self.assertIn("terra_mage_weapon_family", supported)
+        self.assertNotIn("door_toggle_interaction", supported)
+
+    def test_select_programmer_output_spec_rejects_scaffold_only_family(self):
+        with self.assertRaises(UnsupportedProgrammerFamilyError):
+            select_programmer_output_spec(
+                "Implement a door toggle interaction.",
+                "IMPLEMENTATION",
+                "feature-door-toggle-v1",
+                "door_toggle_interaction",
+            )
 
     def test_parse_required_flag_handles_markdown_emphasis(self):
         text = "0. Routing decision\n- Creator required: **no**\n- Programmer required: **yes**"

@@ -9,32 +9,32 @@
     {
       "id": "feature-door-toggle-v1",
       "file": "door_toggle_v1.json",
-      "status": "implementation_requested"
+      "status": "family_scaffold_required"
     },
     {
       "id": "feature-dialogue-prompt-v1",
       "file": "dialogue_prompt_v1.json",
-      "status": "implementation_requested"
+      "status": "family_scaffold_required"
     },
     {
       "id": "feature-inventory-pickup-v1",
       "file": "inventory_pickup_v1.json",
-      "status": "implementation_requested"
+      "status": "family_scaffold_required"
     },
     {
       "id": "feature-quest-marker-v1",
       "file": "quest_marker_v1.json",
-      "status": "implementation_requested"
+      "status": "family_scaffold_required"
     },
     {
       "id": "terra-mage-first-wall-v003",
       "file": "terra_mage_first_wall_v003.json",
-      "status": "implementation_requested"
+      "status": "family_scaffold_required"
     },
     {
       "id": "terra-mage-first-scene-v004",
       "file": "terra_mage_first_scene_v004.json",
-      "status": "implementation_requested"
+      "status": "family_scaffold_required"
     },
     {
       "id": "terra-mage-third-person-aim-v005",

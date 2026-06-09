@@ -11,6 +11,8 @@ from tools.creator_file_tool import write_creator_file
 from tools.programmer_file_tool import write_programmer_file
 from tools.creator_asset_validator import format_creator_validation, validate_creator_exports
 from tools.programmer_output_specs import (
+    AmbiguousProgrammerFamilyError,
+    UnsupportedProgrammerFamilyError,
     select_programmer_output_spec,
     validate_programmer_output_files as validate_programmer_output_spec_files,
 )
@@ -202,6 +204,7 @@ def get_programmer_output_spec_for_state(state: FeatureState):
         feature_request=state["feature_request"],
         phase=state["phase"],
         task_id=state.get("task_id", ""),
+        family=state.get("task_family", ""),
     )
 
 
@@ -370,9 +373,20 @@ Manager output:
     if request_requires_programmer(state["feature_request"]):
         state["programmer_required"] = True
 
-    programmer_spec = get_programmer_output_spec_for_state(state)
-    if programmer_spec.key != "default_interaction":
+    if state.get("task_family"):
         state["programmer_required"] = True
+    if state["programmer_required"]:
+        try:
+            get_programmer_output_spec_for_state(state)
+        except (UnsupportedProgrammerFamilyError, AmbiguousProgrammerFamilyError) as exc:
+            state["final_status"] = f"STOPPED_{type(exc).__name__.replace('ProgrammerFamilyError', '').upper()}"
+            state["designer_output"] += (
+                "\n\n---\n\n"
+                "Deterministic family blocker:\n"
+                f"- {exc}\n"
+            )
+            state["creator_required"] = False
+            state["programmer_required"] = False
 
     print(f"Creator required: {state['creator_required']}")
     print(f"Programmer required: {state['programmer_required']}")
@@ -381,6 +395,8 @@ Manager output:
 
 
 def route_after_designer(state: FeatureState) -> str:
+    if state["final_status"].startswith("STOPPED_"):
+        return "final"
     if state["creator_required"]:
         return "creator"
 
@@ -1124,7 +1140,7 @@ def final_node(state: FeatureState) -> FeatureState:
 
     final_status = state["final_status"] or "ROLE_GRAPH_OK"
     programmer_file_heading = (
-        "Programmer Output File Paths" if is_implementation_phase(state["phase"]) else "Programmer Draft File Paths"
+        "Programmer Output File Paths" if is_implementation_phase(state["phase"]) else "Programmer Design Output File Paths"
     )
 
     report = f"""# AI Studio Role-based Report
@@ -1140,6 +1156,8 @@ def final_node(state: FeatureState) -> FeatureState:
 Task id: {state.get("task_id", "") or "none"}
 
 Task file: {state.get("task_file", "") or "none"}
+
+Task family: {state.get("task_family", "") or "none"}
 
 ---
 
@@ -1359,6 +1377,74 @@ Read `workspace/reports/latest_report.md` only if detailed role output is needed
     return state
 
 
+def write_blocked_family_reports(
+    *,
+    task_id: str,
+    task_file: str,
+    task_family: str,
+    feature_request: str,
+    phase: str,
+    status: str,
+    message: str,
+) -> None:
+    output_dir = ROOT / "workspace" / "reports"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    report = f"""# AI Studio Role-based Report
+
+## Feature Request
+
+{feature_request}
+
+---
+
+## Task Metadata
+
+Task id: {task_id or "none"}
+
+Task file: {task_file or "none"}
+
+Task family: {task_family or "none"}
+
+---
+
+## Phase
+
+{phase}
+
+---
+
+## Final Status
+
+{status}
+
+## Blocker
+
+{message}
+"""
+    (output_dir / "latest_report.md").write_text(report, encoding="utf-8")
+
+    codex_response = f"""# AI Office Response To Codex
+
+## Status
+
+{status}
+
+## Phase
+
+{phase}
+
+## Blocker
+
+{message}
+
+## Output Files
+
+- none
+"""
+    (output_dir / "codex_response.md").write_text(codex_response, encoding="utf-8")
+
+
 def build_graph():
     graph = StateGraph(FeatureState)
 
@@ -1393,6 +1479,7 @@ def build_graph():
         {
             "creator": "creator",
             "skip_creator": "skip_creator",
+            "final": "final",
         },
     )
 
@@ -1502,6 +1589,7 @@ Include placeholder assets, implementation scripts, scene setup, scene validatio
     phase = os.getenv("AI_STUDIO_PHASE", "IMPLEMENTATION")
     task_file = os.getenv("AI_STUDIO_TASK_FILE")
     task_id = ""
+    task_family = os.getenv("AI_STUDIO_TASK_FAMILY", "")
 
     if task_file:
         task_path = Path(task_file)
@@ -1511,10 +1599,37 @@ Include placeholder assets, implementation scripts, scene setup, scene validatio
         task_id = task_data.get("id", "")
         feature_request = task_data.get("request", feature_request)
         phase = task_data.get("phase", phase)
+        task_family = task_data.get("family", task_family)
+
+    try:
+        if task_family or request_requires_programmer(feature_request):
+            select_programmer_output_spec(
+                feature_request=feature_request,
+                phase=phase,
+                task_id=task_id,
+                family=task_family,
+            )
+    except (UnsupportedProgrammerFamilyError, AmbiguousProgrammerFamilyError) as exc:
+        status = type(exc).__name__.replace("ProgrammerFamilyError", "").upper()
+        if not status:
+            status = "FAMILY_ERROR"
+        final_status = f"STOPPED_{status}"
+        write_blocked_family_reports(
+            task_id=task_id,
+            task_file=task_file or "",
+            task_family=task_family,
+            feature_request=feature_request,
+            phase=phase,
+            status=final_status,
+            message=str(exc),
+        )
+        print(final_status)
+        return
 
     result = await app.ainvoke({
         "task_id": task_id,
         "task_file": task_file or "",
+        "task_family": task_family,
         "feature_request": feature_request,
         "phase": phase,
         "manager_output": "",

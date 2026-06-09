@@ -1,5 +1,6 @@
 {
   "id": "terra-mage-third-person-aim-v005",
+  "family": "terra_mage_third_person_aim",
   "phase": "IMPLEMENTATION",
   "title": "Terra Mage third-person aim debug test range",
   "request": "Implement on the real Unity project, not prototype only. Starting from the current Terra Mage scene where the tiny mage can already walk, run, and jump, change the camera to a third-person gameplay camera, add an aiming helper, and add debug output so when the player clicks it reports the distance to the object currently being aimed at. In the same scene, create multiple test objects for aiming verification, including several static targets, a moving target, a target that disappears, and a target that blinks. Update scene setup and validation so this feature is part of the real implementation.",

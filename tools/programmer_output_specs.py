@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 from textwrap import dedent
+from typing import Callable
 
 from tools.terra_mage_weapon_family_spec import (
     build_terra_mage_weapon_family_spec,
@@ -15,6 +16,24 @@ class ProgrammerOutputSpec:
     required_snippets: dict[str, list[str]]
     scene_setup_method: str
     scene_validation_method: str
+
+
+@dataclass(frozen=True)
+class ProgrammerFamilyDefinition:
+    key: str
+    title: str
+    support_level: str
+    description: str
+    detector: Callable[[str, str], bool]
+    spec_builder: Callable[[], ProgrammerOutputSpec] | None
+
+
+class UnsupportedProgrammerFamilyError(ValueError):
+    pass
+
+
+class AmbiguousProgrammerFamilyError(ValueError):
+    pass
 
 
 def _clean(text: str) -> str:
@@ -37,6 +56,19 @@ def is_terra_mage_third_person_aim_request(feature_request: str, task_id: str = 
     has_aim = "aim" in normalized_request or "เล็ง" in feature_request
 
     return has_terra_mage and has_camera and has_aim
+
+
+def is_interaction_vertical_slice_request(feature_request: str, task_id: str = "") -> bool:
+    normalized_request = _normalize(feature_request)
+    normalized_task_id = _normalize(task_id)
+
+    if normalized_task_id == "feature-interaction-v1":
+        return True
+
+    has_interaction = "interact" in normalized_request or "interaction" in normalized_request
+    has_player = "player" in normalized_request
+    has_validation = "scene validation" in normalized_request or "vertical slice" in normalized_request
+    return has_interaction and has_player and has_validation
 
 
 def default_interact_system() -> str:
@@ -330,7 +362,7 @@ def default_interaction_report() -> str:
 
 def default_programmer_output_spec() -> ProgrammerOutputSpec:
     return ProgrammerOutputSpec(
-        key="default_interaction",
+        key="interaction_vertical_slice",
         file_contents={
             "InteractSystem.cs": default_interact_system(),
             "InteractableObject.cs": default_interactable_object(),
@@ -1654,20 +1686,160 @@ def terra_mage_weapon_family_spec() -> ProgrammerOutputSpec:
     )
 
 
+def programmer_family_definitions() -> dict[str, ProgrammerFamilyDefinition]:
+    return {
+        "interaction_vertical_slice": ProgrammerFamilyDefinition(
+            key="interaction_vertical_slice",
+            title="Interaction Vertical Slice",
+            support_level="supported",
+            description="Real Unity interaction slice with sample scene setup and validation.",
+            detector=is_interaction_vertical_slice_request,
+            spec_builder=default_programmer_output_spec,
+        ),
+        "terra_mage_third_person_aim": ProgrammerFamilyDefinition(
+            key="terra_mage_third_person_aim",
+            title="Terra Mage Third-Person Aim",
+            support_level="supported",
+            description="Third-person camera, aiming helper, target range, and scene validation for Terra Mage.",
+            detector=is_terra_mage_third_person_aim_request,
+            spec_builder=terra_mage_third_person_aim_spec,
+        ),
+        "terra_mage_weapon_family": ProgrammerFamilyDefinition(
+            key="terra_mage_weapon_family",
+            title="Terra Mage Weapon Wheel and Combat",
+            support_level="supported",
+            description="Weapon wheel, loadout, melee/range behavior, and scene validation for Terra Mage.",
+            detector=is_terra_mage_weapon_family_request,
+            spec_builder=terra_mage_weapon_family_spec,
+        ),
+        "door_toggle_interaction": ProgrammerFamilyDefinition(
+            key="door_toggle_interaction",
+            title="Door Toggle Interaction",
+            support_level="scaffold_only",
+            description="Planned deterministic family for door toggle interaction work.",
+            detector=lambda *_: False,
+            spec_builder=None,
+        ),
+        "dialogue_prompt": ProgrammerFamilyDefinition(
+            key="dialogue_prompt",
+            title="Dialogue Prompt",
+            support_level="scaffold_only",
+            description="Planned deterministic family for NPC dialogue prompt workflows.",
+            detector=lambda *_: False,
+            spec_builder=None,
+        ),
+        "inventory_pickup": ProgrammerFamilyDefinition(
+            key="inventory_pickup",
+            title="Inventory Pickup",
+            support_level="scaffold_only",
+            description="Planned deterministic family for pickup and inventory workflows.",
+            detector=lambda *_: False,
+            spec_builder=None,
+        ),
+        "quest_marker": ProgrammerFamilyDefinition(
+            key="quest_marker",
+            title="Quest Marker",
+            support_level="scaffold_only",
+            description="Planned deterministic family for quest/objective marker workflows.",
+            detector=lambda *_: False,
+            spec_builder=None,
+        ),
+        "terra_mage_first_wall": ProgrammerFamilyDefinition(
+            key="terra_mage_first_wall",
+            title="Terra Mage First Wall",
+            support_level="scaffold_only",
+            description="Planned deterministic family for early Terra Mage sandbox foundation work.",
+            detector=lambda *_: False,
+            spec_builder=None,
+        ),
+        "terra_mage_first_scene": ProgrammerFamilyDefinition(
+            key="terra_mage_first_scene",
+            title="Terra Mage First Scene",
+            support_level="scaffold_only",
+            description="Planned deterministic family for the first Terra Mage playable scene foundation.",
+            detector=lambda *_: False,
+            spec_builder=None,
+        ),
+    }
+
+
+def list_programmer_family_definitions() -> list[ProgrammerFamilyDefinition]:
+    return list(programmer_family_definitions().values())
+
+
+def get_programmer_family_definition(family: str) -> ProgrammerFamilyDefinition | None:
+    normalized_family = (family or "").strip().lower().replace("-", "_").replace(" ", "_")
+    return programmer_family_definitions().get(normalized_family)
+
+
+def get_supported_programmer_family_keys() -> list[str]:
+    return [
+        family.key
+        for family in list_programmer_family_definitions()
+        if family.support_level == "supported"
+    ]
+
+
+def resolve_programmer_family_definition(
+    feature_request: str,
+    task_id: str = "",
+    family: str = "",
+) -> ProgrammerFamilyDefinition:
+    explicit_family = (family or "").strip().lower().replace("-", "_").replace(" ", "_")
+    definitions = programmer_family_definitions()
+
+    if explicit_family:
+        definition = definitions.get(explicit_family)
+        if definition is None:
+            supported = ", ".join(sorted(definitions))
+            raise UnsupportedProgrammerFamilyError(
+                f"Unknown task family '{explicit_family}'. Known families: {supported}"
+            )
+        if definition.support_level != "supported" or definition.spec_builder is None:
+            raise UnsupportedProgrammerFamilyError(
+                f"Task family '{explicit_family}' is registered as {definition.support_level} and has no deterministic implementation spec yet."
+            )
+        return definition
+
+    matches = [
+        definition
+        for definition in definitions.values()
+        if definition.support_level == "supported" and definition.detector(feature_request, task_id)
+    ]
+
+    if len(matches) == 1:
+        return matches[0]
+
+    if len(matches) > 1:
+        family_keys = ", ".join(sorted(definition.key for definition in matches))
+        raise AmbiguousProgrammerFamilyError(
+            f"Feature request matches multiple supported families. Set task family explicitly. Matches: {family_keys}"
+        )
+
+    supported = ", ".join(sorted(get_supported_programmer_family_keys()))
+    raise UnsupportedProgrammerFamilyError(
+        "No deterministic programmer family matched this request. "
+        f"Supported families: {supported}. Set an explicit supported family or scaffold a new one."
+    )
+
+
 def select_programmer_output_spec(
     feature_request: str,
     phase: str,
     task_id: str = "",
+    family: str = "",
 ) -> ProgrammerOutputSpec:
     del phase
-
-    if is_terra_mage_weapon_family_request(feature_request, task_id):
-        return terra_mage_weapon_family_spec()
-
-    if is_terra_mage_third_person_aim_request(feature_request, task_id):
-        return terra_mage_third_person_aim_spec()
-
-    return default_programmer_output_spec()
+    definition = resolve_programmer_family_definition(
+        feature_request=feature_request,
+        task_id=task_id,
+        family=family,
+    )
+    if definition.spec_builder is None:
+        raise UnsupportedProgrammerFamilyError(
+            f"Task family '{definition.key}' has no deterministic implementation spec."
+        )
+    return definition.spec_builder()
 
 
 def validate_programmer_output_files(

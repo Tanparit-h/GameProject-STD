@@ -9,7 +9,8 @@ class TaskFileTests(unittest.TestCase):
         data = json.loads(task_path.read_text(encoding="utf-8"))
 
         self.assertEqual(data["id"], "feature-interaction-v1")
-        self.assertIn(data["phase"], ["PROTOTYPE_PLAN", "IMPLEMENTATION"])
+        self.assertEqual(data["family"], "interaction_vertical_slice")
+        self.assertEqual(data["phase"], "IMPLEMENTATION")
         self.assertTrue(data["request"])
         self.assertIsInstance(data["approval"]["implementation"], bool)
 
@@ -20,7 +21,8 @@ class TaskFileTests(unittest.TestCase):
             data = json.loads(task_path.read_text(encoding="utf-8"))
             with self.subTest(task=task_path.name):
                 self.assertTrue(data["id"])
-                self.assertIn(data["phase"], ["PROTOTYPE_PLAN", "IMPLEMENTATION"])
+                self.assertTrue(data["family"])
+                self.assertEqual(data["phase"], "IMPLEMENTATION")
                 self.assertTrue(data["title"])
                 self.assertTrue(data["request"])
                 self.assertIsInstance(data["approval"]["implementation"], bool)

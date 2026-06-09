@@ -70,7 +70,7 @@ def write_report_index(status: dict[str, object]) -> Path:
 
     reports = "\n".join(f"- `{name}`" for name in status["reports"])
     tasks = "\n".join(
-        f"- `{task['id']}` `{task['status']}` `{task['phase']}` - {task['title']}"
+        f"- `{task['id']}` `{task['status']}` `{task['family']}` `{task['family_support']}` `{task['phase']}` - {task['title']}"
         for task in status["task_details"]
     ) or "- none"
 

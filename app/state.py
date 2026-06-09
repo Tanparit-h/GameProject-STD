@@ -3,6 +3,7 @@ from typing import TypedDict
 class FeatureState(TypedDict):
     task_id: str
     task_file: str
+    task_family: str
 
     feature_request: str
     phase: str

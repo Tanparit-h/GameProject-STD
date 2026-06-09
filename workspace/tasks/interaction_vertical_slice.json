@@ -1,5 +1,6 @@
 {
   "id": "feature-interaction-v1",
+  "family": "interaction_vertical_slice",
   "phase": "IMPLEMENTATION",
   "title": "Player interaction vertical slice",
   "request": "Create and validate a Unity vertical slice where the player presses E to interact with nearby placeholder objects. Include placeholder assets, implementation scripts, scene setup, scene validation, QA output, and reports.",

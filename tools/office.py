@@ -2,7 +2,9 @@ import argparse
 import subprocess
 import sys
 
+from tools.family_scaffold import scaffold_programmer_family
 from tools.dashboard import write_dashboard
+from tools.programmer_output_specs import list_programmer_family_definitions
 from tools.report_index import collect_status, write_report_index
 from tools.release_notes import write_release_notes
 from tools.task_registry import list_tasks
@@ -29,7 +31,22 @@ def run_release_gate() -> int:
 
 def print_tasks() -> int:
     for task in list_tasks():
-        print(f"{task['id']} | {task['status']} | {task['phase']} | {task['title']}")
+        print(
+            f"{task['id']} | {task['status']} | {task['family']} | {task['family_support']} | "
+            f"{task['phase']} | {task['title']}"
+        )
+    return 0
+
+
+def print_families() -> int:
+    for family in list_programmer_family_definitions():
+        print(f"{family.key} | {family.support_level} | {family.title} | {family.description}")
+    return 0
+
+
+def scaffold_family(family_key: str) -> int:
+    for path in scaffold_programmer_family(family_key):
+        print(path)
     return 0
 
 
@@ -42,6 +59,10 @@ def main() -> int:
     subparsers.add_parser("release-gate")
     subparsers.add_parser("release-notes")
     subparsers.add_parser("tasks")
+    subparsers.add_parser("families")
+
+    scaffold_parser = subparsers.add_parser("scaffold-family")
+    scaffold_parser.add_argument("family_key")
 
     task_parser = subparsers.add_parser("task")
     task_parser.add_argument("task_id")
@@ -66,9 +87,14 @@ def main() -> int:
         return 0
     if args.command == "tasks":
         return print_tasks()
+    if args.command == "families":
+        return print_families()
+    if args.command == "scaffold-family":
+        return scaffold_family(args.family_key)
     if args.command == "task":
-        print(run_task(args.task_id, dry_run=not args.run, response_only=args.response_only))
-        return 0
+        output = run_task(args.task_id, dry_run=not args.run, response_only=args.response_only)
+        print(output)
+        return 1 if output.startswith("TASK_RUNNER_BLOCKED") else 0
 
     return 1
 

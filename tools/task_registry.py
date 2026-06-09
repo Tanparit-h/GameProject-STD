@@ -1,11 +1,12 @@
 import json
 from pathlib import Path
+from tools.programmer_output_specs import get_programmer_family_definition
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 TASKS_DIR = PROJECT_ROOT / "workspace" / "tasks"
 REGISTRY_PATH = TASKS_DIR / "task_registry.json"
 
-REQUIRED_TASK_FIELDS = ["id", "phase", "title", "request", "approval"]
+REQUIRED_TASK_FIELDS = ["id", "family", "phase", "title", "request", "approval"]
 
 
 def load_registry(path: Path = REGISTRY_PATH) -> dict[str, object]:
@@ -18,6 +19,9 @@ def validate_task_file(path: Path) -> tuple[bool, list[str]]:
     for field in REQUIRED_TASK_FIELDS:
         if field not in data:
             problems.append(f"{path.name} missing field: {field}")
+    family = data.get("family", "")
+    if family and get_programmer_family_definition(family) is None:
+        problems.append(f"{path.name} uses unknown family: {family}")
     if "approval" in data and "implementation" not in data["approval"]:
         problems.append(f"{path.name} missing approval.implementation")
     return not problems, problems
@@ -65,6 +69,12 @@ def list_tasks(path: Path = REGISTRY_PATH) -> list[dict[str, str]]:
                 "id": entry.get("id", ""),
                 "file": entry.get("file", ""),
                 "status": entry.get("status", ""),
+                "family": task_data.get("family", ""),
+                "family_support": (
+                    get_programmer_family_definition(task_data.get("family", "")).support_level
+                    if get_programmer_family_definition(task_data.get("family", "")) is not None
+                    else ""
+                ),
                 "phase": task_data.get("phase", ""),
                 "title": task_data.get("title", ""),
             }
