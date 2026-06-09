@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace TerraMageTD
 {
@@ -50,7 +50,8 @@ namespace TerraMageTD
         public static TerraMageMaterialPayload Heat(TerraMageMaterialPayload payload, float heatAmount)
         {
             payload.Heat += Mathf.Max(0f, heatAmount);
-            if ((payload.Kind == TerraMageMaterialKind.LooseEarth || payload.Kind == TerraMageMaterialKind.PackedEarth) && payload.Heat >= 1f)
+            if ((payload.Kind == TerraMageMaterialKind.LooseEarth || payload.Kind == TerraMageMaterialKind.PackedEarth)
+                && payload.Heat >= 1f)
             {
                 payload.Kind = TerraMageMaterialKind.MoltenGlass;
                 payload.Hardness = 0.05f;

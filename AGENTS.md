@@ -2,17 +2,33 @@
 
 ## Project Goal
 
-This project is an AI Office Game Studio prototype.
+This project is an AI Office-style game production workflow that performs real work.
 
 Architecture:
 
-- LangGraph = main workflow/state/router
+- LangGraph = workflow/state/router
 - AutoGen = role agents
 - Ollama = local LLM backend
 - Blender = creator asset generation
-- Unity = target game engine, but do not modify Unity project unless explicitly approved
+- Unity = target game engine
 
-## Current Roles
+## Current Operating Mode
+
+Current phase:
+
+```text
+IMPLEMENTATION
+```
+
+Meaning:
+
+- Creator may generate runnable Blender scripts and export real placeholder assets.
+- Programmer must generate real implementation outputs under `workspace/programmer_outputs/`.
+- Approved outputs may be copied into the Unity project.
+- Unity batchmode validation, scene setup, and scene validation are part of the normal workflow.
+- QA decisions must be based on real files, logs, and deterministic evidence.
+
+## Roles
 
 ### Manager
 
@@ -42,7 +58,7 @@ Designer must always include:
 
 ### Creator
 
-Creates asset spec, image prompt, Blender Python script, and exports mock assets.
+Creates asset spec, image prompt, Blender Python script, and exports assets.
 
 Creator output should stay under:
 
@@ -55,45 +71,29 @@ Creator must not write into Unity directly.
 
 ### Programmer
 
-Creates implementation plan, code draft, pseudo-code, and future Unity setup plan.
+Creates real implementation files, setup/validation support files, and implementation reports under:
 
-In PROTOTYPE_PLAN phase:
+```text
+workspace/programmer_outputs/
+```
 
-- Do not modify the real Unity project
-- Do not write C# files into Unity Assets yet
-- Code draft is allowed
-- Unity setup steps must be conceptual/mock
-- Programmer draft files should be generated into `workspace/programmer_outputs/`
+Programmer should not emit draft-only placeholders when the task requests real implementation.
 
 ### QA
 
-Checks Creator or Programmer output against Designer QA targets.
+Checks Creator, Programmer, or Unity output against evidence and Designer QA targets.
 
 QA must respond in Thai only.
 
 If Blender run result contains `Traceback`, `Error`, `Exception`, `KeyError`, `AttributeError`, `TypeError`, or no exported files, QA must mark it as fail.
 
-## Current Phase
-
-```text
-PROTOTYPE_PLAN
-```
-
-Meaning:
-
-- Creator may generate Blender script and export mock asset to workspace
-- Programmer may generate code draft/pseudo-code into workspace
-- No Unity project modification yet
-- No real import into Unity yet
-
 ## Safety Rules
 
-- Do not modify Unity project directly unless task explicitly says IMPLEMENTATION phase.
 - Do not write outside project root.
-- Do not delete files.
-- Do not commit or push.
-- Prefer patch/draft/report first.
-- If unsure, ask for approval.
+- Do not delete arbitrary project content unrelated to the task.
+- Do not commit or push unless explicitly requested.
+- Keep root repo and Unity repo history intentional and separate.
+- Prefer deterministic validation over role-text claims.
 
 ## Important Paths
 
@@ -108,6 +108,7 @@ D:\AIStudio\ai-game-studio\workspace\creator_outputs
 D:\AIStudio\ai-game-studio\workspace\creator_outputs\exports
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs
 D:\AIStudio\ai-game-studio\workspace\reports\latest_report.md
+D:\AIStudio\ai-game-studio\game_project\STDProject
 ```
 
 ## Commands
@@ -118,10 +119,10 @@ Run main workflow:
 python -m app.main_graph
 ```
 
-Check Blender log:
+Run a task through Office:
 
 ```powershell
-notepad workspace\logs\blender_creator_run.log
+.\.venv\Scripts\python.exe -m tools.office task feature-interaction-v1 --run --response-only
 ```
 
 Check creator exports:
@@ -136,16 +137,6 @@ Check programmer outputs:
 dir workspace\programmer_outputs
 ```
 
-## Current Known Stable Point
+## Current Goal
 
-Creator Blender export is now working and `.glb` placeholder assets can be generated.
-
-## Current Next Goal
-
-Move Programmer output from report-only to real draft files under:
-
-```text
-workspace/programmer_outputs/
-```
-
-Do not write to Unity project yet.
+Keep the Office workflow implementation-first, evidence-driven, and reusable across real Unity game features.

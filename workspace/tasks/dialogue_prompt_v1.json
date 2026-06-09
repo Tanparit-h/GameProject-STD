@@ -1,0 +1,9 @@
+{
+  "id": "feature-dialogue-prompt-v1",
+  "phase": "IMPLEMENTATION",
+  "title": "NPC dialogue prompt",
+  "request": "Implement and validate a real Unity interaction where the player approaches an NPC placeholder, presses E, and sees a short dialogue prompt with one continue action. Include any required placeholder assets, implementation scripts, scene setup, scene validation, QA output, and reports.",
+  "approval": {
+    "implementation": true
+  }
+}

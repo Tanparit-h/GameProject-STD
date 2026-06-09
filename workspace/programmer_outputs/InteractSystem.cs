@@ -1,20 +1,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// PROTOTYPE_PLAN draft only. Do not place this file in Unity Assets yet.
-public class InteractSystem_Draft : MonoBehaviour
+public class InteractSystem : MonoBehaviour
 {
     [SerializeField] private float interactRange = 2.5f;
     [SerializeField] private KeyCode interactKey = KeyCode.E;
-    [SerializeField] private string mockPromptText = "Press E to Interact";
+    [SerializeField] private string promptText = "Press E to Interact";
 
-    private readonly List<InteractableObject_Draft> objectsInRange = new();
-    private InteractableObject_Draft currentTarget;
+    private readonly List<InteractableObject> objectsInRange = new();
+    private InteractableObject currentTarget;
 
     private void Update()
     {
         currentTarget = FindClosestInteractable();
-        UpdateMockFeedback(currentTarget);
+        UpdatePromptFeedback(currentTarget);
 
         if (currentTarget != null && Input.GetKeyDown(interactKey))
         {
@@ -22,9 +21,9 @@ public class InteractSystem_Draft : MonoBehaviour
         }
     }
 
-    private InteractableObject_Draft FindClosestInteractable()
+    private InteractableObject FindClosestInteractable()
     {
-        InteractableObject_Draft closest = null;
+        InteractableObject closest = null;
         float closestDistance = float.MaxValue;
 
         foreach (var candidate in objectsInRange)
@@ -45,20 +44,20 @@ public class InteractSystem_Draft : MonoBehaviour
         return closest;
     }
 
-    private void UpdateMockFeedback(InteractableObject_Draft target)
+    private void UpdatePromptFeedback(InteractableObject target)
     {
         if (target == null)
         {
-            Debug.Log("Mock UI hidden: no interactable object in range.");
+            Debug.Log("Interaction prompt hidden: no interactable object in range.");
             return;
         }
 
-        Debug.Log($"{mockPromptText}: {target.DisplayName}");
+        Debug.Log($"{promptText}: {target.DisplayName}");
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        var interactable = other.GetComponent<InteractableObject_Draft>();
+        var interactable = other.GetComponent<InteractableObject>();
         if (interactable != null && !objectsInRange.Contains(interactable))
         {
             objectsInRange.Add(interactable);
@@ -67,7 +66,7 @@ public class InteractSystem_Draft : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        var interactable = other.GetComponent<InteractableObject_Draft>();
+        var interactable = other.GetComponent<InteractableObject>();
         if (interactable != null)
         {
             objectsInRange.Remove(interactable);

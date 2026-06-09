@@ -1,0 +1,9 @@
+{
+  "id": "feature-door-toggle-v1",
+  "phase": "IMPLEMENTATION",
+  "title": "Door toggle interaction",
+  "request": "Implement and validate a real Unity interaction where the player presses E near a door to toggle open and closed states. Include any required placeholder assets, implementation scripts, scene setup, scene validation, QA output, and reports.",
+  "approval": {
+    "implementation": true
+  }
+}

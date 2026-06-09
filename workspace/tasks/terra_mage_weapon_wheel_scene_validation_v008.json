@@ -1,0 +1,9 @@
+{
+  "id": "terra-mage-weapon-wheel-scene-validation-v008",
+  "phase": "IMPLEMENTATION",
+  "title": "Terra Mage weapon wheel scene setup and validation",
+  "request": "Update Terra Mage first scene setup and validation for the real Unity project so weapon wheel and weapon-based combat can be verified in scene. Include a demo loadout with fewer than 10 active entries so dynamic wheel segmentation can be checked. Validate that slot 0 is bare hands, active wheel segments expand to fill the full circle based on actual assigned item count, Tab opens the weapon wheel, and selected weapons change melee/range behavior in the Terra Mage scene.",
+  "approval": {
+    "implementation": true
+  }
+}

@@ -48,10 +48,11 @@ def collect_status() -> dict[str, object]:
         "latest_report_clean": (
             "ROLE_GRAPH_OK" in latest_text
             and "CLEAN_PASS" in latest_text
-            and (
-                ("## Phase\n\nIMPLEMENTATION" in latest_text and "Deterministic Unity QA: PASS" in latest_text)
-                or ("## Phase\n\nPROTOTYPE_PLAN" in latest_text and "SKIPPED_UNITY_IMPLEMENTATION" in latest_text)
-            )
+            and "## Phase\n\nIMPLEMENTATION" in latest_text
+            and "DETERMINISTIC_UNITY_GATE" in latest_text
+            and "Validation passed: True" in latest_text
+            and "Scene setup passed: True" in latest_text
+            and "Scene validation passed: True" in latest_text
         ),
         "reports": report_files,
         "tasks": task_files,

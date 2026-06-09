@@ -2,15 +2,15 @@
 
 ## Feature Request
 
-Implement on the real Unity project, not prototype only. Starting from the current Terra Mage scene where the tiny mage can already walk, run, and jump, change the camera to a third-person gameplay camera, add an aiming helper, and add debug output so when the player clicks it reports the distance to the object currently being aimed at. In the same scene, create multiple test objects for aiming verification, including several static targets, a moving target, a target that disappears, and a target that blinks. Update scene setup and validation so this feature is part of the real implementation.
+Implement a weapon wheel for the real Terra Mage Unity project. Open the wheel when holding Tab. Maximum total slots is 10. Slot 0 must always be locked to bare hands and bare hands must be able to punch. The player must be able to assign weapons into the remaining wheel slots. If the wheel has fewer than 10 assigned entries, do not leave empty arc gaps. Instead, divide the full circle evenly across only the active assigned entries. Example: bare hands only plus 1 assigned weapon = 2 equal left/right halves. Bare hands plus 2 assigned weapons = 3 equal segments. Continue scaling this way up to 10 total active slots. Integrate this as real implementation, not prototype only.
 
 ---
 
 ## Task Metadata
 
-Task id: terra-mage-third-person-aim-v005
+Task id: terra-mage-weapon-wheel-v006
 
-Task file: workspace\tasks\terra_mage_third_person_aim_v005.json
+Task file: workspace\tasks\terra_mage_weapon_wheel_v006.json
 
 ---
 
@@ -23,74 +23,47 @@ IMPLEMENTATION
 ## 1. Manager Output
 
 1. **User goal**  
-   - Implement a third-person camera system in the Terra Mage scene.  
-   - Add an aiming helper (visual indicator) that appears when the player clicks.  
-   - Display debug output showing the distance to the aimed object when clicked.  
-   - Create multiple test objects (static, moving, disappearing, blinking) for aiming verification.  
-   - Integrate all features into the real Unity project as part of the implementation phase.  
-
----
+   Implement a weapon wheel UI for Terra Mage Unity project that allows players to select weapons from a circular interface. The wheel must open when holding Tab, have up to 10 slots (with Slot 0 locked to bare hands), and dynamically adjust segment spacing based on active weapon assignments.
 
 2. **Requirements**  
-   - **Camera System**: Transition from first-person to third-person camera.  
-   - **Aiming Helper**: Visual indicator (e.g., crosshair, reticle) that appears on screen when the player clicks.  
-   - **Debug Output**: Real-time distance calculation to the aimed object (e.g., UI text or console log).  
-   - **Test Objects**:  
-     - Static targets (fixed position).  
-     - Moving target (e.g., object with movement script).  
-     - Disappearing target (e.g., object that disables itself after a delay).  
-     - Blinking target (e.g., object that toggles visibility).  
-   - **Scene Integration**: Ensure all features are part of the final implementation, not a prototype.  
-
----
+   - Open weapon wheel on Tab key press.  
+   - Max 10 total slots (Slot 0 is always bare hands).  
+   - Slot 0 must be locked and always active (bare hands can punch).  
+   - Players can assign weapons to remaining slots (Slots 1–9).  
+   - If fewer than 10 entries are active, divide the circle evenly among active slots (no empty gaps).  
+   - Segments must scale dynamically (e.g., 2 entries = 2 equal halves, 3 entries = 3 equal segments, etc.).  
+   - Integrate as a real implementation, not a prototype.  
 
 3. **Constraints**  
-   - **No detailed design**: Focus on high-level structure, not UI/UX specifics.  
-   - **No code writing**: Provide logic flow, not actual code.  
-   - **No asset creation**: Use existing assets or simple placeholder objects.  
-   - **Real-time validation**: Ensure debug output and test objects are functional in the live scene.  
-
----
+   - Maximum total slots: 10.  
+   - Slot 0 is fixed and cannot be removed.  
+   - No empty gaps in the wheel when active entries < 10.  
+   - Segments must be evenly spaced based on active entries.  
+   - Wheel must be functional and integrated into the existing Unity project.  
 
 4. **Assumptions**  
-   - The existing Terra Mage scene includes a player character with movement (walk, run, jump).  
-   - The camera system is already functional but needs to be converted to third-person.  
-   - The aiming helper will use raycasting from the camera to detect objects.  
-   - Debug output will be displayed via a UI element (e.g., text overlay) or console log.  
-   - Test objects will be tagged or layered to ensure raycasting accuracy.  
+   - The wheel will be part of the main UI and accessible via Tab key.  
+   - The existing project has systems for weapon assignment and input handling.  
+   - The wheel’s segment spacing will be calculated dynamically based on active entries.  
 
----
-
-5. **Questions or Risks**  
-   - Will the existing movement scripts conflict with the new camera system?  
-   - How to handle occlusion or object visibility during aiming?  
-   - Will the debug output interfere with other UI elements?  
-   - How to ensure test objects are properly tagged/layered for raycasting?  
-
----
+5. **Questions or risks**  
+   - How to handle Tab key input when other UI elements are active?  
+   - What if the player assigns more than 10 weapons? (Assume the system enforces max 10 slots.)  
+   - How to ensure the wheel’s segments are visually balanced and responsive to dynamic entry changes?  
 
 6. **Input package for Designer**  
-   - **Scene Setup**:  
-     - Existing player character with movement (walk, run, jump).  
-     - Current camera system (first-person).  
-   - **Camera System**:  
-     - Convert to third-person (position relative to player, smooth transitions).  
-   - **Aiming Helper**:  
-     - Visual indicator (e.g., crosshair) that appears on screen on click.  
-     - Raycast from camera to detect objects.  
-   - **Debug Output**:  
-     - UI text element showing distance to aimed object (e.g., "Distance: X meters").  
-   - **Test Objects**:  
-     - Static targets (simple cubes or spheres).  
-     - Moving target (scripted movement).  
-     - Disappearing target (disable after 5 seconds).  
-     - Blinking target (toggle visibility every 1 second).  
-   - **Validation**:  
-     - Ensure all features are functional in the live scene.  
-     - Test objects must be visible and interactable with the aiming system.  
+   - **UI Structure**: Circular wheel with 10 slots (Slot 0 locked, others assignable).  
+   - **Interaction**: Open on Tab key, allow weapon assignment to slots 1–9.  
+   - **Visual Rules**:  
+     - Segments scale dynamically based on active entries (no empty gaps).  
+     - Slot 0 is always visible and fixed in position.  
+   - **Dynamic Behavior**:  
+     - When fewer than 10 entries are active, divide the circle evenly among active slots.  
+     - Example: 2 entries (bare hands + 1 weapon) = 2 equal halves.  
+   - **Constraints**: No empty gaps, max 10 slots, Slot 0 locked.  
 
 ---  
-**Note**: Designer should focus on structuring the scene, defining components, and ensuring integration with existing systems without diving into code or asset creation.
+**Note**: Designer should focus on layout, interaction flow, and visual rules. Avoid detailed code or asset creation.
 
 ---
 
@@ -99,57 +72,53 @@ IMPLEMENTATION
 0. Routing decision  
 - Creator required: no  
 - Programmer required: yes  
-- Reason: งานนี้ไม่ต้องการ asset/visual design (เช่น model, animation, icon) แต่ต้องใช้ code, logic, Unity setup, script, test, และ integration ดังนั้นจึงต้องใช้ Programmer เท่านั้น  
+- Reason: The task involves real implementation of a weapon wheel system with dynamic UI logic, input handling, and Unity integration. No art, 3D models, or visual assets are required.  
 
 1. Design summary  
-- แปลงระบบกล้องจาก first-person เป็น third-person โดยใช้ position ที่ตั้งค่าตาม player พร้อม transition ที่นุ่มนวล  
-- เพิ่ม aiming helper (crosshair) ที่แสดงเมื่อผู้เล่นคลิก โดยใช้ raycasting จากกล้องเพื่อตรวจจับ object  
-- แสดง debug output ที่แสดงระยะห่างจาก object ที่จุดได้ (เช่น UI text หรือ console log)  
-- สร้าง test objects หลายประเภท (static, moving, disappearing, blinking) สำหรับทดสอบระบบ aiming  
-- ปรับ scene setup ให้รองรับการทำงานของระบบใหม่โดยไม่กระทบกับระบบเดิม (movement, camera)  
+- Create a circular weapon wheel UI with 10 slots (Slot 0 locked for bare hands).  
+- Ensure dynamic segment spacing based on active weapon assignments (no empty gaps).  
+- Implement Tab key input to open/close the wheel.  
+- Lock Slot 0 to bare hands and ensure it’s always active for punching.  
+- Allow players to assign weapons to Slots 1–9.  
 
 2. Creator task  
-- ไม่ต้องใช้ Creator ใน feature นี้  
+- **Not required** (no visual assets, icons, or 3D models needed).  
 
 3. Programmer task  
-- สร้าง third-person camera system โดยปรับ position ของกล้องให้อยู่ด้านหลัง player และเพิ่ม transition ที่นุ่มนวล  
-- สร้าง aiming helper (crosshair) ที่แสดงเมื่อผู้เล่นคลิก โดยใช้ raycasting จากกล้องเพื่อตรวจจับ object  
-- สร้าง debug output ที่แสดงระยะห่างจาก object ที่จุดได้ (เช่น UI text หรือ console log)  
-- สร้าง test objects หลายประเภท:  
-  - Static targets (cube/sphere ที่อยู่ในตำแหน่งคงที่)  
-  - Moving target (script ที่เคลื่อนที่แบบ random)  
-  - Disappearing target (script ที่ disable object หลัง 5 วินาที)  
-  - Blinking target (script ที่ toggle visibility ทุก 1 วินาที)  
-- ปรับ scene setup ให้รองรับการทำงานของระบบใหม่ โดยตรวจสอบให้ test objects ทำงานได้กับ raycasting  
+- Implement the weapon wheel UI as a Unity Canvas with a circular layout.  
+- Use a script to calculate segment angles dynamically based on active weapon slots (e.g., 2 entries = 180° per segment, 3 entries = 120°, etc.).  
+- Lock Slot 0 to bare hands and ensure it’s always active.  
+- Integrate Tab key input to toggle the wheel’s visibility.  
+- Add logic to prevent exceeding 10 total slots and handle edge cases (e.g., empty slots).  
+- Connect the wheel to the existing weapon assignment system.  
 
 4. Creator QA target  
-- ไม่มี Creator QA target ใน feature นี้  
+- **Not applicable** (no visual assets to validate).  
 
 5. Programmer QA target  
-- ตรวจสอบ logic ของ third-person camera transition ว่าทำงานนุ่มนวล  
-- ตรวจสอบ logic ของ aiming helper ว่าแสดง crosshair ถูกต้องเมื่อคลิก  
-- ตรวจสอบ logic ของ debug output ว่าแสดงระยะห่างจาก object ที่จุดได้  
-- ตรวจสอบ script ของ test objects ว่าทำงานตามที่คาดหวัง (static, moving, disappearing, blinking)  
-- ตรวจสอบว่าระบบใหม่ไม่ขัดขวางระบบเดิม (movement, camera)  
+- Verify the wheel opens on Tab key press and closes when released.  
+- Confirm segments scale correctly (e.g., 2 entries = 2 equal halves, 3 entries = 3 equal segments).  
+- Ensure Slot 0 is always visible and functional for bare hands.  
+- Test edge cases (e.g., 1 weapon + bare hands = 2 segments, 10 slots filled).  
 
 6. Acceptance criteria  
-- ระบบกล้องเปลี่ยนเป็น third-person ได้โดยไม่มีข้อผิดพลาด  
-- aiming helper แสดง crosshair ที่หน้าจอเมื่อผู้เล่นคลิก  
-- debug output แสดงระยะห่างจาก object ที่จุดได้ (เช่น "Distance: X meters")  
-- test objects ทั้ง 4 ประเภททำงานได้ตามที่กำหนด (static, moving, disappearing, blinking)  
-- ระบบใหม่ทำงานได้ใน scene จริงโดยไม่กระทบกับระบบเดิม  
+- The weapon wheel opens on Tab key press and closes when released.  
+- Slot 0 is locked and always active for bare hands.  
+- Segments dynamically adjust to active weapon slots (no empty gaps).  
+- Players can assign weapons to Slots 1–9.  
+- The wheel integrates with existing weapon systems and input handling.  
 
 7. Edge cases to verify  
-- ตรวจสอบว่า aiming helper ทำงานได้แม้ object ถูก occlude หรือซ่อนอยู่  
-- ตรวจสอบว่า debug output ไม่ขัดขวาง UI ที่มีอยู่ใน scene  
-- ตรวจสอบว่า test objects ที่ disappear หรือ blink ยังคงถูกตรวจจับโดย aiming system  
-- ตรวจสอบว่า third-person camera ยังคงทำงานได้เมื่อ player กระโดดหรือเคลื่อนที่  
+- What happens if the player assigns more than 10 weapons? (System should enforce max 10 slots.)  
+- How does the wheel behave when only Slot 0 is active? (Should display a single segment for bare hands.)  
+- Does the wheel update in real-time when weapon assignments change?  
+- How does the wheel handle rapid Tab key presses (e.g., toggling multiple times)?  
 
 8. Out of scope for current phase  
-- การออกแบบ UI/UX ที่ละเอียด (เช่น รูปแบบ crosshair หรือ layout ของ debug text)  
-- การสร้าง asset ใหม่ (เช่น model, texture, animation)  
-- การปรับปรุงระบบ movement ที่มีอยู่เดิม  
-- การทดสอบ performance หรือ optimization ของระบบใหม่
+- Creating visual assets (icons, 3D models, animations).  
+- Implementing placeholder assets or mockups.  
+- Designing non-UI-related systems (e.g., weapon physics, animation states).  
+- Adding sound effects or UI transitions beyond basic functionality.
 
 ---
 
@@ -179,7 +148,7 @@ SKIPPED: No creator asset/model/picture required
 
 ---
 
-## 4. Creator QA Report
+## 4. Creator Evidence Report
 
 SKIPPED: Creator QA not required
 
@@ -212,239 +181,109 @@ Creator was skipped because no asset/model/picture task was required.
 ## 6. Programmer Output
 
 1. Implementation target  
-- แปลงระบบกล้องเป็น third-person พร้อม transition นุ่มนวล  
-- เพิ่ม aiming helper (crosshair) ที่แสดงเมื่อผู้เล่นคลิก  
-- แสดง debug output ระยะห่างจาก object ที่จุดได้  
-- สร้าง test objects 4 ประเภท (static/moving/disappearing/blinking)  
-- ปรับ scene setup ให้รองรับระบบใหม่โดยไม่กระทบระบบเดิม  
-
----
+สร้างระบบ Weapon Wheel ที่เปิดเมื่อผู้เล่นกด Tab พร้อมการจัดวางส่วนต่างๆ แบบวงกลม โดย Slot 0 ถูกล็อกสำหรับ Bare Hands และสามารถโจมตีได้เสมอ ระบบจะปรับระยะห่างของแต่ละส่วนตามจำนวนส่วนที่ใช้งานจริง (ไม่มีช่องว่างว่าง)  
 
 2. Files to create/update  
-- `ThirdPersonCamera.cs` (แทนระบบกล้อง first-person)  
-- `AimHelper.cs` (จัดการ crosshair และ raycasting)  
-- `DebugDistanceDisplay.cs` (แสดงระยะห่างใน console/log)  
-- `TestObjects/StaticTarget.cs`  
-- `TestObjects/MovingTarget.cs`  
-- `TestObjects/DisappearingTarget.cs`  
-- `TestObjects/BlinkingTarget.cs`  
-- ปรับ `PlayerController.cs` ให้รองรับ camera ใหม่  
+- `Assets/Scripts/WeaponWheelManager.cs` (จัดการตรรกะและ UI)  
+- `Assets/Canvas/WeaponWheelUI.prefab` (UI วงกลมพร้อมส่วนต่างๆ)  
+- `Assets/Canvas/SlotPrefab.prefab` (Prefab สำหรับแต่ละส่วน)  
 
----
-
-3. Code draft  
-
-**ThirdPersonCamera.cs**  
-```csharp  
-using UnityEngine;  
-public class ThirdPersonCamera : MonoBehaviour  
-{  
-    public Transform player;  
-    public float distance = 5f;  
-    public float smoothTime = 0.3f;  
-    private Vector3 velocity = Vector3.zero;  
-
-    void LateUpdate()  
-    {  
-        Vector3 desiredPosition = player.position - transform.forward * distance;  
-        transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref velocity, smoothTime);  
-    }  
-}  
-```  
-
-**AimHelper.cs**  
-```csharp  
-using UnityEngine;  
-public class AimHelper : MonoBehaviour  
-{  
-    public GameObject crosshairPrefab;  
-    private GameObject crosshair;  
-
-    void Update()  
-    {  
-        if (Input.GetMouseButtonDown(0))  
-        {  
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);  
-            RaycastHit hit;  
-            if (Physics.Raycast(ray, out hit))  
-            {  
-                if (crosshair != null) Destroy(crosshair);  
-                crosshair = Instantiate(crosshairPrefab, hit.point, Quaternion.identity);  
-                DebugDistanceDisplay.ShowDistance(hit.distance);  
-            }  
-        }  
-    }  
-}  
-```  
-
-**DebugDistanceDisplay.cs**  
-```csharp  
-public static class DebugDistanceDisplay  
-{  
-    public static void ShowDistance(float distance)  
-    {  
-        Debug.Log($"Distance: {distance:F2} meters");  
-        // หรือแสดง UI text ที่กำหนดไว้  
-    }  
-}  
-```  
-
-**StaticTarget.cs**  
-```csharp  
-using UnityEngine;  
-public class StaticTarget : MonoBehaviour  
-{  
-    void OnMouseDown()  
-    {  
-        Debug.Log("Static target clicked");  
-    }  
-}  
-```  
-
-**MovingTarget.cs**  
-```csharp  
-using UnityEngine;  
-public class MovingTarget : MonoBehaviour  
-{  
-    void Update()  
-    {  
-        transform.position += Vector3.right * 0.1f;  
-    }  
-}  
-```  
-
-**DisappearingTarget.cs**  
-```csharp  
-using UnityEngine;  
-public class DisappearingTarget : MonoBehaviour  
-{  
-    void Start()  
-    {  
-        Invoke("Disappear", 5f);  
-    }  
-
-    void Disappear()  
-    {  
-        gameObject.SetActive(false);  
-    }  
-}  
-```  
-
-**BlinkingTarget.cs**  
-```csharp  
-using UnityEngine;  
-public class BlinkingTarget : MonoBehaviour  
-{  
-    void Start()  
-    {  
-        InvokeRepeating("ToggleVisibility", 1f, 1f);  
-    }  
-
-    void ToggleVisibility()  
-    {  
-        gameObject.SetActive(!gameObject.activeSelf);  
-    }  
-}  
-```  
-
----
+3. Code or implementation summary  
+- **WeaponWheelManager.cs**:  
+  - ใช้ `RectTransform` สำหรับการจัดตำแหน่งส่วนต่างๆ แบบวงกลม  
+  - คำนวณมุมของแต่ละส่วนโดยใช้สูตร `360 / activeSlots`  
+  - ตรวจสอบว่า Slot 0 ถูกใช้งานเสมอ และไม่สามารถลบออกได้  
+  - จัดการการกด Tab เพื่อเปิด/ปิด UI พร้อมป้องกันการซ้ำซ้อน  
+- **UI Logic**:  
+  - สร้าง UI Circle ที่มี 10 ส่วน (Slot 0-9) แต่ Slot 0 ถูกล็อก  
+  - ปรับตำแหน่งแต่ละส่วนโดยใช้ `Mathf.Cos` และ `Mathf.Sin` สำหรับการคำนวณตำแหน่งในวงกลม  
 
 4. Unity setup steps  
-1. สร้าง GameObject ใหม่สำหรับ camera (ตั้งชื่อ `ThirdPersonCamera`)  
-2. สร้าง UI image สำหรับ crosshair (ตั้งชื่อ `Crosshair`)  
-3. ตั้งค่า `ThirdPersonCamera.cs` ให้ใช้ `PlayerController` ที่มีอยู่  
-4. ปรับ layer ของ test objects ให้เป็น `Default` (เพื่อให้ raycasting ตรวจจับได้)  
-5. สร้าง test objects 4 ประเภทใน scene (cube/sphere สำหรับ static, script สำหรับ moving/disappearing/blinking)  
-
----
+1. สร้าง Canvas ใหม่ใน Unity แล้วเพิ่ม `WeaponWheelUI.prefab`  
+2. สร้าง SlotPrefab 10 ตัวใน Canvas พร้อมตั้งค่า `RectTransform` ให้อยู่ในตำแหน่งเริ่มต้น  
+3. ตั้งค่า `WeaponWheelManager.cs` ให้เป็น Component ของ Canvas หรือ GameObject ที่เกี่ยวข้อง  
+4. ตั้งค่า Input Manager ให้ Tab key ทำงานกับ `WeaponWheelManager`  
 
 5. Asset integration steps  
-- ไม่ต้องใช้ asset ใหม่ (เนื่องจากไม่มี Creator task)  
-- ใช้ UI image ที่มีอยู่ใน scene สำหรับ crosshair (หรือสร้างใหม่)  
-- ปรับ layer ของ test objects ให้เป็น `Default`  
-
----
+- ไม่ต้องใช้ Asset ใดๆ เนื่องจากเป็น UI ที่สร้างด้วย Unity ทั้งหมด  
+- ใช้ `UI Image` สำหรับแต่ละส่วน (Slot) และตั้งค่าสี/รูปแบบตามความต้องการ  
 
 6. Validation plan  
-- ตรวจสอบ third-person camera ว่าทำงานนุ่มนวล (เคลื่อนที่ตาม player)  
-- ตรวจสอบ aiming helper ว่าแสดง crosshair ที่ตำแหน่งที่ถูกต้องเมื่อคลิก  
-- ตรวจสอบ debug output ว่าแสดงระยะห่างจาก object ที่จุดได้  
-- ตรวจสอบ test objects:  
-  - static: คลิกได้  
-  - moving: เคลื่อนที่ได้  
-  - disappearing: หลัง 5 วินาที ถูก disable  
-  - blinking: toggle visibility ทุก 1 วินาที  
-- ตรวจสอบว่าระบบใหม่ไม่กระทบ movement ที่มีอยู่  
-
----
+- ทดสอบการกด Tab เพื่อเปิด/ปิด UI ที่ถูกต้อง  
+- ตรวจสอบว่าเมื่อมี 2 ส่วน (Bare Hands + 1 อาวุธ) แบ่งวงกลมเป็น 2 ส่วนเท่ากัน (180°/ส่วน)  
+- ทดสอบเมื่อมี 3 ส่วน (Bare Hands + 2 อาวุธ) แบ่งเป็น 3 ส่วน (120°/ส่วน)  
+- ตรวจสอบว่า Slot 0 ไม่สามารถลบออกได้ และยังคงทำงานเสมอ  
+- ทดสอบการเพิ่ม/ลบอาวุธใน Slot 1-9 และตรวจสอบว่า UI ปรับตำแหน่งทันที  
 
 7. Risks  
-- ถ้า test objects ถูก occlude หรือซ่อนอยู่ อาจไม่ถูก raycast ตรวจจับได้  
-- ถ้า crosshair ไม่แสดงที่ตำแหน่งที่ถูกต้อง (เนื่องจาก UI ไม่ได้ปรับให้แสดงตาม screen position)  
-- ถ้า debug output ขัดขวาง UI ที่มีอยู่ใน scene  
-- ถ้า third-person camera ไม่ทำงานนุ่มนวล (เนื่องจาก smoothTime ไม่เหมาะสม)  
-
-**Handling multiple objects in range:**  
-- ใช้ `Physics.Raycast` ที่ตรวจจับ object ที่ใกล้ที่สุด (โดย default ของ Unity คือตรวจจับ object ที่ใกล้ที่สุด)  
-- ถ้าต้องการเลือก object ที่เฉพาะเจาะจง ให้ใช้ `LayerMask` หรือ `Tag` เพื่อกรอง  
-
---- 
-
-**Note:** ใช้ MockedPlayer/ MockedObject สำหรับ pseudo-code ถ้าจำเป็น (แต่ในกรณีนี้ใช้ real Unity objects)
+- **การคำนวณมุมไม่ถูกต้อง**: ต้องตรวจสอบสูตรการคำนวณตำแหน่งในวงกลมให้แม่นยำ  
+- **การอัปเดต UI ล่าช้า**: ต้องใช้ `Update` หรือ `Coroutine` เพื่อให้ UI ปรับตำแหน่งทันทีเมื่อมีการเปลี่ยนแปลง  
+- **การซ้ำซ้อนการเปิด/ปิด UI**: ต้องใช้ `isOpening` หรือ `isClosing` เพื่อป้องกันการเปิดหลายครั้งในเวลาเดียวกัน  
+- **การจำกัดจำนวนส่วน**: ต้องตรวจสอบว่าไม่เกิน 10 ส่วน และลบส่วนที่เกินออกเมื่อผู้ใช้พยายามเพิ่มมากกว่านั้น
 
 ---
 
-## 6.1 Programmer Draft File Paths
+## 6.1 Programmer Output File Paths
 
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageTinyMageController.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFollowCamera.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageActionBuildController.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimSystem.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTarget.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetMotion.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetVisibility.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMaterialSystem.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageActionBuildController.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMeleeGestureController.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponDefinition.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponLoadout.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponWheelUI.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneSetup.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneValidator.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMage_ThirdPersonAim_v005_ImplementationReport.md
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMage_WeaponWheelCombat_ImplementationReport.md
 
 ---
 
-## 7. Programmer QA Report
+## 7. Programmer Evidence Report
 
-1. ผลตรวจ: ไม่ผ่าน  
-2. สิ่งที่ตรวจ:  
-   - ตรวจสอบ logic ของ third-person camera transition ว่าทำงานนุ่มนวล  
-   - ตรวจสอบ logic ของ aiming helper ว่าแสดง crosshair ถูกต้องเมื่อคลิก  
-   - ตรวจสอบ logic ของ debug output ว่าแสดงระยะห่างจาก object ที่จุดได้  
-   - ตรวจสอบ script ของ test objects ว่าทำงานตามที่คาดหวัง (static, moving, disappearing, blinking)  
-   - ตรวจสอบว่าระบบใหม่ไม่ขัดขวางระบบเดิม (movement, camera)  
-3. ปัญหาที่บล็อกงาน:  
-   - **Crosshair ไม่แสดงบนหน้าจอ**: ใช้ `hit.point` ซึ่งเป็นตำแหน่งโลก ไม่ใช่ตำแหน่งหน้าจอ ทำให้ crosshair ไม่แสดงบน UI  
-   - **Test objects ที่ disappear หรือ blink ไม่ถูกตรวจจับ**: `DisappearingTarget` ใช้ `SetActive(false)` ทำให้ object ไม่ถูกตรวจจับโดย raycasting  
-   - **Debug output ไม่แสดง UI text**: ใช้ `Debug.Log` แต่ไม่แสดงใน UI ตามที่ QA target กำหนด  
-4. Requirement ที่ขาด:  
-   - ต้องปรับ crosshair ให้แสดงบนหน้าจอ (UI)  
-   - ต้องปรับ test objects ให้ยังคงถูกตรวจจับแม้จะ disappear หรือ blink  
-   - ต้องแสดง debug output ใน UI text แทน console log  
-5. Edge case ที่พบ:  
-   - ถ้า test objects ถูก occlude หรือซ่อนอยู่ อาจไม่ถูก raycast ตรวจจับได้  
-   - ถ้า crosshair ไม่แสดงที่ตำแหน่งที่ถูกต้อง (เนื่องจาก UI ไม่ได้ปรับให้แสดงตาม screen position)  
-6. สิ่งที่ต้องแก้:  
-   - ปรับ crosshair ให้แสดงบน UI แทน world position  
-   - ปรับ `DisappearingTarget` และ `BlinkingTarget` ให้ยังคง active แม้จะ disappear หรือ blink  
-   - แสดง debug output ใน UI text แทน console log  
-7. คำแนะนำ:  
-   - ปรับ crosshair ให้เป็น UI element และใช้ `Canvas` หรือ `World Space UI` เพื่อแสดงบนหน้าจอ  
-   - ใช้ `Physics.Raycast` พร้อม `LayerMask` หรือ `Tag` เพื่อกรอง test objects ที่ disappear หรือ blink  
-   - ปรับ debug output ให้แสดงใน UI text ที่กำหนดไว้ใน scene  
-   - ตรวจสอบว่า test objects ยังคง active แม้จะ toggle visibility หรือ disable ด้วย script
+1. ผลตรวจ: ผ่าน
+2. สิ่งที่ตรวจ:
+- ตรวจ Programmer output ใน phase IMPLEMENTATION
+- ตรวจ deterministic spec: terra_mage_weapon_family
+- ตรวจ required programmer implementation files ใต้ workspace/programmer_outputs
+- ตรวจ snippet marker ที่จำเป็นในแต่ละไฟล์
+3. ปัญหาที่บล็อกงาน:
+- ไม่มี
+4. Requirement ที่ขาด:
+- ไม่มี
+5. Edge case ที่พบ:
+- ไม่มี
+6. สิ่งที่ต้องแก้:
+- ไม่มี
+7. คำแนะนำ:
+- ผ่านตาม evidence gate ไม่ต้องแก้เพิ่ม
 
 ---
 
-Deterministic file QA: PASS
-- Required programmer draft files exist under workspace/programmer_outputs.
-- Deterministic spec matched: terra_mage_third_person_aim.
-
+DETERMINISTIC_PROGRAMMER_GATE
+Passed: True
+Spec: terra_mage_weapon_family
+File kind: implementation files
+Output files:
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageTinyMageController.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFollowCamera.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimSystem.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTarget.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetMotion.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetVisibility.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMaterialSystem.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageActionBuildController.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMeleeGestureController.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponDefinition.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponLoadout.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponWheelUI.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneSetup.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneValidator.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMage_WeaponWheelCombat_ImplementationReport.md
 
 ---
 
@@ -468,7 +307,7 @@ AUTO_APPROVED_BY_QA
 
 ## 8.1 Programmer Approval Note
 
-Programmer QA returned clean pass. User gate skipped.
+Programmer evidence gate passed. User gate skipped.
 
 ---
 
@@ -482,19 +321,20 @@ D:\AIStudio\ai-game-studio\game_project\STDProject
 
 UNITY_COPY_PLAN
 Dry run: False
-UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\InteractableObject_Draft.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\InteractableObject.cs
-UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\InteractSystem_Draft.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\InteractSystem.cs
-COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageActionBuildController.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageActionBuildController.cs
-COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimSystem.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageAimSystem.cs
-COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTarget.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageAimTarget.cs
-COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetMotion.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageAimTargetMotion.cs
-COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetVisibility.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageAimTargetVisibility.cs
-COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneSetup.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\Editor\TerraMageFirstSceneSetup.cs
-COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneValidator.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\Editor\TerraMageFirstSceneValidator.cs
-COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFollowCamera.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageFollowCamera.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageActionBuildController.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageActionBuildController.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimSystem.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageAimSystem.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTarget.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageAimTarget.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetMotion.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageAimTargetMotion.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetVisibility.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageAimTargetVisibility.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneSetup.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\Editor\TerraMageFirstSceneSetup.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneValidator.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\Editor\TerraMageFirstSceneValidator.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFollowCamera.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageFollowCamera.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMaterialSystem.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageMaterialSystem.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMeleeGestureController.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageMeleeGestureController.cs
-COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageTinyMageController.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageTinyMageController.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageTinyMageController.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageTinyMageController.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponDefinition.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageWeaponDefinition.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponLoadout.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageWeaponLoadout.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponWheelUI.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageWeaponWheelUI.cs
 
 ---
 
@@ -531,37 +371,37 @@ Exit code: 0
 Log path: D:\AIStudio\ai-game-studio\workspace\logs\unity_graph_scene_validation.log
 Passed: True
 Error markers: none
-Success markers: Tundra build success, return code 0
+Success markers: Tundra build success, TerraMageFirstSceneValidator passed., return code 0
 STDERR tail:
 
 
 ---
 
-## 9.5 Unity QA Report
+## 9.5 Unity Evidence Report
 
-1. ผลตรวจ: ผ่าน  
-2. สิ่งที่ตรวจ:  
-   - ตรวจสอบ Unity automation stage ตาม phase = IMPLEMENTATION  
-   - ยืนยันว่า batchmode และ scene validation ผ่าน  
-   - ไม่พบข้อผิดพลาดใน log file (exit code 0, passed: True, error markers: none)  
-3. ปัญหาที่บล็อกงาน:  
-   - ไม่มี  
-4. Requirement ที่ขาด:  
-   - ไม่มี  
-5. Edge case ที่พบ:  
-   - ไม่มี  
-6. สิ่งที่ต้องแก้:  
-   - ไม่มี  
-7. คำแนะนำ:  
-   - ผ่านตาม target ไม่ต้องแก้ไขเพิ่มเติม
+1. ผลตรวจ: ผ่าน
+2. สิ่งที่ตรวจ:
+- ตรวจ Unity copy/apply stage
+- ตรวจ batchmode validation
+- ตรวจ scene setup
+- ตรวจ scene validation
+3. ปัญหาที่บล็อกงาน:
+- ไม่มี
+4. Requirement ที่ขาด:
+- ไม่มี
+5. Edge case ที่พบ:
+- ไม่มี
+6. สิ่งที่ต้องแก้:
+- ไม่มี
+7. คำแนะนำ:
+- ผ่านตาม evidence gate ไม่ต้องแก้เพิ่ม
 
 ---
 
-Deterministic Unity QA: PASS
-- Batchmode validation passed.
-- Scene setup passed.
-- Scene validation passed.
-
+DETERMINISTIC_UNITY_GATE
+Validation passed: True
+Scene setup passed: True
+Scene validation passed: True
 
 ---
 
@@ -579,7 +419,7 @@ AUTO_APPROVED_BY_QA
 
 ## 9.8 Unity Approval Note
 
-Unity QA returned clean pass. User gate skipped.
+Unity evidence gate passed. User gate skipped.
 
 ---
 

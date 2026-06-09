@@ -13,16 +13,10 @@ AGENTS.md
 PROJECT_STATUS.md
 NEXT_STEPS.md
 CODEX_TASK.md
-workspace/reports/production_readiness_checklist.md
 workspace/reports/index.md
-workspace/reports/office_user_manual.md
+workspace/reports/latest_report.md
+workspace/reports/codex_response.md
 ```
-
-Current milestone:
-
-- First AI Game Studio Unity vertical slice is release-gate clean.
-- Root repo and `game_project/STDProject` submodule are expected to stay clean between checkpoints.
-- Continue productization work unless a user-level decision is required.
 
 Recommended validation:
 
@@ -38,7 +32,6 @@ Office CLI:
 .\.venv\Scripts\python.exe -m tools.office status
 .\.venv\Scripts\python.exe -m tools.office dashboard
 .\.venv\Scripts\python.exe -m tools.office release-gate
-.\.venv\Scripts\python.exe -m tools.office release-notes
 .\.venv\Scripts\python.exe -m tools.office tasks
 .\.venv\Scripts\python.exe -m tools.office task feature-interaction-v1
 ```
@@ -46,9 +39,6 @@ Office CLI:
 Useful workflow commands:
 
 ```powershell
-$env:AI_STUDIO_PHASE='PROTOTYPE_PLAN'
-.\.venv\Scripts\python.exe -m app.main_graph
-
 $env:AI_STUDIO_PHASE='IMPLEMENTATION'
 .\.venv\Scripts\python.exe -m app.main_graph
 

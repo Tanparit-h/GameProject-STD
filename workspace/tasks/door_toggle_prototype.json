@@ -1,9 +1,0 @@
-{
-  "id": "feature-door-toggle-v1",
-  "phase": "PROTOTYPE_PLAN",
-  "title": "Door toggle interaction prototype",
-  "request": "Plan a prototype where the player presses E near a door placeholder to toggle open and closed states. Include a creator placeholder asset plan, programmer draft logic, QA targets, edge cases, and implementation notes, but do not modify Unity yet.",
-  "approval": {
-    "implementation": false
-  }
-}

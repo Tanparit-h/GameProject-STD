@@ -30,6 +30,7 @@ UNITY_ERROR_MARKERS = [
 UNITY_SUCCESS_MARKERS = [
     "Tundra build success",
     "AIPrototypeSceneValidator passed.",
+    "TerraMageFirstSceneValidator passed.",
     "Exit code: 0",
     "return code 0",
 ]
@@ -97,8 +98,10 @@ def parse_unity_result_text(result_text: str) -> dict[str, object]:
 
 def get_programmer_script_target(project: Path, source: Path) -> Path | None:
     script_map = {
-        "InteractSystem_Draft.cs": project / "Assets" / "Scripts" / "AIPrototype" / "InteractSystem.cs",
-        "InteractableObject_Draft.cs": project / "Assets" / "Scripts" / "AIPrototype" / "InteractableObject.cs",
+        "InteractSystem.cs": project / "Assets" / "Scripts" / "AIPrototype" / "InteractSystem.cs",
+        "InteractableObject.cs": project / "Assets" / "Scripts" / "AIPrototype" / "InteractableObject.cs",
+        "AIPrototypeSceneSetup.cs": project / "Assets" / "Scripts" / "AIPrototype" / "Editor" / "AIPrototypeSceneSetup.cs",
+        "AIPrototypeSceneValidator.cs": project / "Assets" / "Scripts" / "AIPrototype" / "Editor" / "AIPrototypeSceneValidator.cs",
     }
 
     mapped = script_map.get(source.name)
@@ -147,13 +150,7 @@ def build_copy_plan(project_path: str | Path | None = None) -> list[tuple[Path, 
 
 
 def _transform_unity_script(source: Path) -> str:
-    content = source.read_text(encoding="utf-8", errors="replace")
-    content = content.replace("InteractSystem_Draft", "InteractSystem")
-    content = content.replace("InteractableObject_Draft", "InteractableObject")
-    return content.replace(
-        "// PROTOTYPE_PLAN draft only. Do not place this file in Unity Assets yet.\n",
-        "",
-    )
+    return source.read_text(encoding="utf-8", errors="replace")
 
 
 def _target_matches_source(source: Path, target: Path) -> bool:

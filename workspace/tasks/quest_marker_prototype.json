@@ -1,9 +1,0 @@
-{
-  "id": "feature-quest-marker-v1",
-  "phase": "PROTOTYPE_PLAN",
-  "title": "Quest marker prototype",
-  "request": "Plan a prototype where an objective marker points the player toward a target placeholder and updates when the target is reached. Include creator placeholder asset plan, programmer draft logic, QA targets, edge cases, and implementation notes, but do not modify Unity yet.",
-  "approval": {
-    "implementation": false
-  }
-}

@@ -69,10 +69,10 @@ class UnityToolTests(unittest.TestCase):
         if not project.exists():
             self.skipTest("STDProject is not present in this checkout")
 
-        source = PROGRAMMER_OUTPUT_DIR / "InteractSystem_Draft.cs"
+        source = PROGRAMMER_OUTPUT_DIR / "InteractSystem.cs"
         target = project / "Assets" / "Scripts" / "AIPrototype" / "InteractSystem.cs"
         if not source.exists() or not target.exists():
-            self.skipTest("InteractSystem draft or Unity target is not present")
+            self.skipTest("InteractSystem source or Unity target is not present")
 
         result = apply_copy_plan(dry_run=True, project_path=project)
 
@@ -87,6 +87,17 @@ class UnityToolTests(unittest.TestCase):
         self.assertEqual(
             target,
             project / "Assets" / "Scripts" / "AIPrototype" / "TerraMageTD" / "TerraMageAimSystem.cs",
+        )
+
+    def test_get_programmer_script_target_routes_terra_mage_weapon_runtime_scripts(self):
+        project = PROJECT_ROOT / "game_project" / "STDProject"
+        source = PROGRAMMER_OUTPUT_DIR / "TerraMageWeaponWheelUI.cs"
+
+        target = get_programmer_script_target(project, source)
+
+        self.assertEqual(
+            target,
+            project / "Assets" / "Scripts" / "AIPrototype" / "TerraMageTD" / "TerraMageWeaponWheelUI.cs",
         )
 
     def test_get_programmer_script_target_routes_terra_mage_editor_scripts(self):

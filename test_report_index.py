@@ -23,10 +23,13 @@ class ReportIndexTests(unittest.TestCase):
         ]:
             self.assertIn(key, status)
 
-    def test_collect_status_accepts_prototype_plan_report(self):
+    def test_collect_status_accepts_implementation_report(self):
         report = (
-            "## Phase\n\nPROTOTYPE_PLAN\n"
-            "SKIPPED_UNITY_IMPLEMENTATION\n"
+            "## Phase\n\nIMPLEMENTATION\n"
+            "DETERMINISTIC_UNITY_GATE\n"
+            "Validation passed: True\n"
+            "Scene setup passed: True\n"
+            "Scene validation passed: True\n"
             "CLEAN_PASS\n"
             "ROLE_GRAPH_OK\n"
         )

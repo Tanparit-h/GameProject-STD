@@ -11,7 +11,7 @@ def ensure_programmer_output_dir() -> Path:
 
 def write_programmer_file(filename: str, content: str) -> str:
     """
-    Write programmer-generated draft files into workspace/programmer_outputs only.
+    Write programmer-generated files into workspace/programmer_outputs only.
     """
     output_dir = ensure_programmer_output_dir()
     target = output_dir / filename

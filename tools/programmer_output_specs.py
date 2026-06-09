@@ -2,6 +2,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from textwrap import dedent
 
+from tools.terra_mage_weapon_family_spec import (
+    build_terra_mage_weapon_family_spec,
+    is_terra_mage_weapon_family_request,
+)
+
 
 @dataclass(frozen=True)
 class ProgrammerOutputSpec:
@@ -34,26 +39,25 @@ def is_terra_mage_third_person_aim_request(feature_request: str, task_id: str = 
     return has_terra_mage and has_camera and has_aim
 
 
-def default_interact_system_draft() -> str:
+def default_interact_system() -> str:
     return _clean(
         """
         using System.Collections.Generic;
         using UnityEngine;
 
-        // PROTOTYPE_PLAN draft only. Do not place this file in Unity Assets yet.
-        public class InteractSystem_Draft : MonoBehaviour
+        public class InteractSystem : MonoBehaviour
         {
             [SerializeField] private float interactRange = 2.5f;
             [SerializeField] private KeyCode interactKey = KeyCode.E;
-            [SerializeField] private string mockPromptText = "Press E to Interact";
+            [SerializeField] private string promptText = "Press E to Interact";
 
-            private readonly List<InteractableObject_Draft> objectsInRange = new();
-            private InteractableObject_Draft currentTarget;
+            private readonly List<InteractableObject> objectsInRange = new();
+            private InteractableObject currentTarget;
 
             private void Update()
             {
                 currentTarget = FindClosestInteractable();
-                UpdateMockFeedback(currentTarget);
+                UpdatePromptFeedback(currentTarget);
 
                 if (currentTarget != null && Input.GetKeyDown(interactKey))
                 {
@@ -61,9 +65,9 @@ def default_interact_system_draft() -> str:
                 }
             }
 
-            private InteractableObject_Draft FindClosestInteractable()
+            private InteractableObject FindClosestInteractable()
             {
-                InteractableObject_Draft closest = null;
+                InteractableObject closest = null;
                 float closestDistance = float.MaxValue;
 
                 foreach (var candidate in objectsInRange)
@@ -84,20 +88,20 @@ def default_interact_system_draft() -> str:
                 return closest;
             }
 
-            private void UpdateMockFeedback(InteractableObject_Draft target)
+            private void UpdatePromptFeedback(InteractableObject target)
             {
                 if (target == null)
                 {
-                    Debug.Log("Mock UI hidden: no interactable object in range.");
+                    Debug.Log("Interaction prompt hidden: no interactable object in range.");
                     return;
                 }
 
-                Debug.Log($"{mockPromptText}: {target.DisplayName}");
+                Debug.Log($"{promptText}: {target.DisplayName}");
             }
 
             private void OnTriggerEnter(Collider other)
             {
-                var interactable = other.GetComponent<InteractableObject_Draft>();
+                var interactable = other.GetComponent<InteractableObject>();
                 if (interactable != null && !objectsInRange.Contains(interactable))
                 {
                     objectsInRange.Add(interactable);
@@ -106,7 +110,7 @@ def default_interact_system_draft() -> str:
 
             private void OnTriggerExit(Collider other)
             {
-                var interactable = other.GetComponent<InteractableObject_Draft>();
+                var interactable = other.GetComponent<InteractableObject>();
                 if (interactable != null)
                 {
                     objectsInRange.Remove(interactable);
@@ -117,13 +121,12 @@ def default_interact_system_draft() -> str:
     )
 
 
-def default_interactable_object_draft() -> str:
+def default_interactable_object() -> str:
     return _clean(
         """
         using UnityEngine;
 
-        // PROTOTYPE_PLAN draft only. Do not place this file in Unity Assets yet.
-        public class InteractableObject_Draft : MonoBehaviour
+        public class InteractableObject : MonoBehaviour
         {
             [SerializeField] private string displayName = "Interactable Object";
             [SerializeField] private bool canInteract = true;
@@ -139,46 +142,188 @@ def default_interactable_object_draft() -> str:
                     return;
                 }
 
-                Debug.Log($"Mock interaction triggered for {displayName}.");
+                Debug.Log($"Interaction triggered for {displayName}.");
             }
         }
         """
     )
 
 
-def default_programmer_plan() -> str:
+def default_interaction_scene_setup() -> str:
     return _clean(
         """
-        # Programmer Implementation Plan
+        using System.IO;
+        using UnityEditor;
+        using UnityEditor.SceneManagement;
+        using UnityEngine;
 
-        ## Phase
+        public static class AIPrototypeSceneSetup
+        {
+            private const string ScenePath = "Assets/Scenes/SampleScene.unity";
+            private const string AssetPath = "Assets/AIAssets/interactive_objects.glb";
 
-        PROTOTYPE_PLAN only. These files are drafts under `workspace/programmer_outputs/` and must not be copied into Unity Assets yet.
+            public static void SetupSampleScene()
+            {
+                var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
 
-        ## Draft Files
+                RemoveExisting("AIPrototype_Player");
+                RemoveExisting("AIPrototype_Interactable");
+                RemoveExisting("AIPrototype_VisualReference");
 
-        - `InteractSystem_Draft.cs`: detects nearby interactables, chooses the closest valid target, shows mock UI feedback, and triggers interaction with `E`.
-        - `InteractableObject_Draft.cs`: mock interactable component with display name, availability flag, and draft interaction behavior.
+                var player = new GameObject("AIPrototype_Player");
+                player.transform.position = new Vector3(0f, 1f, -2f);
 
-        ## Logic Notes
+                var trigger = player.AddComponent<SphereCollider>();
+                trigger.isTrigger = true;
+                trigger.radius = 2.5f;
 
-        - No object in range: hide mock UI feedback and ignore `E`.
-        - Multiple objects in range: select the closest valid object by distance.
-        - Disabled or unavailable objects: skip them during target selection.
-        - Blender `.glb` output is visual reference only in this phase.
+                var body = player.AddComponent<Rigidbody>();
+                body.isKinematic = true;
+                body.useGravity = false;
 
-        ## Future Unity Setup
+                player.AddComponent<InteractSystem>();
 
-        - Add final scripts under `Assets/Scripts/AIPrototype/` only after switching to IMPLEMENTATION phase.
-        - Add imported visual assets under `Assets/AIAssets/` only after explicit approval.
-        - Add collider/trigger setup to player and interactable prefabs during IMPLEMENTATION validation.
+                var interactable = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                interactable.name = "AIPrototype_Interactable";
+                interactable.transform.position = new Vector3(0f, 1f, 0f);
+                interactable.AddComponent<InteractableObject>();
 
-        ## Validation Plan
+                var visualReference = AssetDatabase.LoadAssetAtPath<GameObject>(AssetPath);
+                if (visualReference != null)
+                {
+                    var instance = (GameObject)PrefabUtility.InstantiatePrefab(visualReference);
+                    instance.name = "AIPrototype_VisualReference";
+                    instance.transform.position = new Vector3(3f, 0f, 0f);
+                }
+                else
+                {
+                    var fallback = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    fallback.name = "AIPrototype_VisualReference";
+                    fallback.transform.position = new Vector3(3f, 1f, 0f);
+                    fallback.transform.localScale = Vector3.one * 0.75f;
+                    Debug.Log($"AIPrototype visual reference fallback created because {AssetPath} was not loaded as a GameObject.");
+                }
 
-        - Confirm all draft files exist in `workspace/programmer_outputs/`.
-        - Review closest-target selection and no-target behavior.
-        - Review mock UI feedback path.
-        - Confirm no file was written inside the Unity project.
+                EditorSceneManager.MarkSceneDirty(scene);
+                EditorSceneManager.SaveScene(scene);
+
+                Debug.Log("AIPrototypeSceneSetup complete.");
+            }
+
+            private static void RemoveExisting(string objectName)
+            {
+                var existing = GameObject.Find(objectName);
+                if (existing != null)
+                {
+                    Object.DestroyImmediate(existing);
+                }
+            }
+        }
+        """
+    )
+
+
+def default_interaction_scene_validator() -> str:
+    return _clean(
+        """
+        using System;
+        using UnityEditor;
+        using UnityEditor.SceneManagement;
+        using UnityEngine;
+
+        public static class AIPrototypeSceneValidator
+        {
+            private const string ScenePath = "Assets/Scenes/SampleScene.unity";
+            private const string AssetPath = "Assets/AIAssets/interactive_objects.glb";
+
+            public static void ValidateSampleScene()
+            {
+                EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+
+                var player = RequireObject("AIPrototype_Player");
+                RequireComponent<InteractSystem>(player, "AIPrototype_Player");
+
+                var trigger = RequireComponent<SphereCollider>(player, "AIPrototype_Player");
+                if (!trigger.isTrigger)
+                {
+                    throw new InvalidOperationException("AIPrototype_Player SphereCollider must be a trigger.");
+                }
+
+                var body = RequireComponent<Rigidbody>(player, "AIPrototype_Player");
+                if (!body.isKinematic)
+                {
+                    throw new InvalidOperationException("AIPrototype_Player Rigidbody must be kinematic.");
+                }
+
+                var interactable = RequireObject("AIPrototype_Interactable");
+                RequireComponent<InteractableObject>(interactable, "AIPrototype_Interactable");
+                RequireComponent<Collider>(interactable, "AIPrototype_Interactable");
+
+                RequireObject("AIPrototype_VisualReference");
+
+                if (AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(AssetPath) == null)
+                {
+                    throw new InvalidOperationException($"Required visual asset is missing: {AssetPath}");
+                }
+
+                Debug.Log("AIPrototypeSceneValidator passed.");
+            }
+
+            private static GameObject RequireObject(string objectName)
+            {
+                var found = GameObject.Find(objectName);
+                if (found == null)
+                {
+                    throw new InvalidOperationException($"Required scene object is missing: {objectName}");
+                }
+
+                return found;
+            }
+
+            private static T RequireComponent<T>(GameObject target, string objectName) where T : Component
+            {
+                var component = target.GetComponent<T>();
+                if (component == null)
+                {
+                    throw new InvalidOperationException($"{objectName} is missing required component {typeof(T).Name}.");
+                }
+
+                return component;
+            }
+        }
+        """
+    )
+
+
+def default_interaction_report() -> str:
+    return _clean(
+        """
+        # Interaction Vertical Slice - Implementation Report
+
+        ## Goal
+
+        Deliver a real Unity interaction slice that can be copied into the project, set up in the sample scene, and validated in batchmode.
+
+        ## Implemented Programmer Outputs
+
+        - `InteractSystem.cs`
+        - `InteractableObject.cs`
+        - `AIPrototypeSceneSetup.cs`
+        - `AIPrototypeSceneValidator.cs`
+
+        ## Behavior Summary
+
+        - Detect nearby interactables through a trigger volume.
+        - Select the closest valid interactable.
+        - Show debug prompt feedback for the current target.
+        - Trigger interaction with `E`.
+        - Build and validate the sample scene through editor automation.
+
+        ## Validation Target
+
+        - Scene: `Assets/Scenes/SampleScene.unity`
+        - Setup method: `AIPrototypeSceneSetup.SetupSampleScene`
+        - Validation method: `AIPrototypeSceneValidator.ValidateSampleScene`
         """
     )
 
@@ -187,27 +332,39 @@ def default_programmer_output_spec() -> ProgrammerOutputSpec:
     return ProgrammerOutputSpec(
         key="default_interaction",
         file_contents={
-            "InteractSystem_Draft.cs": default_interact_system_draft(),
-            "InteractableObject_Draft.cs": default_interactable_object_draft(),
-            "Programmer_Implementation_Plan.md": default_programmer_plan(),
+            "InteractSystem.cs": default_interact_system(),
+            "InteractableObject.cs": default_interactable_object(),
+            "AIPrototypeSceneSetup.cs": default_interaction_scene_setup(),
+            "AIPrototypeSceneValidator.cs": default_interaction_scene_validator(),
+            "Interaction_VerticalSlice_ImplementationReport.md": default_interaction_report(),
         },
         required_snippets={
-            "InteractSystem_Draft.cs": [
+            "InteractSystem.cs": [
                 "FindClosestInteractable",
                 "closestDistance",
-                "UpdateMockFeedback",
+                "UpdatePromptFeedback",
                 "target == null",
                 "Input.GetKeyDown",
             ],
-            "InteractableObject_Draft.cs": [
+            "InteractableObject.cs": [
                 "DisplayName =>",
                 "CanInteract =>",
-                "Mock interaction triggered",
+                "Interaction triggered",
             ],
-            "Programmer_Implementation_Plan.md": [
-                "No object in range",
-                "Multiple objects in range",
-                "visual reference only",
+            "AIPrototypeSceneSetup.cs": [
+                "SetupSampleScene",
+                "AIPrototype_Player",
+                "InteractSystem",
+            ],
+            "AIPrototypeSceneValidator.cs": [
+                "ValidateSampleScene",
+                "AIPrototype_Interactable",
+                "AIPrototypeSceneValidator passed.",
+            ],
+            "Interaction_VerticalSlice_ImplementationReport.md": [
+                "real Unity interaction slice",
+                "InteractSystem.cs",
+                "AIPrototypeSceneValidator.ValidateSampleScene",
             ],
         },
         scene_setup_method="AIPrototypeSceneSetup.SetupSampleScene",
@@ -488,6 +645,84 @@ def terra_mage_action_build_controller() -> str:
                     float damage = TerraMageMaterialSystem.CalculateImpactDamage(heldPayload, velocity, 1f);
                     Debug.Log($"Terra Mage threw {heldPayload.Kind} with expected physics damage {damage:0.0}");
                     hasPayload = false;
+                }
+            }
+        }
+        """
+    )
+
+
+def terra_mage_material_system() -> str:
+    return _clean(
+        """
+        using UnityEngine;
+
+        namespace TerraMageTD
+        {
+            public enum TerraMageMaterialKind
+            {
+                LooseEarth,
+                SoftEarth,
+                PackedEarth,
+                Stone,
+                MoltenGlass,
+                Glass
+            }
+
+            public struct TerraMageMaterialPayload
+            {
+                public TerraMageMaterialKind Kind;
+                public float Mass;
+                public float Hardness;
+                public float Heat;
+                public Vector3 SourcePoint;
+
+                public bool IsHot => Heat >= 1f || Kind == TerraMageMaterialKind.MoltenGlass;
+            }
+
+            public static class TerraMageMaterialSystem
+            {
+                public static TerraMageMaterialPayload CreateLooseEarth(Vector3 sourcePoint)
+                {
+                    return new TerraMageMaterialPayload
+                    {
+                        Kind = TerraMageMaterialKind.LooseEarth,
+                        Mass = 1f,
+                        Hardness = 0.15f,
+                        Heat = 0f,
+                        SourcePoint = sourcePoint
+                    };
+                }
+
+                public static TerraMageMaterialPayload Compress(TerraMageMaterialPayload payload, float multiplier)
+                {
+                    payload.Kind = payload.Kind == TerraMageMaterialKind.Stone
+                        ? TerraMageMaterialKind.Stone
+                        : TerraMageMaterialKind.PackedEarth;
+                    payload.Mass *= Mathf.Max(1f, multiplier);
+                    payload.Hardness = Mathf.Max(payload.Hardness, 0.7f);
+                    return payload;
+                }
+
+                public static TerraMageMaterialPayload Heat(TerraMageMaterialPayload payload, float heatAmount)
+                {
+                    payload.Heat += Mathf.Max(0f, heatAmount);
+                    if ((payload.Kind == TerraMageMaterialKind.LooseEarth || payload.Kind == TerraMageMaterialKind.PackedEarth)
+                        && payload.Heat >= 1f)
+                    {
+                        payload.Kind = TerraMageMaterialKind.MoltenGlass;
+                        payload.Hardness = 0.05f;
+                    }
+
+                    return payload;
+                }
+
+                public static float CalculateImpactDamage(TerraMageMaterialPayload payload, Vector3 velocity, float impactAngle01)
+                {
+                    float velocityDamage = velocity.magnitude * payload.Mass;
+                    float hardnessDamage = payload.Hardness * 10f;
+                    float heatDamage = payload.Heat * 5f;
+                    return (velocityDamage + hardnessDamage + heatDamage) * Mathf.Clamp01(impactAngle01);
                 }
             }
         }
@@ -1404,12 +1639,30 @@ def terra_mage_third_person_aim_spec() -> ProgrammerOutputSpec:
     )
 
 
+def terra_mage_weapon_family_spec() -> ProgrammerOutputSpec:
+    return build_terra_mage_weapon_family_spec(
+        ProgrammerOutputSpec,
+        {
+            "TerraMageTinyMageController.cs": terra_mage_tiny_mage_controller(),
+            "TerraMageFollowCamera.cs": terra_mage_follow_camera(),
+            "TerraMageAimSystem.cs": terra_mage_aim_system(),
+            "TerraMageAimTarget.cs": terra_mage_aim_target(),
+            "TerraMageAimTargetMotion.cs": terra_mage_aim_target_motion(),
+            "TerraMageAimTargetVisibility.cs": terra_mage_aim_target_visibility(),
+            "TerraMageMaterialSystem.cs": terra_mage_material_system(),
+        },
+    )
+
+
 def select_programmer_output_spec(
     feature_request: str,
     phase: str,
     task_id: str = "",
 ) -> ProgrammerOutputSpec:
     del phase
+
+    if is_terra_mage_weapon_family_request(feature_request, task_id):
+        return terra_mage_weapon_family_spec()
 
     if is_terra_mage_third_person_aim_request(feature_request, task_id):
         return terra_mage_third_person_aim_spec()

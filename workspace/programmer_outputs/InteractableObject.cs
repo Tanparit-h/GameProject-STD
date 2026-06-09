@@ -1,7 +1,6 @@
 using UnityEngine;
 
-// PROTOTYPE_PLAN draft only. Do not place this file in Unity Assets yet.
-public class InteractableObject_Draft : MonoBehaviour
+public class InteractableObject : MonoBehaviour
 {
     [SerializeField] private string displayName = "Interactable Object";
     [SerializeField] private bool canInteract = true;
@@ -17,6 +16,6 @@ public class InteractableObject_Draft : MonoBehaviour
             return;
         }
 
-        Debug.Log($"Mock interaction triggered for {displayName}.");
+        Debug.Log($"Interaction triggered for {displayName}.");
     }
 }

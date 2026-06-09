@@ -9,11 +9,11 @@ Use JSON for now so the workflow can parse tasks with the Python standard librar
 ```json
 {
   "id": "feature-interaction-v1",
-  "phase": "PROTOTYPE_PLAN",
-  "title": "Player interaction prototype",
-  "request": "Create a prototype where the player presses E to interact with nearby objects.",
+  "phase": "IMPLEMENTATION",
+  "title": "Player interaction vertical slice",
+  "request": "Create and validate a real Unity vertical slice where the player presses E to interact with nearby objects.",
   "approval": {
-    "implementation": false
+    "implementation": true
   }
 }
 ```

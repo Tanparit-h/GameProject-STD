@@ -9,6 +9,7 @@ from app.state import FeatureState
 from autogen_teams.role_runner import run_role
 from tools.creator_file_tool import write_creator_file
 from tools.programmer_file_tool import write_programmer_file
+from tools.creator_asset_validator import format_creator_validation, validate_creator_exports
 from tools.programmer_output_specs import (
     select_programmer_output_spec,
     validate_programmer_output_files as validate_programmer_output_spec_files,
@@ -147,18 +148,21 @@ def parse_required_flag(text: str, label: str, default: bool) -> bool:
 
 def request_requires_programmer(feature_request: str) -> bool:
     """
-    Keep implementation-plan requests from being accidentally routed away from Programmer.
+    Keep real implementation requests from being accidentally routed away from Programmer.
     """
     text = feature_request.lower()
     programmer_keywords = [
+        "implementation",
         "implementation plan",
-        "code draft",
-        "pseudo-code",
-        "pseudocode",
         "programmer",
         "unity setup",
         "logic",
         "script",
+        "gameplay",
+        "combat",
+        "weapon wheel",
+        "scene validation",
+        "ui",
     ]
     return any(keyword in text for keyword in programmer_keywords)
 
@@ -201,147 +205,53 @@ def get_programmer_output_spec_for_state(state: FeatureState):
     )
 
 
-def default_interact_system_draft() -> str:
-    return """using System.Collections.Generic;
-using UnityEngine;
-
-// PROTOTYPE_PLAN draft only. Do not place this file in Unity Assets yet.
-public class InteractSystem_Draft : MonoBehaviour
-{
-    [SerializeField] private float interactRange = 2.5f;
-    [SerializeField] private KeyCode interactKey = KeyCode.E;
-    [SerializeField] private string mockPromptText = "Press E to Interact";
-
-    private readonly List<InteractableObject_Draft> objectsInRange = new();
-    private InteractableObject_Draft currentTarget;
-
-    private void Update()
-    {
-        currentTarget = FindClosestInteractable();
-        UpdateMockFeedback(currentTarget);
-
-        if (currentTarget != null && Input.GetKeyDown(interactKey))
-        {
-            currentTarget.Interact();
-        }
-    }
-
-    private InteractableObject_Draft FindClosestInteractable()
-    {
-        InteractableObject_Draft closest = null;
-        float closestDistance = float.MaxValue;
-
-        foreach (var candidate in objectsInRange)
-        {
-            if (candidate == null || !candidate.CanInteract)
-            {
-                continue;
-            }
-
-            float distance = Vector3.Distance(transform.position, candidate.transform.position);
-            if (distance <= interactRange && distance < closestDistance)
-            {
-                closest = candidate;
-                closestDistance = distance;
-            }
-        }
-
-        return closest;
-    }
-
-    private void UpdateMockFeedback(InteractableObject_Draft target)
-    {
-        if (target == null)
-        {
-            Debug.Log("Mock UI hidden: no interactable object in range.");
-            return;
-        }
-
-        Debug.Log($"{mockPromptText}: {target.DisplayName}");
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        var interactable = other.GetComponent<InteractableObject_Draft>();
-        if (interactable != null && !objectsInRange.Contains(interactable))
-        {
-            objectsInRange.Add(interactable);
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        var interactable = other.GetComponent<InteractableObject_Draft>();
-        if (interactable != null)
-        {
-            objectsInRange.Remove(interactable);
-        }
-    }
-}
-"""
+def is_implementation_phase(phase: str) -> bool:
+    return (phase or "").upper() == "IMPLEMENTATION"
 
 
-def default_interactable_object_draft() -> str:
-    return """using UnityEngine;
-
-// PROTOTYPE_PLAN draft only. Do not place this file in Unity Assets yet.
-public class InteractableObject_Draft : MonoBehaviour
-{
-    [SerializeField] private string displayName = "Interactable Object";
-    [SerializeField] private bool canInteract = true;
-
-    public string DisplayName => displayName;
-    public bool CanInteract => canInteract;
-
-    public void Interact()
-    {
-        if (!canInteract)
-        {
-            Debug.Log($"{displayName} is currently unavailable.");
-            return;
-        }
-
-        Debug.Log($"Mock interaction triggered for {displayName}.");
-    }
-}
-"""
+def programmer_output_file_label(phase: str) -> str:
+    return "implementation files" if is_implementation_phase(phase) else "design outputs"
 
 
-def default_programmer_plan() -> str:
-    return """# Programmer Implementation Plan
-
-## Phase
-
-PROTOTYPE_PLAN only. These files are drafts under `workspace/programmer_outputs/` and must not be copied into Unity Assets yet.
-
-## Draft Files
-
-- `InteractSystem_Draft.cs`: detects nearby interactables, chooses the closest valid target, shows mock UI feedback, and triggers interaction with `E`.
-- `InteractableObject_Draft.cs`: mock interactable component with display name, availability flag, and draft interaction behavior.
-
-## Logic Notes
-
-- No object in range: hide mock UI feedback and ignore `E`.
-- Multiple objects in range: select the closest valid object by distance.
-- Disabled or unavailable objects: skip them during target selection.
-- Blender `.glb` output is visual reference only in this phase.
-
-## Future Unity Setup
-
-- Add final scripts under `Assets/Scripts/AIPrototype/` only after switching to IMPLEMENTATION phase.
-- Add imported visual assets under `Assets/AIAssets/` only after explicit approval.
-- Add collider/trigger setup to player and interactable prefabs during IMPLEMENTATION validation.
-
-## Validation Plan
-
-- Confirm all draft files exist in `workspace/programmer_outputs/`.
-- Review closest-target selection and no-target behavior.
-- Review mock UI feedback path.
-- Confirm no file was written inside the Unity project.
-"""
+def _thai_list(items: list[str]) -> str:
+    if not items:
+        return "- ไม่มี"
+    return "\n".join(f"- {item}" for item in items)
 
 
-def write_programmer_draft_files(state: FeatureState) -> list[str]:
+def build_thai_evidence_report(
+    passed: bool,
+    checks: list[str],
+    blockers: list[str] | None = None,
+    missing: list[str] | None = None,
+    edge_cases: list[str] | None = None,
+    fixes: list[str] | None = None,
+    recommendations: list[str] | None = None,
+    evidence_blocks: list[str] | None = None,
+) -> str:
+    report = (
+        f"1. ผลตรวจ: {'ผ่าน' if passed else 'ไม่ผ่าน'}\n"
+        "2. สิ่งที่ตรวจ:\n"
+        f"{_thai_list(checks)}\n"
+        "3. ปัญหาที่บล็อกงาน:\n"
+        f"{_thai_list(blockers or [])}\n"
+        "4. Requirement ที่ขาด:\n"
+        f"{_thai_list(missing or [])}\n"
+        "5. Edge case ที่พบ:\n"
+        f"{_thai_list(edge_cases or [])}\n"
+        "6. สิ่งที่ต้องแก้:\n"
+        f"{_thai_list(fixes or [])}\n"
+        "7. คำแนะนำ:\n"
+        f"{_thai_list(recommendations or [])}"
+    )
+
+    if evidence_blocks:
+        report += "\n\n---\n\n" + "\n\n---\n\n".join(block for block in evidence_blocks if block)
+
+    return report
+
+
+def write_programmer_output_files(state: FeatureState) -> list[str]:
     """
     Persist Programmer output files using the task-aware deterministic spec.
     """
@@ -352,10 +262,43 @@ def write_programmer_draft_files(state: FeatureState) -> list[str]:
     ]
 
 
-def validate_programmer_draft_files(state: FeatureState, file_paths: list[str]) -> tuple[bool, list[str]]:
+def validate_programmer_output_files(state: FeatureState, file_paths: list[str]) -> tuple[bool, list[str]]:
     output_dir = ROOT / "workspace" / "programmer_outputs"
     spec = get_programmer_output_spec_for_state(state)
     return validate_programmer_output_spec_files(output_dir, file_paths, spec)
+
+
+def validate_creator_output_evidence(state: FeatureState) -> tuple[bool, list[str], dict[str, object]]:
+    problems: list[str] = []
+    script_path_text = state["creator_script_path"]
+    if not script_path_text:
+        problems.append("creator_script_path ว่าง")
+        return False, problems, validate_creator_exports()
+
+    script_path = Path(script_path_text)
+    if not script_path.exists():
+        problems.append(f"ไม่พบ Blender script: {script_path}")
+    else:
+        creator_root = (ROOT / "workspace" / "creator_outputs").resolve()
+        try:
+            script_path.resolve().relative_to(creator_root)
+        except ValueError:
+            problems.append(f"Blender script อยู่นอก workspace/creator_outputs: {script_path.resolve()}")
+
+        script_text = script_path.read_text(encoding="utf-8", errors="replace")
+        for marker in ["import bpy", "import os", "AI_STUDIO_EXPORT_DIR"]:
+            if marker not in script_text:
+                problems.append(f"Blender script ขาด marker: {marker}")
+
+    blender_result = state["creator_blender_result"]
+    if "BLENDER_ERROR" in blender_result or "Exit code: 0" not in blender_result:
+        problems.append("Blender run ไม่สำเร็จ")
+
+    creator_validation = validate_creator_exports()
+    if not creator_validation["passed"]:
+        problems.append("Creator export validation ไม่ผ่าน")
+
+    return not problems, problems, creator_validation
 
 
 async def manager_node(state: FeatureState) -> FeatureState:
@@ -425,6 +368,10 @@ Manager output:
     )
 
     if request_requires_programmer(state["feature_request"]):
+        state["programmer_required"] = True
+
+    programmer_spec = get_programmer_output_spec_for_state(state)
+    if programmer_spec.key != "default_interaction":
         state["programmer_required"] = True
 
     print(f"Creator required: {state['creator_required']}")
@@ -646,7 +593,7 @@ def route_after_creator_approval(state: FeatureState) -> str:
 
 
 async def programmer_node(state: FeatureState) -> FeatureState:
-    print(f"[7/11] Programmer creating implementation plan... retry={state['programmer_retry_count']}")
+    print(f"[7/11] Programmer creating implementation outputs... retry={state['programmer_retry_count']}")
 
     retry_note = ""
     if state["programmer_retry_count"] > 0:
@@ -702,11 +649,17 @@ Creator approval note:
 
 ทำเฉพาะ Programmer task
 ใช้ Programmer QA target จาก Designer เป็นเป้าหมาย
-ใน phase PROTOTYPE_PLAN อนุญาตให้สร้าง code draft, pseudo-code, Unity setup steps ได้
-แต่ยังไม่ต้องแก้ Unity project จริง
-
+สร้าง output ที่พร้อมใช้จริงสำหรับ implementation
+อธิบายไฟล์, setup, และ validation ให้ชัดเจน
 ถ้ามี edge case จาก Designer เช่น multiple objects in range ต้องระบุวิธี handle
-หลีกเลี่ยงตัวแปรที่ดูเหมือน real Unity dependency ถ้าเป็น pseudo-code ให้ตั้งชื่อเป็น MockedPlayer, MockedObject
+"""
+
+    task += """
+
+Additional runtime instructions:
+- Treat the workflow as implementation-first unless phase explicitly equals DESIGN_ONLY.
+- Do not return draft-only, pseudo-code-only, or mock-only outputs.
+- Describe real files, setup steps, and validation targets.
 """
 
     state["programmer_output"] = await run_role(
@@ -714,7 +667,7 @@ Creator approval note:
         prompt_file="programmer.md",
         task=task,
     )
-    state["programmer_file_paths"] = write_programmer_draft_files(state)
+    state["programmer_file_paths"] = write_programmer_output_files(state)
     return state
 
 
@@ -733,7 +686,6 @@ Programmer output:
 {state["programmer_output"]}
 
 ตรวจเฉพาะ Programmer QA target จาก Designer เท่านั้น
-อย่า fail เพราะมี code draft ถ้า phase = PROTOTYPE_PLAN
 ให้หา blocker, edge case, missing requirement ที่เกี่ยวกับ implementation
 
 ถ้าเจอปัญหาแม้เล็กน้อย เช่น ambiguity, edge case ไม่ครบ, missing requirement
@@ -753,15 +705,15 @@ Programmer output:
 
     task += f"""
 
-Programmer draft file paths:
+Programmer output file paths:
 {chr(10).join(state["programmer_file_paths"])}
 
-Required programmer draft files:
+Required programmer output files:
 {chr(10).join(programmer_spec.file_contents.keys())}
 
 Additional Programmer QA checks:
-- Confirm all required draft files exist.
-- Confirm draft files are under workspace/programmer_outputs only.
+- Confirm all required output files exist.
+- Confirm output files are under workspace/programmer_outputs only.
 - Confirm the generated files satisfy the feature-specific implementation target from Designer.
 """
 
@@ -772,7 +724,7 @@ Additional Programmer QA checks:
     )
 
     state["programmer_gate_status"] = analyze_qa_gate(state["programmer_qa_report"])
-    deterministic_pass, deterministic_problems = validate_programmer_draft_files(
+    deterministic_pass, deterministic_problems = validate_programmer_output_files(
         state,
         state["programmer_file_paths"],
     )
@@ -781,7 +733,7 @@ Additional Programmer QA checks:
         state["programmer_qa_report"] += (
             "\n\n---\n\n"
             "Deterministic file QA: PASS\n"
-            "- Required programmer draft files exist under workspace/programmer_outputs.\n"
+            "- Required programmer output files exist under workspace/programmer_outputs.\n"
             f"- Deterministic spec matched: {programmer_spec.key}.\n"
         )
     else:
@@ -900,8 +852,8 @@ Unity scene validation result:
 {state["unity_scene_validation_result"]}
 
 ตรวจ Unity automation stage เท่านั้น
-ถ้า phase เป็น PROTOTYPE_PLAN ให้ถือว่าการ skip การแก้ Unity เป็นพฤติกรรมที่ถูกต้อง
 ถ้า phase เป็น IMPLEMENTATION ต้องตรวจว่า batchmode และ scene validation ผ่าน
+ถ้าไม่ใช่ IMPLEMENTATION ให้ถือว่าเป็น design-only review และห้ามอ้างว่าแก้ Unity จริง
 ต้องตอบเป็นภาษาไทยเท่านั้น
 """
 
@@ -999,6 +951,171 @@ def route_after_programmer_approval(state: FeatureState) -> str:
     return "final"
 
 
+async def creator_qa_node(state: FeatureState) -> FeatureState:
+    print("[5/11] Running creator evidence gate...")
+
+    passed, problems, creator_validation = validate_creator_output_evidence(state)
+    checks = [
+        f"ตรวจ Creator output ใน phase {state['phase']}",
+        f"ตรวจ Blender script path: {state['creator_script_path'] or 'none'}",
+        "ตรวจ Blender run result",
+        "ตรวจ exported files ใต้ workspace/creator_outputs/exports",
+        "ตรวจ marker ขั้นต่ำของ Blender script",
+    ]
+
+    state["creator_qa_report"] = build_thai_evidence_report(
+        passed=passed,
+        checks=checks,
+        blockers=problems if not passed else [],
+        fixes=problems if not passed else [],
+        recommendations=[
+            "ผ่านตาม evidence gate ไม่ต้องแก้เพิ่ม"
+            if passed
+            else "แก้ Blender script หรือ export flow ตามรายการที่ fail แล้วรันใหม่"
+        ],
+        evidence_blocks=[format_creator_validation(creator_validation)],
+    )
+    state["creator_gate_status"] = "CLEAN_PASS" if passed else "NEED_USER_GATE"
+    return state
+
+
+async def programmer_qa_node(state: FeatureState) -> FeatureState:
+    print("[8/11] Running programmer evidence gate...")
+    programmer_spec = get_programmer_output_spec_for_state(state)
+    file_label = programmer_output_file_label(state["phase"])
+
+    deterministic_pass, deterministic_problems = validate_programmer_output_files(
+        state,
+        state["programmer_file_paths"],
+    )
+
+    checks = [
+        f"ตรวจ Programmer output ใน phase {state['phase']}",
+        f"ตรวจ deterministic spec: {programmer_spec.key}",
+        f"ตรวจ required programmer {file_label} ใต้ workspace/programmer_outputs",
+        "ตรวจ snippet marker ที่จำเป็นในแต่ละไฟล์",
+    ]
+
+    evidence_block = (
+        "DETERMINISTIC_PROGRAMMER_GATE\n"
+        f"Passed: {deterministic_pass}\n"
+        f"Spec: {programmer_spec.key}\n"
+        f"File kind: {file_label}\n"
+        "Output files:\n"
+        + "\n".join(state["programmer_file_paths"])
+    )
+
+    state["programmer_qa_report"] = build_thai_evidence_report(
+        passed=deterministic_pass,
+        checks=checks,
+        blockers=deterministic_problems if not deterministic_pass else [],
+        fixes=deterministic_problems if not deterministic_pass else [],
+        recommendations=[
+            "ผ่านตาม evidence gate ไม่ต้องแก้เพิ่ม"
+            if deterministic_pass
+            else "แก้ programmer output ให้ตรง deterministic spec แล้วรันใหม่"
+        ],
+        evidence_blocks=[evidence_block],
+    )
+    state["programmer_gate_status"] = "CLEAN_PASS" if deterministic_pass else "NEED_USER_GATE"
+    return state
+
+
+async def unity_qa_node(state: FeatureState) -> FeatureState:
+    print("[QA] Running unity evidence gate...")
+
+    if not is_implementation_phase(state["phase"]):
+        implementation_skipped = state["unity_implementation_result"].startswith("SKIPPED_UNITY_IMPLEMENTATION")
+        validation_skipped = state["unity_validation_result"].startswith("SKIPPED_UNITY_VALIDATION")
+        scene_setup_skipped = state["unity_scene_setup_result"].startswith("SKIPPED_UNITY_SCENE_SETUP")
+        scene_validation_skipped = state["unity_scene_validation_result"].startswith("SKIPPED_UNITY_SCENE_VALIDATION")
+        passed = implementation_skipped and validation_skipped and scene_setup_skipped and scene_validation_skipped
+
+        state["unity_qa_report"] = build_thai_evidence_report(
+            passed=passed,
+            checks=[
+                f"ตรวจ Unity stage ใน phase {state['phase']}",
+                "ตรวจว่าระบบ skip Unity implementation/validation ตาม phase ถูกต้อง",
+            ],
+            blockers=[] if passed else ["Unity stage ไม่ได้ skip ตาม phase ที่คาดไว้"],
+            fixes=[] if passed else ["แก้ route หรือ phase handling ของ Unity stage"],
+            recommendations=[
+                "ผ่านตาม evidence gate"
+                if passed
+                else "ตรวจ phase handling ของ Unity stage อีกครั้ง"
+            ],
+        )
+        state["unity_gate_status"] = "CLEAN_PASS" if passed else "NEED_USER_GATE"
+        return state
+
+    validation = parse_unity_result_text(state["unity_validation_result"])
+    scene_setup = parse_unity_result_text(state["unity_scene_setup_result"])
+    scene_validation = parse_unity_result_text(state["unity_scene_validation_result"])
+
+    deterministic_results = [
+        ("batchmode validation", validation),
+        ("scene setup", scene_setup),
+        ("scene validation", scene_validation),
+    ]
+    failed_steps = [
+        f"{name} failed (return_code={result['return_code']}, errors={', '.join(result['error_markers']) or 'none'})"
+        for name, result in deterministic_results
+        if not result["passed"]
+    ]
+    passed = not failed_steps
+
+    evidence_block = (
+        "DETERMINISTIC_UNITY_GATE\n"
+        f"Validation passed: {validation['passed']}\n"
+        f"Scene setup passed: {scene_setup['passed']}\n"
+        f"Scene validation passed: {scene_validation['passed']}"
+    )
+
+    state["unity_qa_report"] = build_thai_evidence_report(
+        passed=passed,
+        checks=[
+            "ตรวจ Unity copy/apply stage",
+            "ตรวจ batchmode validation",
+            "ตรวจ scene setup",
+            "ตรวจ scene validation",
+        ],
+        blockers=failed_steps,
+        fixes=failed_steps,
+        recommendations=[
+            "ผ่านตาม evidence gate ไม่ต้องแก้เพิ่ม"
+            if passed
+            else "เปิด log ของ step ที่ fail แล้วแก้เฉพาะจุด"
+        ],
+        evidence_blocks=[evidence_block],
+    )
+    state["unity_gate_status"] = "CLEAN_PASS" if passed else "NEED_USER_GATE"
+    return state
+
+
+def creator_auto_approval_node(state: FeatureState) -> FeatureState:
+    print("[6/11] Creator evidence gate clean pass. Auto approving creator output...")
+
+    state["creator_approval_status"] = "AUTO_APPROVED_BY_QA"
+    state["creator_approval_note"] = "Creator evidence gate passed. User gate skipped."
+    return state
+
+
+def programmer_auto_approval_node(state: FeatureState) -> FeatureState:
+    print("[9/11] Programmer evidence gate clean pass. Auto approving programmer output...")
+
+    state["programmer_approval_status"] = "AUTO_APPROVED_BY_QA"
+    state["programmer_approval_note"] = "Programmer evidence gate passed. User gate skipped."
+    return state
+
+
+def unity_auto_approval_node(state: FeatureState) -> FeatureState:
+    print("[Gate] Unity evidence gate clean pass. Auto approving Unity stage...")
+
+    state["unity_approval_status"] = "AUTO_APPROVED_BY_QA"
+    state["unity_approval_note"] = "Unity evidence gate passed. User gate skipped."
+    return state
+
+
 def final_node(state: FeatureState) -> FeatureState:
     print("[11/11] Writing report...")
 
@@ -1006,6 +1123,9 @@ def final_node(state: FeatureState) -> FeatureState:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     final_status = state["final_status"] or "ROLE_GRAPH_OK"
+    programmer_file_heading = (
+        "Programmer Output File Paths" if is_implementation_phase(state["phase"]) else "Programmer Draft File Paths"
+    )
 
     report = f"""# AI Studio Role-based Report
 
@@ -1067,7 +1187,7 @@ Programmer required: {state["programmer_required"]}
 
 ---
 
-## 4. Creator QA Report
+## 4. Creator Evidence Report
 
 {state["creator_qa_report"]}
 
@@ -1103,13 +1223,13 @@ Programmer required: {state["programmer_required"]}
 
 ---
 
-## 6.1 Programmer Draft File Paths
+## 6.1 {programmer_file_heading}
 
 {chr(10).join(state["programmer_file_paths"])}
 
 ---
 
-## 7. Programmer QA Report
+## 7. Programmer Evidence Report
 
 {state["programmer_qa_report"]}
 
@@ -1169,7 +1289,7 @@ Programmer required: {state["programmer_required"]}
 
 ---
 
-## 9.5 Unity QA Report
+## 9.5 Unity Evidence Report
 
 {state["unity_qa_report"]}
 
@@ -1211,7 +1331,7 @@ Programmer required: {state["programmer_required"]}
 
 {state["phase"]}
 
-## QA Gate Summary
+## Gate Summary
 
 - Creator gate: {state["creator_gate_status"] or "SKIPPED"}
 - Programmer gate: {state["programmer_gate_status"] or "SKIPPED"}
@@ -1229,7 +1349,7 @@ Programmer required: {state["programmer_required"]}
 
 ## Codex Next Action
 
-Read `workspace/reports/latest_report.md` only if detailed role output is needed. Otherwise use this response as the complete Office AI handoff after QA review.
+Read `workspace/reports/latest_report.md` only if detailed role output is needed. Otherwise use this response as the complete Office AI handoff after evidence gate review.
 """
 
     codex_response_path = output_dir / "codex_response.md"
@@ -1373,15 +1493,13 @@ def build_graph():
 async def main():
     app = build_graph()
     default_feature_request = """
-สร้างระบบ prototype:
-Player กด E เพื่อ interact กับ object ใกล้ตัว
-ต้องมี asset placeholder สำหรับ object ที่ interact ได้
-ยังไม่ต้องแก้ Unity project จริง
-ขอ design spec, asset plan, implementation plan, และ QA checklist
+Create and validate a real Unity interaction vertical slice.
+The player should press E to interact with nearby objects.
+Include placeholder assets, implementation scripts, scene setup, scene validation, and QA-ready reports.
 """
 
     feature_request = os.getenv("AI_STUDIO_FEATURE_REQUEST", default_feature_request)
-    phase = os.getenv("AI_STUDIO_PHASE", "PROTOTYPE_PLAN")
+    phase = os.getenv("AI_STUDIO_PHASE", "IMPLEMENTATION")
     task_file = os.getenv("AI_STUDIO_TASK_FILE")
     task_id = ""
 

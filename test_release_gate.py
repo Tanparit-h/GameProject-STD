@@ -20,11 +20,14 @@ class ReleaseGateTests(unittest.TestCase):
         self.assertIsInstance(ok, bool)
         self.assertIsInstance(message, str)
 
-    def test_latest_report_clean_accepts_prototype_plan_skip(self):
+    def test_latest_report_clean_accepts_implementation_report(self):
         report = (
-            "## Phase\n\nPROTOTYPE_PLAN\n"
-            "## 9.1 Unity Implementation Result\n\nSKIPPED_UNITY_IMPLEMENTATION\n"
+            "## Phase\n\nIMPLEMENTATION\n"
             "## 9.6 Unity Gate Status\n\nCLEAN_PASS\n"
+            "DETERMINISTIC_UNITY_GATE\n"
+            "Validation passed: True\n"
+            "Scene setup passed: True\n"
+            "Scene validation passed: True\n"
             "## Final Status\n\nROLE_GRAPH_OK\n"
         )
         with patch.object(release_gate, "LATEST_REPORT", Path("mock_report.md")):

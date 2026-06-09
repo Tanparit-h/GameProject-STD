@@ -8,23 +8,23 @@
     },
     {
       "id": "feature-door-toggle-v1",
-      "file": "door_toggle_prototype.json",
-      "status": "prototype_planned"
+      "file": "door_toggle_v1.json",
+      "status": "implementation_requested"
     },
     {
       "id": "feature-dialogue-prompt-v1",
-      "file": "dialogue_prompt_prototype.json",
-      "status": "backlog"
+      "file": "dialogue_prompt_v1.json",
+      "status": "implementation_requested"
     },
     {
       "id": "feature-inventory-pickup-v1",
-      "file": "inventory_pickup_prototype.json",
-      "status": "backlog"
+      "file": "inventory_pickup_v1.json",
+      "status": "implementation_requested"
     },
     {
       "id": "feature-quest-marker-v1",
-      "file": "quest_marker_prototype.json",
-      "status": "backlog"
+      "file": "quest_marker_v1.json",
+      "status": "implementation_requested"
     },
     {
       "id": "terra-mage-first-wall-v003",
@@ -39,6 +39,21 @@
     {
       "id": "terra-mage-third-person-aim-v005",
       "file": "terra_mage_third_person_aim_v005.json",
+      "status": "implementation_requested"
+    },
+    {
+      "id": "terra-mage-weapon-wheel-v006",
+      "file": "terra_mage_weapon_wheel_v006.json",
+      "status": "implementation_requested"
+    },
+    {
+      "id": "terra-mage-weapon-combat-profiles-v007",
+      "file": "terra_mage_weapon_combat_profiles_v007.json",
+      "status": "implementation_requested"
+    },
+    {
+      "id": "terra-mage-weapon-wheel-scene-validation-v008",
+      "file": "terra_mage_weapon_wheel_scene_validation_v008.json",
       "status": "implementation_requested"
     }
   ]

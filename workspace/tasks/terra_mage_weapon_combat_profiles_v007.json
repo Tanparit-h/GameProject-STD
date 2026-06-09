@@ -1,0 +1,9 @@
+{
+  "id": "terra-mage-weapon-combat-profiles-v007",
+  "phase": "IMPLEMENTATION",
+  "title": "Terra Mage weapon-driven melee and range profiles",
+  "request": "Implement weapon-driven combat behavior for the real Terra Mage Unity project. The currently selected weapon from the weapon wheel must change the melee attack behavior and attack reach/range. Bare hands in slot 0 must use punch behavior. Other assigned weapons must be able to define different melee profiles, reach, and any related combat range parameters. Integrate this into the existing TerraMageMeleeGestureController and any related action/range controller so the selected weapon materially changes combat behavior in the real scene.",
+  "approval": {
+    "implementation": true
+  }
+}
