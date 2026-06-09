@@ -27,9 +27,27 @@ Primary features:
 - Follow camera and over-the-shoulder aim.
 - Reticle-based interact raycast.
 - Magic tool controller.
+- Gesture-based melee action.
+- Weapon wheel for switching melee range and equipped tool style.
 - Spell/tool wheel.
 - Build-mode camera adjustment.
 - Tactical overview mode.
+
+Melee action controls:
+
+- Mouse drag left: left swing.
+- Mouse drag right: right swing.
+- Mouse drag upward or forward: overhead strike.
+- Weapon wheel changes melee range profile, such as short staff, medium pole, long reach, or heavy overhead tool.
+- Melee attacks should share the same physics language as building: impact direction, hit mass, weapon reach, and material contact all matter.
+
+Character creation and art style:
+
+- Simple chunky cartoon characters.
+- Readable class identity from silhouette first, detail second.
+- Mage class example: small robed body, cloak shape, simple hood/hat, staff in hand.
+- The character should feel toy-like and easy to animate, not realistic.
+- Equipment should visually explain function: staff for magic, hammer/tool for compression, blade/pole for melee reach.
 
 First playable target:
 
@@ -109,6 +127,7 @@ Primary action verbs:
 - Absorb or pull loose material from the world.
 - Compress loose material into a dense block or sphere.
 - Throw compressed blocks as physics projectiles.
+- Swing melee weapons with directional mouse-drag attacks.
 - Heat sand until it becomes molten glass material.
 - Pour molten material onto enemies, terrain, or structures.
 - Cool molten material into glass barriers, spikes, or lens components.
@@ -138,6 +157,8 @@ MVP action-build examples:
 - Pull sand into a wall shape, compress it, and use it as base defense.
 - Heat lifted sand into molten glass and pour it onto the ground as a temporary hazard.
 - Cool molten material into a fragile glass barrier or spike.
+- Drag mouse left/right/overhead to strike an enemy or hit a loose block into motion.
+- Switch melee range through the weapon wheel before engaging enemies near the base wall.
 
 Design rule:
 
@@ -327,6 +348,8 @@ Required systems:
 
 - Third-person mage controller.
 - Camera and aim reticle.
+- Mouse-drag melee input: left, right, overhead.
+- Weapon wheel range switching placeholder.
 - Interact raycast.
 - Beach seed test scene.
 - Small sand grid.
@@ -347,6 +370,9 @@ Acceptance criteria:
 - Player can move and aim reliably.
 - Player scale reads as a small mage, roughly 30 cm tall, inside a large generated world.
 - The scene communicates a Minecraft-like sandbox/building feel without using a block-only camera builder format.
+- Player character reads as a simple chunky cartoon mage with robe/cloak/staff class identity.
+- Mouse drag can trigger left swing, right swing, and overhead melee actions.
+- Weapon wheel can switch at least two melee range profiles.
 - Player can lift/place sand using the reticle.
 - Player can compress sand into a stable wall block.
 - Player can compress loose material into a throwable sphere.
