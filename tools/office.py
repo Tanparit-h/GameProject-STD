@@ -4,6 +4,7 @@ import sys
 
 from tools.dashboard import write_dashboard
 from tools.report_index import collect_status, write_report_index
+from tools.release_notes import write_release_notes
 from tools.task_registry import list_tasks
 from tools.task_runner import run_task
 
@@ -39,6 +40,7 @@ def main() -> int:
     subparsers.add_parser("status")
     subparsers.add_parser("dashboard")
     subparsers.add_parser("release-gate")
+    subparsers.add_parser("release-notes")
     subparsers.add_parser("tasks")
 
     task_parser = subparsers.add_parser("task")
@@ -57,6 +59,10 @@ def main() -> int:
         return 0
     if args.command == "release-gate":
         return run_release_gate()
+    if args.command == "release-notes":
+        path = write_release_notes()
+        print(f"Release notes written: {path}")
+        return 0
     if args.command == "tasks":
         return print_tasks()
     if args.command == "task":

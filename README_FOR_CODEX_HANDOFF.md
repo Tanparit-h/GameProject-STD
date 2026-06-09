@@ -37,6 +37,7 @@ Office CLI:
 .\.venv\Scripts\python.exe -m tools.office status
 .\.venv\Scripts\python.exe -m tools.office dashboard
 .\.venv\Scripts\python.exe -m tools.office release-gate
+.\.venv\Scripts\python.exe -m tools.office release-notes
 .\.venv\Scripts\python.exe -m tools.office tasks
 .\.venv\Scripts\python.exe -m tools.office task feature-interaction-v1
 ```

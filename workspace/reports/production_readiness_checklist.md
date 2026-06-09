@@ -53,6 +53,12 @@ Office CLI:
 .\.venv\Scripts\python.exe -m tools.office release-gate
 ```
 
+Release notes draft:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.office release-notes
+```
+
 Office task list:
 
 ```powershell
