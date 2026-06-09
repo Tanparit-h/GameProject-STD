@@ -9,6 +9,10 @@ from app.state import FeatureState
 from autogen_teams.role_runner import run_role
 from tools.creator_file_tool import write_creator_file
 from tools.programmer_file_tool import write_programmer_file
+from tools.programmer_output_specs import (
+    select_programmer_output_spec,
+    validate_programmer_output_files as validate_programmer_output_spec_files,
+)
 from tools.blender_tool import run_blender_script
 from tools.unity_tool import (
     apply_copy_plan,
@@ -23,12 +27,6 @@ ROOT = Path(__file__).resolve().parents[1]
 MAX_CREATOR_RETRY = 2
 MAX_PROGRAMMER_RETRY = 2
 MAX_UNITY_RETRY = 1
-
-PROGRAMMER_DRAFT_FILES = [
-    "InteractSystem_Draft.cs",
-    "InteractableObject_Draft.cs",
-    "Programmer_Implementation_Plan.md",
-]
 
 
 def analyze_qa_gate(qa_report: str) -> str:
@@ -136,8 +134,9 @@ def parse_required_flag(text: str, label: str, default: bool) -> bool:
     - Programmer required: yes
     - Programmer required: no
     """
+    normalized_text = re.sub(r"[*_`]", "", text)
     pattern = rf"{label}\s*required\s*:\s*(yes|no|true|false)"
-    match = re.search(pattern, text, re.IGNORECASE)
+    match = re.search(pattern, normalized_text, re.IGNORECASE)
 
     if not match:
         return default
@@ -192,6 +191,14 @@ def extract_code_block(text: str, language: str | None = None) -> str:
         return match.group(1).strip()
 
     return ""
+
+
+def get_programmer_output_spec_for_state(state: FeatureState):
+    return select_programmer_output_spec(
+        feature_request=state["feature_request"],
+        phase=state["phase"],
+        task_id=state.get("task_id", ""),
+    )
 
 
 def default_interact_system_draft() -> str:
@@ -334,59 +341,21 @@ PROTOTYPE_PLAN only. These files are drafts under `workspace/programmer_outputs/
 """
 
 
-def write_programmer_draft_files(programmer_output: str) -> list[str]:
+def write_programmer_draft_files(state: FeatureState) -> list[str]:
     """
-    Persist Programmer draft files using stable PROTOTYPE_PLAN templates.
+    Persist Programmer output files using the task-aware deterministic spec.
     """
-    paths = [
-        write_programmer_file("InteractSystem_Draft.cs", default_interact_system_draft()),
-        write_programmer_file("InteractableObject_Draft.cs", default_interactable_object_draft()),
-        write_programmer_file("Programmer_Implementation_Plan.md", default_programmer_plan()),
+    spec = get_programmer_output_spec_for_state(state)
+    return [
+        write_programmer_file(filename, content)
+        for filename, content in spec.file_contents.items()
     ]
-    return paths
 
 
-def validate_programmer_draft_files(file_paths: list[str]) -> tuple[bool, list[str]]:
+def validate_programmer_draft_files(state: FeatureState, file_paths: list[str]) -> tuple[bool, list[str]]:
     output_dir = ROOT / "workspace" / "programmer_outputs"
-    problems: list[str] = []
-
-    expected_paths = [output_dir / filename for filename in PROGRAMMER_DRAFT_FILES]
-    actual_paths = {Path(path).resolve() for path in file_paths}
-
-    for expected in expected_paths:
-        resolved = expected.resolve()
-        if resolved not in actual_paths:
-            problems.append(f"Missing file path in state: {expected.name}")
-        if not expected.exists():
-            problems.append(f"Missing file on disk: {expected.name}")
-            continue
-        try:
-            resolved.relative_to(output_dir.resolve())
-        except ValueError:
-            problems.append(f"File outside programmer output dir: {resolved}")
-
-    interact_system = output_dir / "InteractSystem_Draft.cs"
-    if interact_system.exists():
-        text = interact_system.read_text(encoding="utf-8", errors="replace")
-        required_snippets = [
-            "FindClosestInteractable",
-            "closestDistance",
-            "UpdateMockFeedback",
-            "target == null",
-            "Input.GetKeyDown",
-        ]
-        for snippet in required_snippets:
-            if snippet not in text:
-                problems.append(f"InteractSystem_Draft.cs missing logic marker: {snippet}")
-
-    plan = output_dir / "Programmer_Implementation_Plan.md"
-    if plan.exists():
-        text = plan.read_text(encoding="utf-8", errors="replace")
-        for snippet in ["No object in range", "Multiple objects in range", "visual reference only"]:
-            if snippet not in text:
-                problems.append(f"Programmer_Implementation_Plan.md missing note: {snippet}")
-
-    return not problems, problems
+    spec = get_programmer_output_spec_for_state(state)
+    return validate_programmer_output_spec_files(output_dir, file_paths, spec)
 
 
 async def manager_node(state: FeatureState) -> FeatureState:
@@ -745,12 +714,13 @@ Creator approval note:
         prompt_file="programmer.md",
         task=task,
     )
-    state["programmer_file_paths"] = write_programmer_draft_files(state["programmer_output"])
+    state["programmer_file_paths"] = write_programmer_draft_files(state)
     return state
 
 
 async def programmer_qa_node(state: FeatureState) -> FeatureState:
     print("[8/11] QA checking programmer output...")
+    programmer_spec = get_programmer_output_spec_for_state(state)
 
     task = f"""
 Current phase:
@@ -787,15 +757,12 @@ Programmer draft file paths:
 {chr(10).join(state["programmer_file_paths"])}
 
 Required programmer draft files:
-{chr(10).join(PROGRAMMER_DRAFT_FILES)}
+{chr(10).join(programmer_spec.file_contents.keys())}
 
 Additional Programmer QA checks:
 - Confirm all required draft files exist.
 - Confirm draft files are under workspace/programmer_outputs only.
-- Confirm the draft logic handles no object in range.
-- Confirm the draft logic handles multiple objects by closest priority.
-- Confirm mock UI feedback exists.
-- Confirm Blender asset is treated as visual reference only.
+- Confirm the generated files satisfy the feature-specific implementation target from Designer.
 """
 
     state["programmer_qa_report"] = await run_role(
@@ -805,14 +772,17 @@ Additional Programmer QA checks:
     )
 
     state["programmer_gate_status"] = analyze_qa_gate(state["programmer_qa_report"])
-    deterministic_pass, deterministic_problems = validate_programmer_draft_files(state["programmer_file_paths"])
+    deterministic_pass, deterministic_problems = validate_programmer_draft_files(
+        state,
+        state["programmer_file_paths"],
+    )
     if deterministic_pass:
         state["programmer_gate_status"] = "CLEAN_PASS"
         state["programmer_qa_report"] += (
             "\n\n---\n\n"
             "Deterministic file QA: PASS\n"
             "- Required programmer draft files exist under workspace/programmer_outputs.\n"
-            "- Draft logic includes no-target handling, closest-target priority, input handling, and mock UI feedback.\n"
+            f"- Deterministic spec matched: {programmer_spec.key}.\n"
         )
     else:
         state["programmer_gate_status"] = "NEED_USER_GATE"
@@ -874,6 +844,7 @@ def unity_batchmode_validation_node(state: FeatureState) -> FeatureState:
 
 def unity_scene_setup_node(state: FeatureState) -> FeatureState:
     print("[12/13] Running or skipping Unity scene setup...")
+    programmer_spec = get_programmer_output_spec_for_state(state)
 
     if state["phase"] != "IMPLEMENTATION":
         state["unity_scene_setup_result"] = (
@@ -883,7 +854,7 @@ def unity_scene_setup_node(state: FeatureState) -> FeatureState:
         return state
 
     state["unity_scene_setup_result"] = run_unity_batchmode(
-        extra_args=["-executeMethod", "AIPrototypeSceneSetup.SetupSampleScene"],
+        extra_args=["-executeMethod", programmer_spec.scene_setup_method],
         log_name="unity_graph_scene_setup.log",
     )
     return state
@@ -891,6 +862,7 @@ def unity_scene_setup_node(state: FeatureState) -> FeatureState:
 
 def unity_scene_validation_node(state: FeatureState) -> FeatureState:
     print("[13/13] Running or skipping Unity scene validation...")
+    programmer_spec = get_programmer_output_spec_for_state(state)
 
     if state["phase"] != "IMPLEMENTATION":
         state["unity_scene_validation_result"] = (
@@ -899,7 +871,7 @@ def unity_scene_validation_node(state: FeatureState) -> FeatureState:
         return state
 
     state["unity_scene_validation_result"] = run_unity_batchmode(
-        extra_args=["-executeMethod", "AIPrototypeSceneValidator.ValidateSampleScene"],
+        extra_args=["-executeMethod", programmer_spec.scene_validation_method],
         log_name="unity_graph_scene_validation.log",
     )
     return state
@@ -1040,6 +1012,14 @@ def final_node(state: FeatureState) -> FeatureState:
 ## Feature Request
 
 {state["feature_request"]}
+
+---
+
+## Task Metadata
+
+Task id: {state.get("task_id", "") or "none"}
+
+Task file: {state.get("task_file", "") or "none"}
 
 ---
 
@@ -1403,16 +1383,20 @@ Player กด E เพื่อ interact กับ object ใกล้ตัว
     feature_request = os.getenv("AI_STUDIO_FEATURE_REQUEST", default_feature_request)
     phase = os.getenv("AI_STUDIO_PHASE", "PROTOTYPE_PLAN")
     task_file = os.getenv("AI_STUDIO_TASK_FILE")
+    task_id = ""
 
     if task_file:
         task_path = Path(task_file)
         if not task_path.is_absolute():
             task_path = ROOT / task_path
         task_data = json.loads(task_path.read_text(encoding="utf-8"))
+        task_id = task_data.get("id", "")
         feature_request = task_data.get("request", feature_request)
         phase = task_data.get("phase", phase)
 
     result = await app.ainvoke({
+        "task_id": task_id,
+        "task_file": task_file or "",
         "feature_request": feature_request,
         "phase": phase,
         "manager_output": "",

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace TerraMageTD
 {
@@ -13,12 +13,20 @@ namespace TerraMageTD
 
         private CharacterController characterController;
         private Vector3 verticalVelocity;
+        private Vector3 lastMoveDirection = Vector3.forward;
 
         public bool IsGrounded => characterController != null && characterController.isGrounded;
+        public Transform CameraPivot => cameraPivot;
+        public Vector3 LastMoveDirection => lastMoveDirection;
 
         private void Awake()
         {
             characterController = GetComponent<CharacterController>();
+        }
+
+        public void SetCameraPivot(Transform newPivot)
+        {
+            cameraPivot = newPivot;
         }
 
         private void Update()
@@ -37,17 +45,28 @@ namespace TerraMageTD
             Transform basis = cameraPivot != null ? cameraPivot : transform;
             Vector3 forward = Vector3.ProjectOnPlane(basis.forward, Vector3.up).normalized;
             Vector3 right = Vector3.ProjectOnPlane(basis.right, Vector3.up).normalized;
-            Vector3 move = right * input.x + forward * input.z;
 
+            if (forward.sqrMagnitude < 0.001f)
+            {
+                forward = transform.forward;
+            }
+
+            if (right.sqrMagnitude < 0.001f)
+            {
+                right = transform.right;
+            }
+
+            Vector3 move = right * input.x + forward * input.z;
             bool running = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
             float speed = running ? runSpeed : walkSpeed;
             characterController.Move(move * speed * Time.deltaTime);
 
             if (move.sqrMagnitude > 0.001f)
             {
+                lastMoveDirection = move.normalized;
                 transform.rotation = Quaternion.Slerp(
                     transform.rotation,
-                    Quaternion.LookRotation(move, Vector3.up),
+                    Quaternion.LookRotation(lastMoveDirection, Vector3.up),
                     12f * Time.deltaTime);
             }
         }

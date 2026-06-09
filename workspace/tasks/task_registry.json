@@ -35,6 +35,11 @@
       "id": "terra-mage-first-scene-v004",
       "file": "terra_mage_first_scene_v004.json",
       "status": "implementation_requested"
+    },
+    {
+      "id": "terra-mage-third-person-aim-v005",
+      "file": "terra_mage_third_person_aim_v005.json",
+      "status": "implementation_requested"
     }
   ]
 }

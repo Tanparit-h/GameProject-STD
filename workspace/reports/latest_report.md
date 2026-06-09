@@ -2,133 +2,160 @@
 
 ## Feature Request
 
-Plan a prototype where the player presses E near a door placeholder to toggle open and closed states. Include a creator placeholder asset plan, programmer draft logic, QA targets, edge cases, and implementation notes, but do not modify Unity yet.
+Implement on the real Unity project, not prototype only. Starting from the current Terra Mage scene where the tiny mage can already walk, run, and jump, change the camera to a third-person gameplay camera, add an aiming helper, and add debug output so when the player clicks it reports the distance to the object currently being aimed at. In the same scene, create multiple test objects for aiming verification, including several static targets, a moving target, a target that disappears, and a target that blinks. Update scene setup and validation so this feature is part of the real implementation.
+
+---
+
+## Task Metadata
+
+Task id: terra-mage-third-person-aim-v005
+
+Task file: workspace\tasks\terra_mage_third_person_aim_v005.json
 
 ---
 
 ## Phase
 
-PROTOTYPE_PLAN
+IMPLEMENTATION
 
 ---
 
 ## 1. Manager Output
 
 1. **User goal**  
-   ผู้เล่นสามารถกดปุ่ม E ใกล้กับ "door placeholder" เพื่อสลับสถานะเปิด/ปิดของประตู  
+   - Implement a third-person camera system in the Terra Mage scene.  
+   - Add an aiming helper (visual indicator) that appears when the player clicks.  
+   - Display debug output showing the distance to the aimed object when clicked.  
+   - Create multiple test objects (static, moving, disappearing, blinking) for aiming verification.  
+   - Integrate all features into the real Unity project as part of the implementation phase.  
+
+---
 
 2. **Requirements**  
-   - ประตูต้องมีสถานะเปิด/ปิดที่สามารถสลับได้  
-   - ต้องตรวจสอบระยะห่างระหว่างผู้เล่นกับประตู (เช่น ใช้ Collider หรือ Raycast)  
-   - ต้องมี "creator placeholder asset" สำหรับสร้างประตูในระบบ  
-   - ต้องมี "programmer draft logic" สำหรับการตรวจสอบการกด E และการสลับสถานะ  
+   - **Camera System**: Transition from first-person to third-person camera.  
+   - **Aiming Helper**: Visual indicator (e.g., crosshair, reticle) that appears on screen when the player clicks.  
+   - **Debug Output**: Real-time distance calculation to the aimed object (e.g., UI text or console log).  
+   - **Test Objects**:  
+     - Static targets (fixed position).  
+     - Moving target (e.g., object with movement script).  
+     - Disappearing target (e.g., object that disables itself after a delay).  
+     - Blinking target (e.g., object that toggles visibility).  
+   - **Scene Integration**: Ensure all features are part of the final implementation, not a prototype.  
+
+---
 
 3. **Constraints**  
-   - ห้ามแก้ไข Unity หรือสร้าง asset ทันที  
-   - ต้องใช้ระบบที่ยืดหยุ่นสำหรับการปรับเปลี่ยนสถานะประตูในอนาคต  
-   - ต้องไม่สร้าง animation หรือ effect ที่ซับซ้อน  
+   - **No detailed design**: Focus on high-level structure, not UI/UX specifics.  
+   - **No code writing**: Provide logic flow, not actual code.  
+   - **No asset creation**: Use existing assets or simple placeholder objects.  
+   - **Real-time validation**: Ensure debug output and test objects are functional in the live scene.  
+
+---
 
 4. **Assumptions**  
-   - "door placeholder" เป็น object ที่มี Collider และสามารถเปลี่ยนสถานะได้  
-   - ผู้เล่นจะไม่กด E ขณะอยู่ห่างเกินระยะที่กำหนด  
-   - ระบบจะไม่ต้องการการตรวจสอบสถานะอื่นๆ เช่น ความสูงหรือการเคลื่อนที่ของผู้เล่น  
+   - The existing Terra Mage scene includes a player character with movement (walk, run, jump).  
+   - The camera system is already functional but needs to be converted to third-person.  
+   - The aiming helper will use raycasting from the camera to detect objects.  
+   - Debug output will be displayed via a UI element (e.g., text overlay) or console log.  
+   - Test objects will be tagged or layered to ensure raycasting accuracy.  
 
-5. **Questions or risks**  
-   - ระยะห่างที่ถือว่า "ใกล้" ควรกำหนดเป็นค่าเท่าไร?  
-   - หากมีหลายประตูในฉาก จะเลือกประตูใดที่จะสลับสถานะ?  
-   - สถานะเปิด/ปิดจะแสดงผลอย่างไร (เช่น ใช้ material, sprite, หรือ animation)?  
-   - ถ้าผู้เล่นกด E ซ้ำๆ จะเกิดปัญหาหรือไม่?  
+---
+
+5. **Questions or Risks**  
+   - Will the existing movement scripts conflict with the new camera system?  
+   - How to handle occlusion or object visibility during aiming?  
+   - Will the debug output interfere with other UI elements?  
+   - How to ensure test objects are properly tagged/layered for raycasting?  
+
+---
 
 6. **Input package for Designer**  
-   - **Creator placeholder asset**:  
-     - สร้าง object ที่มี Collider (เช่น Box Collider) และ tag เป็น "Door"  
-     - ตั้งค่า prefab สำหรับการสร้างประตูในระบบ  
-   - **Programmer draft logic**:  
-     - ตรวจสอบระยะห่างระหว่างผู้เล่นกับประตู (เช่น ใช้ `Physics.Raycast` หรือ `Collider.bounds`)  
-     - ตรวจสอบการกด E ที่มีสถานะเปิด/ปิด  
-     - เปลี่ยนสถานะประตู (เช่น ใช้ boolean หรือ enum) และอัปเดต UI/visual  
-   - **QA targets**:  
-     - ทดสอบการสลับสถานะเมื่อผู้เล่นอยู่ใกล้ประตู  
-     - ทดสอบการไม่สลับสถานะเมื่อผู้เล่นอยู่ห่างเกินระยะ  
-     - ทดสอบการสลับสถานะหลายครั้ง  
-   - **Edge cases**:  
-     - ประตูที่ไม่มี Collider  
-     - ผู้เล่นกด E ขณะไม่ได้อยู่ในระยะ  
-     - ประตูที่ถูกสร้างซ้ำในฉาก  
-   - **Implementation notes**:  
-     - ใช้ `OnTriggerEnter` หรือ `OnCollisionEnter` สำหรับการตรวจสอบการสัมผัส  
-     - ใช้ `Input.GetKeyDown(KeyCode.E)` สำหรับการตรวจสอบการกด E  
-     - ไม่ต้องสร้าง animation ทันที แต่สามารถใช้ material หรือ sprite สำหรับการแสดงผลสถานะ  
+   - **Scene Setup**:  
+     - Existing player character with movement (walk, run, jump).  
+     - Current camera system (first-person).  
+   - **Camera System**:  
+     - Convert to third-person (position relative to player, smooth transitions).  
+   - **Aiming Helper**:  
+     - Visual indicator (e.g., crosshair) that appears on screen on click.  
+     - Raycast from camera to detect objects.  
+   - **Debug Output**:  
+     - UI text element showing distance to aimed object (e.g., "Distance: X meters").  
+   - **Test Objects**:  
+     - Static targets (simple cubes or spheres).  
+     - Moving target (scripted movement).  
+     - Disappearing target (disable after 5 seconds).  
+     - Blinking target (toggle visibility every 1 second).  
+   - **Validation**:  
+     - Ensure all features are functional in the live scene.  
+     - Test objects must be visible and interactable with the aiming system.  
 
 ---  
-**หมายเหตุ**: ห้ามสร้าง asset หรือ code ทันที ให้ Designer สร้าง blueprint สำหรับการพัฒนาต่อใน Unity ภายหลัง
+**Note**: Designer should focus on structuring the scene, defining components, and ensuring integration with existing systems without diving into code or asset creation.
 
 ---
 
 ## 2. Designer Output
 
 0. Routing decision  
-- Creator required: yes  
+- Creator required: no  
 - Programmer required: yes  
-- Reason: งานต้องการ Creator สร้าง placeholder asset (door prefab พร้อม Collider และ tag) และ Programmer สร้าง draft logic สำหรับตรวจสอบการกด E และสลับสถานะประตู  
+- Reason: งานนี้ไม่ต้องการ asset/visual design (เช่น model, animation, icon) แต่ต้องใช้ code, logic, Unity setup, script, test, และ integration ดังนั้นจึงต้องใช้ Programmer เท่านั้น  
 
 1. Design summary  
-- ออกแบบระบบให้ผู้เล่นกด E ใกล้ "door placeholder" เพื่อสลับสถานะเปิด/ปิด  
-- ใช้ Collider ตรวจสอบระยะห่างระหว่างผู้เล่นกับประตู  
-- สร้าง placeholder asset สำหรับ door ที่สามารถปรับสถานะได้  
-- ออกแบบ logic draft สำหรับการตรวจสอบการกด E และการเปลี่ยนสถานะ  
+- แปลงระบบกล้องจาก first-person เป็น third-person โดยใช้ position ที่ตั้งค่าตาม player พร้อม transition ที่นุ่มนวล  
+- เพิ่ม aiming helper (crosshair) ที่แสดงเมื่อผู้เล่นคลิก โดยใช้ raycasting จากกล้องเพื่อตรวจจับ object  
+- แสดง debug output ที่แสดงระยะห่างจาก object ที่จุดได้ (เช่น UI text หรือ console log)  
+- สร้าง test objects หลายประเภท (static, moving, disappearing, blinking) สำหรับทดสอบระบบ aiming  
+- ปรับ scene setup ให้รองรับการทำงานของระบบใหม่โดยไม่กระทบกับระบบเดิม (movement, camera)  
 
 2. Creator task  
-- สร้าง prefab สำหรับ door placeholder ที่มี:  
-  - Box Collider หรือ Sphere Collider  
-  - Tag เป็น "Door"  
-  - Material/Visual ที่แสดงสถานะเปิด/ปิด (เช่น ใช้ sprite หรือ material ที่เปลี่ยนได้)  
-- สร้าง blueprint สำหรับการสร้าง door หลายตัวในระบบ  
+- ไม่ต้องใช้ Creator ใน feature นี้  
 
 3. Programmer task  
-- เขียน draft logic สำหรับ:  
-  - ตรวจสอบการกด E ด้วย `Input.GetKeyDown(KeyCode.E)`  
-  - ตรวจสอบระยะห่างระหว่างผู้เล่นกับ door ด้วย `Physics.Raycast` หรือ `Collider.bounds`  
-  - เปลี่ยนสถานะเปิด/ปิดด้วย boolean หรือ enum  
-  - อัปเดต visual ของ door ตามสถานะ (เช่น ใช้ material หรือ sprite ที่เปลี่ยนได้)  
-- สร้าง implementation plan สำหรับการเชื่อมต่อกับ Unity ภายหลัง  
+- สร้าง third-person camera system โดยปรับ position ของกล้องให้อยู่ด้านหลัง player และเพิ่ม transition ที่นุ่มนวล  
+- สร้าง aiming helper (crosshair) ที่แสดงเมื่อผู้เล่นคลิก โดยใช้ raycasting จากกล้องเพื่อตรวจจับ object  
+- สร้าง debug output ที่แสดงระยะห่างจาก object ที่จุดได้ (เช่น UI text หรือ console log)  
+- สร้าง test objects หลายประเภท:  
+  - Static targets (cube/sphere ที่อยู่ในตำแหน่งคงที่)  
+  - Moving target (script ที่เคลื่อนที่แบบ random)  
+  - Disappearing target (script ที่ disable object หลัง 5 วินาที)  
+  - Blinking target (script ที่ toggle visibility ทุก 1 วินาที)  
+- ปรับ scene setup ให้รองรับการทำงานของระบบใหม่ โดยตรวจสอบให้ test objects ทำงานได้กับ raycasting  
 
 4. Creator QA target  
-- ตรวจสอบว่า door placeholder มี Collider และ tag "Door"  
-- ตรวจสอบว่า visual ของ door แสดงสถานะเปิด/ปิดได้ชัดเจน  
-- ตรวจสอบว่า prefab สามารถสร้าง door หลายตัวในระบบได้  
+- ไม่มี Creator QA target ใน feature นี้  
 
 5. Programmer QA target  
-- ตรวจสอบว่า logic สำหรับการกด E และสลับสถานะทำงานถูกต้อง  
-- ตรวจสอบว่าระยะห่างระหว่างผู้เล่นกับ door ถูกคำนวณและตรวจสอบได้  
-- ตรวจสอบว่าสถานะเปิด/ปิดอัปเดต visual ของ door ได้  
-- ตรวจสอบว่าระบบรองรับการสลับสถานะหลายครั้งโดยไม่มีข้อผิดพลาด  
+- ตรวจสอบ logic ของ third-person camera transition ว่าทำงานนุ่มนวล  
+- ตรวจสอบ logic ของ aiming helper ว่าแสดง crosshair ถูกต้องเมื่อคลิก  
+- ตรวจสอบ logic ของ debug output ว่าแสดงระยะห่างจาก object ที่จุดได้  
+- ตรวจสอบ script ของ test objects ว่าทำงานตามที่คาดหวัง (static, moving, disappearing, blinking)  
+- ตรวจสอบว่าระบบใหม่ไม่ขัดขวางระบบเดิม (movement, camera)  
 
 6. Acceptance criteria  
-- ผู้เล่นสามารถกด E ใกล้ door placeholder เพื่อสลับสถานะเปิด/ปิดได้  
-- ระบบตรวจสอบระยะห่างระหว่างผู้เล่นกับ door ได้ถูกต้อง  
-- สถานะเปิด/ปิดแสดงผลบน visual ของ door ได้ชัดเจน  
-- ระบบรองรับการสร้าง door หลายตัวในฉากได้  
-- ไม่มี animation หรือ effect ที่ซับซ้อน  
+- ระบบกล้องเปลี่ยนเป็น third-person ได้โดยไม่มีข้อผิดพลาด  
+- aiming helper แสดง crosshair ที่หน้าจอเมื่อผู้เล่นคลิก  
+- debug output แสดงระยะห่างจาก object ที่จุดได้ (เช่น "Distance: X meters")  
+- test objects ทั้ง 4 ประเภททำงานได้ตามที่กำหนด (static, moving, disappearing, blinking)  
+- ระบบใหม่ทำงานได้ใน scene จริงโดยไม่กระทบกับระบบเดิม  
 
 7. Edge cases to verify  
-- ประตูที่ไม่มี Collider หรือ tag "Door"  
-- ผู้เล่นกด E ขณะอยู่ห่างเกินระยะที่กำหนด  
-- ประตูที่ถูกสร้างซ้ำในฉาก  
-- ผู้เล่นกด E ซ้ำๆ จนเกิดปัญหาการสลับสถานะ  
-- ประตูที่ไม่มี visual สำหรับแสดงสถานะเปิด/ปิด  
+- ตรวจสอบว่า aiming helper ทำงานได้แม้ object ถูก occlude หรือซ่อนอยู่  
+- ตรวจสอบว่า debug output ไม่ขัดขวาง UI ที่มีอยู่ใน scene  
+- ตรวจสอบว่า test objects ที่ disappear หรือ blink ยังคงถูกตรวจจับโดย aiming system  
+- ตรวจสอบว่า third-person camera ยังคงทำงานได้เมื่อ player กระโดดหรือเคลื่อนที่  
 
 8. Out of scope for current phase  
-- ห้ามสร้าง asset หรือ code จริงใน Unity  
-- ห้ามปรับแต่ง animation หรือ effect ที่ซับซ้อน  
-- ห้ามทดสอบใน Unity หรือ import file เข้า project จริง  
-- ห้ามแก้ไข logic หรือ asset ที่สร้างใน phase นี้ในขั้นตอนต่อไป
+- การออกแบบ UI/UX ที่ละเอียด (เช่น รูปแบบ crosshair หรือ layout ของ debug text)  
+- การสร้าง asset ใหม่ (เช่น model, texture, animation)  
+- การปรับปรุงระบบ movement ที่มีอยู่เดิม  
+- การทดสอบ performance หรือ optimization ของระบบใหม่
 
 ---
 
 ## 2.1 Routing Decision
 
-Creator required: True
+Creator required: False
 
 Programmer required: True
 
@@ -136,322 +163,249 @@ Programmer required: True
 
 ## 3. Creator Output
 
-### 1. Asset Spec  
-- **Door Placeholder**:  
-  - สร้างจาก Cube ที่ scale เป็น Rectangle (เช่น ขนาด 1x0.2x1)  
-  - ใช้ Material สีเขียว (#00FF00) สำหรับสถานะ "Closed" และสีแดง (#FF0000) สำหรับ "Open"  
-  - ติดตั้ง Text Label บน Object: "Door Placeholder"  
-  - ตั้งค่า Material ให้เปลี่ยนสีได้ตามสถานะ (ใช้ Boolean หรือ Enum)  
-- **Cube Placeholder**:  
-  - ใช้ Material สีฟ้า (#0000FF)  
-  - ติดตั้ง Text Label: "Cube Placeholder"  
-- **Sphere Placeholder**:  
-  - ใช้ Material สีเหลือง (#FFFF00)  
-  - ติดตั้ง Text Label: "Sphere Placeholder"  
-
----
-
-### 2. Image Prompt  
-**Door Placeholder**:  
-- ประตูทรงสี่เหลี่ยม (Rectangle) ขนาด 1x0.2x1 หน้าตัดสีเขียว (#00FF00)  
-- ติดป้ายชื่อ "Door Placeholder" กลางหน้าจอ  
-- สถานะเปิด/ปิดแสดงด้วยการเปลี่ยนสี (เขียว → แดง)  
-**Cube Placeholder**:  
-- ลูกบาศก์สีฟ้า (#0000FF) พร้อมป้ายชื่อ "Cube Placeholder"  
-**Sphere Placeholder**:  
-- ลูกกลมสีเหลือง (#FFFF00) พร้อมป้ายชื่อ "Sphere Placeholder"  
-
----
-
-### 3. Blender Script Draft  
-```python
-import bpy
-import os
-from mathutils import Vector
-
-# ตั้งค่าโฟลเดอร์สำหรับ export
-export_dir = os.getenv("AI_STUDIO_EXPORT_DIR")
-if not export_dir:
-    export_dir = os.path.join(os.getcwd(), "exports")
-os.makedirs(export_dir, exist_ok=True)
-
-# ล้าง scene ก่อนสร้าง object
-bpy.ops.object.select_all(action="SELECT")
-bpy.ops.object.delete()
-
-def create_material(name, color):
-    mat = bpy.data.materials.new(name)
-    mat.diffuse_color = color  # RGBA 4 ค่า
-    return mat
-
-# สร้าง Cube Placeholder
-cube = bpy.ops.mesh.primitive_cube_add(location=(0, 0, 0))
-cube_obj = bpy.context.object
-cube_obj.scale = (1, 1, 1)
-cube_mat = create_material("Cube_Material", (0.0, 0.0, 1.0, 1.0))
-cube_obj.data.materials.append(cube_mat)
-
-# สร้าง Door Placeholder (Rectangle)
-door = bpy.ops.mesh.primitive_cube_add(location=(2, 0, 0))
-door_obj = bpy.context.object
-door_obj.scale = (1, 0.2, 1)  # ปรับเป็น Rectangle
-door_mat = create_material("Door_Material", (0.0, 1.0, 0.0, 1.0))
-door_obj.data.materials.append(door_mat)
-
-# สร้าง Sphere Placeholder
-sphere = bpy.ops.mesh.primitive_uv_sphere_add(location=(-2, 0, 0))
-sphere_obj = bpy.context.object
-sphere_mat = create_material("Sphere_Material", (1.0, 1.0, 0.0, 1.0))
-sphere_obj.data.materials.append(sphere_mat)
-
-# สร้าง Text Label สำหรับ Object
-def add_text_label(obj, text, align_x="CENTER", align_y="CENTER"):
-    bpy.ops.object.text_add(location=obj.location)
-    text_obj = bpy.context.object
-    text_obj.data.body = text
-    text_obj.data.align_x = align_x
-    text_obj.data.align_y = align_y
-    text_obj.data.size = 20  # ปรับขนาดตัวอักษร
-    text_obj.location = obj.location + Vector((0, 0.5, 0))  # ปรับตำแหน่งให้อยู่เหนือ object
-    text_mat = create_material("Text_Material", (1.0, 1.0, 1.0, 1.0))
-    text_obj.data.materials.append(text_mat)
-    return text_obj
-
-# สร้าง Text Label สำหรับ Cube
-cube_text = add_text_label(cube_obj, "Cube Placeholder", align_x="CENTER", align_y="CENTER")
-
-# สร้าง Text Label สำหรับ Door
-door_text = add_text_label(door_obj, "Door Placeholder", align_x="CENTER", align_y="CENTER")
-
-# สร้าง Text Label สำหรับ Sphere
-sphere_text = add_text_label(sphere_obj, "Sphere Placeholder", align_x="CENTER", align_y="CENTER")
-
-# ตั้งค่า camera และ light
-bpy.ops.object.camera_add(location=(5, 5, 5), rotation=(1.1, 0, 0))
-camera = bpy.context.object
-bpy.context.scene.camera = camera
-
-bpy.ops.object.light_add(type='SUN', radius=0.1)
-light = bpy.context.object
-light.data.energy = 5
-
-# ปรับการ render
-bpy.context.scene.render.engine = 'CYCLES'
-bpy.context.scene.cycles.device = 'GPU'
-
-# สร้างไฟล์ export
-export_path = os.path.join(export_dir, "door_placeholder.glb")
-bpy.ops.export_scene.gltf(filepath=export_path, export_format="GLB")
-print("EXPORTED:", export_path)
-```
+SKIPPED: Designer marked Creator required: no
 
 ---
 
 ## 3.1 Creator Blender Script Path
 
-D:\AIStudio\ai-game-studio\workspace\creator_outputs\create_placeholder_assets.py
+
 
 ---
 
 ## 3.2 Creator Blender Result
 
-BLENDER_RUN_RESULT
-Exit code: 0
-Log path: D:\AIStudio\ai-game-studio\workspace\logs\blender_creator_run.log
-Export dir: D:\AIStudio\ai-game-studio\workspace\creator_outputs\exports
-Exported files:
-D:\AIStudio\ai-game-studio\workspace\creator_outputs\exports\door_placeholder.glb
-D:\AIStudio\ai-game-studio\workspace\creator_outputs\exports\interactables_prototype.glb
-D:\AIStudio\ai-game-studio\workspace\creator_outputs\exports\interactable_objects.glb
-D:\AIStudio\ai-game-studio\workspace\creator_outputs\exports\interactable_placeholders.glb
-D:\AIStudio\ai-game-studio\workspace\creator_outputs\exports\interactive_objects.glb
-
-STDERR tail:
-
+SKIPPED: No creator asset/model/picture required
 
 ---
 
 ## 4. Creator QA Report
 
-1. ผลตรวจ: ผ่าน  
-2. สิ่งที่ตรวจ:  
-   - มี Blender script draft ตามที่กำหนด  
-   - Blender run สำเร็จ (Exit code: 0)  
-   - มีไฟล์ export ใน workspace/creator_outputs/exports  
-   - script สร้าง placeholder object ตาม spec (Cube, Door, Sphere)  
-   - script ไม่ใช้ texture ภายนอก  
-   - script ไม่ใช้ addon พิเศษ  
-   - ไฟล์ export อยู่ใน workspace เท่านั้น  
-3. ปัญหาที่บล็อกงาน:  
-   - ไม่มี  
-4. Requirement ที่ขาด:  
-   - ไม่มี  
-5. Edge case ที่พบ:  
-   - ไม่มี  
-6. สิ่งที่ต้องแก้:  
-   - ไม่มี  
-7. คำแนะนำ:  
-   - ผ่านตาม target ไม่ต้องแก้ไขเพิ่มเติม
+SKIPPED: Creator QA not required
 
 ---
 
 ## 4.1 Creator Gate Status
 
-CLEAN_PASS
+SKIPPED
 
 ---
 
 ## 4.2 Creator Retry Count
 
-1
+0
 
 ---
 
 ## 5. Creator Approval Status
 
-AUTO_APPROVED_BY_QA
+SKIPPED
 
 ---
 
 ## 5.1 Creator Approval Note
 
-Creator QA returned clean pass. User gate skipped.
+Creator was skipped because no asset/model/picture task was required.
 
 ---
 
 ## 6. Programmer Output
 
 1. Implementation target  
-- สร้าง logic draft สำหรับการตรวจสอบการกด E และสลับสถานะประตู  
-- ใช้ `Input.GetKeyDown(KeyCode.E)` ตรวจสอบการกด E  
-- ใช้ `Physics.Raycast` ตรวจสอบระยะห่างระหว่างผู้เล่นกับประตู  
-- สร้าง boolean สำหรับสถานะเปิด/ปิด  
-- อัปเดต visual ของประตูตามสถานะ (เปลี่ยนสี/material)  
-- รองรับการสลับสถานะหลายครั้ง  
+- แปลงระบบกล้องเป็น third-person พร้อม transition นุ่มนวล  
+- เพิ่ม aiming helper (crosshair) ที่แสดงเมื่อผู้เล่นคลิก  
+- แสดง debug output ระยะห่างจาก object ที่จุดได้  
+- สร้าง test objects 4 ประเภท (static/moving/disappearing/blinking)  
+- ปรับ scene setup ให้รองรับระบบใหม่โดยไม่กระทบระบบเดิม  
 
 ---
 
 2. Files to create/update  
-- `PlayerInputManager.cs` (สำหรับตรวจสอบการกด E)  
-- `DoorStateManager.cs` (สำหรับจัดการสถานะประตู)  
-- `DoorVisualUpdater.cs` (สำหรับอัปเดต visual ตามสถานะ)  
+- `ThirdPersonCamera.cs` (แทนระบบกล้อง first-person)  
+- `AimHelper.cs` (จัดการ crosshair และ raycasting)  
+- `DebugDistanceDisplay.cs` (แสดงระยะห่างใน console/log)  
+- `TestObjects/StaticTarget.cs`  
+- `TestObjects/MovingTarget.cs`  
+- `TestObjects/DisappearingTarget.cs`  
+- `TestObjects/BlinkingTarget.cs`  
+- ปรับ `PlayerController.cs` ให้รองรับ camera ใหม่  
 
 ---
 
-3. Code draft (Pseudo-code)  
-```csharp
-// PlayerInputManager.cs (MockedPlayer)  
-public class PlayerInputManager  
-{  
-    public void Update()  
-    {  
-        if (Input.GetKeyDown(KeyCode.E))  
-        {  
-            // ตรวจสอบการกด E  
-            DetectNearbyDoors();  
-        }  
-    }  
+3. Code draft  
 
-    private void DetectNearbyDoors()  
+**ThirdPersonCamera.cs**  
+```csharp  
+using UnityEngine;  
+public class ThirdPersonCamera : MonoBehaviour  
+{  
+    public Transform player;  
+    public float distance = 5f;  
+    public float smoothTime = 0.3f;  
+    private Vector3 velocity = Vector3.zero;  
+
+    void LateUpdate()  
     {  
-        // ใช้ Raycast ตรวจสอบประตูที่อยู่ใกล้  
-        RaycastHit[] hits = Physics.RaycastAll(transform.position, Vector3.forward, 5f);  
-        foreach (RaycastHit hit in hits)  
+        Vector3 desiredPosition = player.position - transform.forward * distance;  
+        transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref velocity, smoothTime);  
+    }  
+}  
+```  
+
+**AimHelper.cs**  
+```csharp  
+using UnityEngine;  
+public class AimHelper : MonoBehaviour  
+{  
+    public GameObject crosshairPrefab;  
+    private GameObject crosshair;  
+
+    void Update()  
+    {  
+        if (Input.GetMouseButtonDown(0))  
         {  
-            if (hit.collider.CompareTag("Door"))  
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);  
+            RaycastHit hit;  
+            if (Physics.Raycast(ray, out hit))  
             {  
-                // ส่งไปยัง DoorStateManager  
-                DoorStateManager.ToggleDoorState(hit.collider.gameObject);  
+                if (crosshair != null) Destroy(crosshair);  
+                crosshair = Instantiate(crosshairPrefab, hit.point, Quaternion.identity);  
+                DebugDistanceDisplay.ShowDistance(hit.distance);  
             }  
         }  
     }  
 }  
+```  
 
-// DoorStateManager.cs (MockedObject)  
-public class DoorStateManager  
+**DebugDistanceDisplay.cs**  
+```csharp  
+public static class DebugDistanceDisplay  
 {  
-    public static void ToggleDoorState(GameObject door)  
+    public static void ShowDistance(float distance)  
     {  
-        // ตรวจสอบสถานะปัจจุบัน  
-        bool isOpen = door.GetComponent<DoorVisualUpdater>().IsOpen;  
-        isOpen = !isOpen;  
-
-        // อัปเดตสถานะ  
-        door.GetComponent<DoorVisualUpdater>().IsOpen = isOpen;  
-
-        // บันทึกสถานะ (เช่น ใช้ PlayerPrefs หรือ Save System)  
-        SaveDoorState(door);  
-    }  
-
-    private static void SaveDoorState(GameObject door)  
-    {  
-        // ตัวอย่างการบันทึกสถานะ  
-        // ใช้ PlayerPrefs หรือระบบ Save ที่เหมาะสม  
+        Debug.Log($"Distance: {distance:F2} meters");  
+        // หรือแสดง UI text ที่กำหนดไว้  
     }  
 }  
+```  
 
-// DoorVisualUpdater.cs (MockedObject)  
-public class DoorVisualUpdater  
+**StaticTarget.cs**  
+```csharp  
+using UnityEngine;  
+public class StaticTarget : MonoBehaviour  
 {  
-    public bool IsOpen = false;  
-    public Material OpenMaterial;  
-    public Material ClosedMaterial;  
-
-    public void UpdateVisual()  
+    void OnMouseDown()  
     {  
-        if (IsOpen)  
-        {  
-            GetComponent<Renderer>().material = OpenMaterial;  
-        }  
-        else  
-        {  
-            GetComponent<Renderer>().material = ClosedMaterial;  
-        }  
+        Debug.Log("Static target clicked");  
+    }  
+}  
+```  
+
+**MovingTarget.cs**  
+```csharp  
+using UnityEngine;  
+public class MovingTarget : MonoBehaviour  
+{  
+    void Update()  
+    {  
+        transform.position += Vector3.right * 0.1f;  
+    }  
+}  
+```  
+
+**DisappearingTarget.cs**  
+```csharp  
+using UnityEngine;  
+public class DisappearingTarget : MonoBehaviour  
+{  
+    void Start()  
+    {  
+        Invoke("Disappear", 5f);  
+    }  
+
+    void Disappear()  
+    {  
+        gameObject.SetActive(false);  
+    }  
+}  
+```  
+
+**BlinkingTarget.cs**  
+```csharp  
+using UnityEngine;  
+public class BlinkingTarget : MonoBehaviour  
+{  
+    void Start()  
+    {  
+        InvokeRepeating("ToggleVisibility", 1f, 1f);  
+    }  
+
+    void ToggleVisibility()  
+    {  
+        gameObject.SetActive(!gameObject.activeSelf);  
     }  
 }  
 ```  
 
 ---
 
-4. Unity setup steps (Prototype Plan)  
-- สร้าง script `PlayerInputManager` สำหรับตรวจสอบการกด E  
-- สร้าง script `DoorStateManager` สำหรับจัดการสถานะประตู  
-- สร้าง script `DoorVisualUpdater` สำหรับอัปเดต visual  
-- ตั้งค่า Collider สำหรับ door placeholder ให้มี tag "Door"  
-- ตั้งค่า material สำหรับสถานะเปิด/ปิด (เช่น ใช้ material ที่เปลี่ยนได้)  
-- ตั้งค่า layer mask สำหรับ Raycast ตรวจสอบประตู  
+4. Unity setup steps  
+1. สร้าง GameObject ใหม่สำหรับ camera (ตั้งชื่อ `ThirdPersonCamera`)  
+2. สร้าง UI image สำหรับ crosshair (ตั้งชื่อ `Crosshair`)  
+3. ตั้งค่า `ThirdPersonCamera.cs` ให้ใช้ `PlayerController` ที่มีอยู่  
+4. ปรับ layer ของ test objects ให้เป็น `Default` (เพื่อให้ raycasting ตรวจจับได้)  
+5. สร้าง test objects 4 ประเภทใน scene (cube/sphere สำหรับ static, script สำหรับ moving/disappearing/blinking)  
 
 ---
 
-5. Asset integration steps (Prototype Plan)  
-- นำไฟล์ `.glb` จาก Creator ไปใช้ใน Unity (ไม่ต้อง import เข้า project จริงใน phase นี้)  
-- ตั้งค่า material สำหรับ door placeholder ให้เปลี่ยนสีได้ตามสถานะ  
-- สร้าง prefab สำหรับ door placeholder พร้อม Collider และ tag "Door"  
+5. Asset integration steps  
+- ไม่ต้องใช้ asset ใหม่ (เนื่องจากไม่มี Creator task)  
+- ใช้ UI image ที่มีอยู่ใน scene สำหรับ crosshair (หรือสร้างใหม่)  
+- ปรับ layer ของ test objects ให้เป็น `Default`  
 
 ---
 
 6. Validation plan  
-- ตรวจสอบว่าการกด E ทำให้สถานะประตูสลับได้  
-- ตรวจสอบว่าประตูที่อยู่ใกล้ถูกตรวจจับและสลับสถานะ  
-- ตรวจสอบว่า visual ของประตูเปลี่ยนสีตามสถานะ  
-- ตรวจสอบว่าระบบรองรับการสลับสถานะหลายครั้ง  
-- ตรวจสอบว่าประตูที่อยู่ห่างเกินระยะไม่ถูกตรวจจับ  
+- ตรวจสอบ third-person camera ว่าทำงานนุ่มนวล (เคลื่อนที่ตาม player)  
+- ตรวจสอบ aiming helper ว่าแสดง crosshair ที่ตำแหน่งที่ถูกต้องเมื่อคลิก  
+- ตรวจสอบ debug output ว่าแสดงระยะห่างจาก object ที่จุดได้  
+- ตรวจสอบ test objects:  
+  - static: คลิกได้  
+  - moving: เคลื่อนที่ได้  
+  - disappearing: หลัง 5 วินาที ถูก disable  
+  - blinking: toggle visibility ทุก 1 วินาที  
+- ตรวจสอบว่าระบบใหม่ไม่กระทบ movement ที่มีอยู่  
 
 ---
 
 7. Risks  
-- ระยะห่างในการตรวจจับประตูอาจไม่ถูกต้อง (ต้องปรับ parameter ของ Raycast)  
-- ไม่สามารถอัปเดต visual ได้หากไม่มี material ที่เปลี่ยนได้  
-- ระบบอาจไม่รองรับการสลับสถานะหลายครั้งหากไม่มี logic สำหรับการตรวจสอบสถานะปัจจุบัน  
-- ไม่มีการบันทึกสถานะประตูอาจทำให้สถานะสูญหายเมื่อออกจากฉาก
+- ถ้า test objects ถูก occlude หรือซ่อนอยู่ อาจไม่ถูก raycast ตรวจจับได้  
+- ถ้า crosshair ไม่แสดงที่ตำแหน่งที่ถูกต้อง (เนื่องจาก UI ไม่ได้ปรับให้แสดงตาม screen position)  
+- ถ้า debug output ขัดขวาง UI ที่มีอยู่ใน scene  
+- ถ้า third-person camera ไม่ทำงานนุ่มนวล (เนื่องจาก smoothTime ไม่เหมาะสม)  
+
+**Handling multiple objects in range:**  
+- ใช้ `Physics.Raycast` ที่ตรวจจับ object ที่ใกล้ที่สุด (โดย default ของ Unity คือตรวจจับ object ที่ใกล้ที่สุด)  
+- ถ้าต้องการเลือก object ที่เฉพาะเจาะจง ให้ใช้ `LayerMask` หรือ `Tag` เพื่อกรอง  
+
+--- 
+
+**Note:** ใช้ MockedPlayer/ MockedObject สำหรับ pseudo-code ถ้าจำเป็น (แต่ในกรณีนี้ใช้ real Unity objects)
 
 ---
 
 ## 6.1 Programmer Draft File Paths
 
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\InteractSystem_Draft.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\InteractableObject_Draft.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\Programmer_Implementation_Plan.md
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageTinyMageController.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFollowCamera.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageActionBuildController.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimSystem.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTarget.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetMotion.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetVisibility.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneSetup.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneValidator.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMage_ThirdPersonAim_v005_ImplementationReport.md
 
 ---
 
@@ -459,41 +413,37 @@ D:\AIStudio\ai-game-studio\workspace\programmer_outputs\Programmer_Implementatio
 
 1. ผลตรวจ: ไม่ผ่าน  
 2. สิ่งที่ตรวจ:  
-   - ตรวจสอบ logic สำหรับการกด E และสลับสถานะประตู  
-   - ตรวจสอบระยะห่างระหว่างผู้เล่นกับประตู  
-   - ตรวจสอบการอัปเดต visual ตามสถานะ  
-   - ตรวจสอบการรองรับการสลับสถานะหลายครั้ง  
+   - ตรวจสอบ logic ของ third-person camera transition ว่าทำงานนุ่มนวล  
+   - ตรวจสอบ logic ของ aiming helper ว่าแสดง crosshair ถูกต้องเมื่อคลิก  
+   - ตรวจสอบ logic ของ debug output ว่าแสดงระยะห่างจาก object ที่จุดได้  
+   - ตรวจสอบ script ของ test objects ว่าทำงานตามที่คาดหวัง (static, moving, disappearing, blinking)  
+   - ตรวจสอบว่าระบบใหม่ไม่ขัดขวางระบบเดิม (movement, camera)  
 3. ปัญหาที่บล็อกงาน:  
-   - **DoorStateManager.cs** ไม่ได้เรียกใช้ `UpdateVisual()` หลังจากเปลี่ยนสถานะ ทำให้ visual ไม่เปลี่ยน  
-   - **DoorStateManager.ToggleDoorState** ใช้ `GetComponent<DoorVisualUpdater>().IsOpen` ซึ่งอาจไม่ถูกต้องหากไม่มี component นี้บน GameObject  
-   - **Raycast ระยะห่าง** ใช้ค่าคงที่ 5f โดยไม่มี parameter ปรับได้ ไม่รองรับ edge case ผู้เล่นอยู่ห่างเกินระยะ  
-   - **ไม่มี mock UI feedback** สำหรับการกด E หรือสถานะประตู  
-   - **ไม่มีการบันทึกสถานะประตู** ทำให้สถานะสูญหายเมื่อออกจากฉาก  
+   - **Crosshair ไม่แสดงบนหน้าจอ**: ใช้ `hit.point` ซึ่งเป็นตำแหน่งโลก ไม่ใช่ตำแหน่งหน้าจอ ทำให้ crosshair ไม่แสดงบน UI  
+   - **Test objects ที่ disappear หรือ blink ไม่ถูกตรวจจับ**: `DisappearingTarget` ใช้ `SetActive(false)` ทำให้ object ไม่ถูกตรวจจับโดย raycasting  
+   - **Debug output ไม่แสดง UI text**: ใช้ `Debug.Log` แต่ไม่แสดงใน UI ตามที่ QA target กำหนด  
 4. Requirement ที่ขาด:  
-   - **ไม่มีไฟล์ draft ที่จำเป็น** เช่น `InteractSystem_Draft.cs`, `InteractableObject_Draft.cs`, `Programmer_Implementation_Plan.md`  
-   - **ไม่มีการตรวจสอบกรณีไม่มีประตูในระยะ** หรือประตูซ้ำในฉาก  
-   - **ไม่มีการอัปเดต visual ตามสถานะ** อย่างครบถ้วน (เช่น ไม่ได้เรียกใช้ `UpdateVisual()` หลังจากเปลี่ยนสถานะ)  
+   - ต้องปรับ crosshair ให้แสดงบนหน้าจอ (UI)  
+   - ต้องปรับ test objects ให้ยังคงถูกตรวจจับแม้จะ disappear หรือ blink  
+   - ต้องแสดง debug output ใน UI text แทน console log  
 5. Edge case ที่พบ:  
-   - ไม่มีการตรวจสอบกรณีผู้เล่นกด E ขณะไม่มีประตูในระยะ  
-   - ไม่มีการจัดลำดับความสำคัญของประตูหลายตัว (เช่น ใช้ closest priority)  
+   - ถ้า test objects ถูก occlude หรือซ่อนอยู่ อาจไม่ถูก raycast ตรวจจับได้  
+   - ถ้า crosshair ไม่แสดงที่ตำแหน่งที่ถูกต้อง (เนื่องจาก UI ไม่ได้ปรับให้แสดงตาม screen position)  
 6. สิ่งที่ต้องแก้:  
-   - เพิ่ม `UpdateVisual()` ใน `DoorStateManager` หลังจากเปลี่ยนสถานะ  
-   - ปรับ `Raycast` ให้รองรับ parameter ปรับระยะห่าง  
-   - ตรวจสอบว่า `DoorVisualUpdater` ถูกติดตั้งบน GameObject ที่ถูกต้อง  
-   - เพิ่ม mock UI feedback สำหรับการกด E และสถานะประตู  
-   - สร้างไฟล์ draft ที่จำเป็นทั้งหมด (InteractSystem_Draft.cs, InteractableObject_Draft.cs, Programmer_Implementation_Plan.md)  
-   - เพิ่ม logic สำหรับการบันทึกสถานะประตู  
+   - ปรับ crosshair ให้แสดงบน UI แทน world position  
+   - ปรับ `DisappearingTarget` และ `BlinkingTarget` ให้ยังคง active แม้จะ disappear หรือ blink  
+   - แสดง debug output ใน UI text แทน console log  
 7. คำแนะนำ:  
-   - ปรับปรุง logic ให้รองรับ edge case ทั้งหมดตาม Designer QA target  
-   - สร้างไฟล์ draft ที่จำเป็นทั้งหมดใน `workspace/programmer_outputs`  
-   - ตรวจสอบให้แน่ใจว่า `DoorVisualUpdater` ถูกติดตั้งและเรียกใช้ถูกต้อง  
-   - เพิ่ม parameter ปรับระยะห่างใน Raycast เพื่อรองรับการทดสอบต่าง ๆ
+   - ปรับ crosshair ให้เป็น UI element และใช้ `Canvas` หรือ `World Space UI` เพื่อแสดงบนหน้าจอ  
+   - ใช้ `Physics.Raycast` พร้อม `LayerMask` หรือ `Tag` เพื่อกรอง test objects ที่ disappear หรือ blink  
+   - ปรับ debug output ให้แสดงใน UI text ที่กำหนดไว้ใน scene  
+   - ตรวจสอบว่า test objects ยังคง active แม้จะ toggle visibility หรือ disable ด้วย script
 
 ---
 
 Deterministic file QA: PASS
 - Required programmer draft files exist under workspace/programmer_outputs.
-- Draft logic includes no-target handling, closest-target priority, input handling, and mock UI feedback.
+- Deterministic spec matched: terra_mage_third_person_aim.
 
 
 ---
@@ -530,34 +480,60 @@ D:\AIStudio\ai-game-studio\game_project\STDProject
 
 ## 9.1 Unity Implementation Result
 
-SKIPPED_UNITY_IMPLEMENTATION: Current phase is PROTOTYPE_PLAN. Dry-run copy plan only.
 UNITY_COPY_PLAN
-Dry run: True
-COPY: D:\AIStudio\ai-game-studio\workspace\creator_outputs\exports\door_placeholder.glb -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\AIAssets\door_placeholder.glb
-UNCHANGED: D:\AIStudio\ai-game-studio\workspace\creator_outputs\exports\interactable_objects.glb -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\AIAssets\interactable_objects.glb
-UNCHANGED: D:\AIStudio\ai-game-studio\workspace\creator_outputs\exports\interactable_placeholders.glb -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\AIAssets\interactable_placeholders.glb
-UNCHANGED: D:\AIStudio\ai-game-studio\workspace\creator_outputs\exports\interactables_prototype.glb -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\AIAssets\interactables_prototype.glb
-UNCHANGED: D:\AIStudio\ai-game-studio\workspace\creator_outputs\exports\interactive_objects.glb -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\AIAssets\interactive_objects.glb
-UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\InteractSystem_Draft.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\InteractSystem.cs
+Dry run: False
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\InteractableObject_Draft.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\InteractableObject.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\InteractSystem_Draft.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\InteractSystem.cs
+COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageActionBuildController.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageActionBuildController.cs
+COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimSystem.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageAimSystem.cs
+COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTarget.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageAimTarget.cs
+COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetMotion.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageAimTargetMotion.cs
+COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetVisibility.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageAimTargetVisibility.cs
+COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneSetup.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\Editor\TerraMageFirstSceneSetup.cs
+COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneValidator.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\Editor\TerraMageFirstSceneValidator.cs
+COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFollowCamera.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageFollowCamera.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMaterialSystem.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageMaterialSystem.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMeleeGestureController.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageMeleeGestureController.cs
+COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageTinyMageController.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageTinyMageController.cs
 
 ---
 
 ## 9.2 Unity Validation Result
 
-SKIPPED_UNITY_VALIDATION: Current phase is PROTOTYPE_PLAN. Unity batchmode requires IMPLEMENTATION phase.
+UNITY_BATCHMODE_RESULT
+Exit code: 0
+Log path: D:\AIStudio\ai-game-studio\workspace\logs\unity_graph_validation.log
+Passed: True
+Error markers: none
+Success markers: Tundra build success, return code 0
+STDERR tail:
+
 
 ---
 
 ## 9.3 Unity Scene Setup Result
 
-SKIPPED_UNITY_SCENE_SETUP: Scene/prefab modification requires IMPLEMENTATION phase and explicit approval.
+UNITY_BATCHMODE_RESULT
+Exit code: 0
+Log path: D:\AIStudio\ai-game-studio\workspace\logs\unity_graph_scene_setup.log
+Passed: True
+Error markers: none
+Success markers: Tundra build success, return code 0
+STDERR tail:
+
 
 ---
 
 ## 9.4 Unity Scene Validation Result
 
-SKIPPED_UNITY_SCENE_VALIDATION: Scene validation requires IMPLEMENTATION phase.
+UNITY_BATCHMODE_RESULT
+Exit code: 0
+Log path: D:\AIStudio\ai-game-studio\workspace\logs\unity_graph_scene_validation.log
+Passed: True
+Error markers: none
+Success markers: Tundra build success, return code 0
+STDERR tail:
+
 
 ---
 
@@ -565,9 +541,9 @@ SKIPPED_UNITY_SCENE_VALIDATION: Scene validation requires IMPLEMENTATION phase.
 
 1. ผลตรวจ: ผ่าน  
 2. สิ่งที่ตรวจ:  
-   - ขั้นตอนการ copy file ระหว่าง folder ถูกดำเนินการตามแผน (D:\AIStudio\ai-game-studio\workspace\creator_outputs\exports\... -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\AIAssets\...)  
-   - ไฟล์ที่ copy มีสถานะ UNCHANGED แสดงว่าไม่มีการแก้ไขเนื้อหาไฟล์  
-   - ไฟล์ C# script (InteractSystem.cs, InteractableObject.cs) ถูก copy ไปยังโฟลเดอร์ Scripts\AIPrototype  
+   - ตรวจสอบ Unity automation stage ตาม phase = IMPLEMENTATION  
+   - ยืนยันว่า batchmode และ scene validation ผ่าน  
+   - ไม่พบข้อผิดพลาดใน log file (exit code 0, passed: True, error markers: none)  
 3. ปัญหาที่บล็อกงาน:  
    - ไม่มี  
 4. Requirement ที่ขาด:  
@@ -577,7 +553,15 @@ SKIPPED_UNITY_SCENE_VALIDATION: Scene validation requires IMPLEMENTATION phase.
 6. สิ่งที่ต้องแก้:  
    - ไม่มี  
 7. คำแนะนำ:  
-   - ผ่านตาม target ไม่ต้องแก้ไขเพิ่มเติม เนื่องจาก phase คือ PROTOTYPE_PLAN ซึ่งอนุญาตให้ skip ขั้นตอน Unity implementation, validation, scene setup, และ scene validation ได้
+   - ผ่านตาม target ไม่ต้องแก้ไขเพิ่มเติม
+
+---
+
+Deterministic Unity QA: PASS
+- Batchmode validation passed.
+- Scene setup passed.
+- Scene validation passed.
+
 
 ---
 

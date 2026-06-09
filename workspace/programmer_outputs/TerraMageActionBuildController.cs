@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace TerraMageTD
 {
@@ -15,6 +15,7 @@ namespace TerraMageTD
         private bool hasPayload;
 
         public bool HasPayload => hasPayload;
+        public Camera AimCamera => aimCamera;
         public TerraMageMaterialPayload HeldPayload => heldPayload;
 
         private void Awake()
@@ -23,6 +24,11 @@ namespace TerraMageTD
             {
                 aimCamera = Camera.main;
             }
+        }
+
+        public void SetAimCamera(Camera newAimCamera)
+        {
+            aimCamera = newAimCamera;
         }
 
         private void Update()

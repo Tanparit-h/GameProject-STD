@@ -1,17 +1,43 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace TerraMageTD
 {
     public sealed class TerraMageFollowCamera : MonoBehaviour
     {
         [SerializeField] private Transform target;
-        [SerializeField] private Vector3 offset = new Vector3(0f, 1.2f, -2.4f);
+        [SerializeField] private Vector3 pivotOffset = new Vector3(0f, 1.1f, 0f);
+        [SerializeField] private float distance = 3.6f;
+        [SerializeField] private float yaw;
+        [SerializeField] private float pitch = 16f;
+        [SerializeField] private float mouseSensitivity = 120f;
         [SerializeField] private float followSharpness = 12f;
-        [SerializeField] private float lookHeight = 0.45f;
+        [SerializeField] private float minPitch = -10f;
+        [SerializeField] private float maxPitch = 45f;
+
+        public Transform Target => target;
 
         public void SetTarget(Transform newTarget)
         {
             target = newTarget;
+            if (target != null)
+            {
+                yaw = target.eulerAngles.y;
+            }
+        }
+
+        private void Update()
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            if (Input.GetMouseButton(1))
+            {
+                yaw += Input.GetAxisRaw("Mouse X") * mouseSensitivity * Time.deltaTime;
+                pitch -= Input.GetAxisRaw("Mouse Y") * mouseSensitivity * Time.deltaTime;
+                pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+            }
         }
 
         private void LateUpdate()
@@ -21,9 +47,13 @@ namespace TerraMageTD
                 return;
             }
 
-            Vector3 desired = target.position + target.TransformDirection(offset);
-            transform.position = Vector3.Lerp(transform.position, desired, 1f - Mathf.Exp(-followSharpness * Time.deltaTime));
-            transform.LookAt(target.position + Vector3.up * lookHeight);
+            Quaternion orbit = Quaternion.Euler(pitch, yaw, 0f);
+            Vector3 focusPoint = target.position + pivotOffset;
+            Vector3 desiredPosition = focusPoint - orbit * Vector3.forward * distance;
+            float blend = 1f - Mathf.Exp(-followSharpness * Time.deltaTime);
+
+            transform.position = Vector3.Lerp(transform.position, desiredPosition, blend);
+            transform.rotation = Quaternion.Slerp(transform.rotation, orbit, blend);
         }
     }
 }

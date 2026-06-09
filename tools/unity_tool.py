@@ -95,6 +95,28 @@ def parse_unity_result_text(result_text: str) -> dict[str, object]:
     return parse_unity_log(result_text, return_code)
 
 
+def get_programmer_script_target(project: Path, source: Path) -> Path | None:
+    script_map = {
+        "InteractSystem_Draft.cs": project / "Assets" / "Scripts" / "AIPrototype" / "InteractSystem.cs",
+        "InteractableObject_Draft.cs": project / "Assets" / "Scripts" / "AIPrototype" / "InteractableObject.cs",
+    }
+
+    mapped = script_map.get(source.name)
+    if mapped is not None:
+        return mapped
+
+    if source.suffix.lower() != ".cs":
+        return None
+
+    if source.name.startswith("TerraMage"):
+        if "SceneSetup" in source.stem or "SceneValidator" in source.stem:
+            return project / "Assets" / "Scripts" / "AIPrototype" / "Editor" / source.name
+
+        return project / "Assets" / "Scripts" / "AIPrototype" / "TerraMageTD" / source.name
+
+    return None
+
+
 def build_copy_plan(project_path: str | Path | None = None) -> list[tuple[Path, Path]]:
     ok, message, project = validate_unity_project_path(project_path)
     if not ok:
@@ -116,19 +138,10 @@ def build_copy_plan(project_path: str | Path | None = None) -> list[tuple[Path, 
                 plan.append((source.resolve(), project / "Assets" / "AIAssets" / source.name))
 
     if PROGRAMMER_OUTPUT_DIR.exists():
-        script_map = {
-            "InteractSystem_Draft.cs": "InteractSystem.cs",
-            "InteractableObject_Draft.cs": "InteractableObject.cs",
-            "TerraMageMaterialSystem.cs": "TerraMageTD/TerraMageMaterialSystem.cs",
-            "TerraMageActionBuildController.cs": "TerraMageTD/TerraMageActionBuildController.cs",
-            "TerraMageMeleeGestureController.cs": "TerraMageTD/TerraMageMeleeGestureController.cs",
-            "TerraMageTinyMageController.cs": "TerraMageTD/TerraMageTinyMageController.cs",
-            "TerraMageFollowCamera.cs": "TerraMageTD/TerraMageFollowCamera.cs",
-        }
-        for draft_name, target_name in script_map.items():
-            source = PROGRAMMER_OUTPUT_DIR / draft_name
-            if source.exists():
-                plan.append((source.resolve(), project / "Assets" / "Scripts" / "AIPrototype" / target_name))
+        for source in sorted(PROGRAMMER_OUTPUT_DIR.glob("*.cs")):
+            target = get_programmer_script_target(project, source)
+            if target is not None:
+                plan.append((source.resolve(), target))
 
     return plan
 

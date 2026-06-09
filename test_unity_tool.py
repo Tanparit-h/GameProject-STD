@@ -6,6 +6,7 @@ from tools.unity_tool import (
     apply_copy_plan,
     CREATOR_EXPORT_DIR,
     PROGRAMMER_OUTPUT_DIR,
+    get_programmer_script_target,
     parse_unity_log,
     parse_unity_result_text,
     validate_unity_project_path,
@@ -76,6 +77,28 @@ class UnityToolTests(unittest.TestCase):
         result = apply_copy_plan(dry_run=True, project_path=project)
 
         self.assertIn("UNCHANGED:", result)
+
+    def test_get_programmer_script_target_routes_terra_mage_runtime_scripts(self):
+        project = PROJECT_ROOT / "game_project" / "STDProject"
+        source = PROGRAMMER_OUTPUT_DIR / "TerraMageAimSystem.cs"
+
+        target = get_programmer_script_target(project, source)
+
+        self.assertEqual(
+            target,
+            project / "Assets" / "Scripts" / "AIPrototype" / "TerraMageTD" / "TerraMageAimSystem.cs",
+        )
+
+    def test_get_programmer_script_target_routes_terra_mage_editor_scripts(self):
+        project = PROJECT_ROOT / "game_project" / "STDProject"
+        source = PROGRAMMER_OUTPUT_DIR / "TerraMageFirstSceneValidator.cs"
+
+        target = get_programmer_script_target(project, source)
+
+        self.assertEqual(
+            target,
+            project / "Assets" / "Scripts" / "AIPrototype" / "Editor" / "TerraMageFirstSceneValidator.cs",
+        )
 
 
 if __name__ == "__main__":
