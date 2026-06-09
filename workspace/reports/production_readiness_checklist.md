@@ -66,6 +66,12 @@ $env:AI_STUDIO_TASK_FILE='workspace/tasks/interaction_vertical_slice.json'
 .\.venv\Scripts\python.exe -m app.main_graph
 ```
 
+Task runner:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.task_runner feature-interaction-v1
+```
+
 Scene validation only:
 
 ```powershell

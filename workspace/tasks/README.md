@@ -41,6 +41,18 @@ Validate the registry:
 .\.venv\Scripts\python.exe -m tools.task_registry
 ```
 
+Dry-run a registered task:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.task_runner feature-interaction-v1
+```
+
+Run a registered task:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.task_runner feature-interaction-v1 --run
+```
+
 ## Approval Records
 
 Approval decisions are recorded as JSON Lines:
