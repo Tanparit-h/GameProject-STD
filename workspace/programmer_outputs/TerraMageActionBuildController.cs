@@ -75,22 +75,22 @@ namespace TerraMageTD
                 return;
             }
 
-            if (Input.GetKeyDown(KeyCode.Q))
+            if (TerraMageTerraMageInput.GetKeyDown(KeyCode.Q))
             {
                 PullMaterialFromAim();
             }
 
-            if (Input.GetKeyDown(KeyCode.E))
+            if (TerraMageTerraMageInput.GetKeyDown(KeyCode.E))
             {
                 CompressHeldMaterial();
             }
 
-            if (Input.GetKeyDown(KeyCode.R))
+            if (TerraMageTerraMageInput.GetKeyDown(KeyCode.R))
             {
                 HeatHeldMaterial();
             }
 
-            if (Input.GetMouseButtonDown(0))
+            if (TerraMageTerraMageInput.GetMouseButtonDown(0))
             {
                 UsePrimaryAction();
             }
@@ -118,7 +118,7 @@ namespace TerraMageTD
                 return;
             }
 
-            Ray ray = aimCamera.ScreenPointToRay(Input.mousePosition);
+            Ray ray = aimCamera.ScreenPointToRay(TerraMageInput.MousePosition());
             if (!Physics.Raycast(ray, out RaycastHit hit, Mathf.Max(1f, CurrentPullRange), materialMask))
             {
                 return;

@@ -63,7 +63,7 @@ namespace TerraMageTD
         {
             EvaluateAim();
 
-            if (Input.GetMouseButtonDown(0))
+            if (TerraMageTerraMageInput.GetMouseButtonDown(0))
             {
                 LogAimDistance();
             }

@@ -51,7 +51,7 @@ namespace TerraMageTD
                 return;
             }
 
-            bool shouldOpen = Input.GetKey(openWheelKey);
+            bool shouldOpen = TerraMageInput.GetKey(openWheelKey);
             if (shouldOpen && !isOpen)
             {
                 isOpen = true;
@@ -108,8 +108,6 @@ namespace TerraMageTD
 
             int activeSlots = Mathf.Max(1, loadout.ActiveSlotCount);
             float segmentSweep = CalculateSegmentSweep(activeSlots);
-            Sprite radialSprite = Resources.GetBuiltinResource<Sprite>("UI/Skin/UISprite.psd");
-
             for (int slotIndex = 0; slotIndex < activeSlots; slotIndex++)
             {
                 TerraMageWeaponDefinition weapon = loadout.GetWeapon(slotIndex);
@@ -126,12 +124,7 @@ namespace TerraMageTD
                 segmentRect.localRotation = Quaternion.Euler(0f, 0f, -startAngle);
 
                 var segmentImage = segmentObject.AddComponent<Image>();
-                segmentImage.sprite = radialSprite;
-                segmentImage.type = Image.Type.Filled;
-                segmentImage.fillMethod = Image.FillMethod.Radial360;
-                segmentImage.fillOrigin = (int)Image.Origin360.Right;
-                segmentImage.fillClockwise = false;
-                segmentImage.fillAmount = 1f / activeSlots;
+                segmentImage.type = Image.Type.Simple;
                 segmentImage.color = slotIndex == 0 ? lockedSlotColor : weapon.UiColor;
                 segmentImages.Add(segmentImage);
 
@@ -248,7 +241,7 @@ namespace TerraMageTD
 
         private void UpdateHoverFromMouse()
         {
-            Vector2 direction = (Vector2)Input.mousePosition - new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+            Vector2 direction = (Vector2)TerraMageInput.MousePosition() - new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
             if (direction.sqrMagnitude < 16f)
             {
                 hoverSlotIndex = loadout.SelectedSlotIndex;

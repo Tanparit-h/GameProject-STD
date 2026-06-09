@@ -54,14 +54,14 @@ namespace TerraMageTD
                 return;
             }
 
-            if (Input.GetMouseButtonDown(1))
+            if (TerraMageTerraMageInput.GetMouseButtonDown(1))
             {
-                BeginDrag(Input.mousePosition);
+                BeginDrag(TerraMageInput.MousePosition());
             }
 
-            if (Input.GetMouseButtonUp(1))
+            if (TerraMageTerraMageInput.GetMouseButtonUp(1))
             {
-                TerraMageMeleeGesture gesture = EndDrag(Input.mousePosition);
+                TerraMageMeleeGesture gesture = EndDrag(TerraMageInput.MousePosition());
                 if (gesture != TerraMageMeleeGesture.None)
                 {
                     PerformAttack(gesture);

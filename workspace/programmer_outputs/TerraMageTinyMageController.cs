@@ -37,8 +37,8 @@ namespace TerraMageTD
 
         private void Move()
         {
-            float horizontal = Input.GetAxisRaw("Horizontal");
-            float vertical = Input.GetAxisRaw("Vertical");
+            float horizontal = TerraMageInput.GetAxisRaw("Horizontal");
+            float vertical = TerraMageInput.GetAxisRaw("Vertical");
             Vector3 input = new Vector3(horizontal, 0f, vertical);
             input = Vector3.ClampMagnitude(input, 1f);
 
@@ -57,7 +57,7 @@ namespace TerraMageTD
             }
 
             Vector3 move = right * input.x + forward * input.z;
-            bool running = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            bool running = TerraMageInput.GetKey(KeyCode.LeftShift) || TerraMageInput.GetKey(KeyCode.RightShift);
             float speed = running ? runSpeed : walkSpeed;
             characterController.Move(move * speed * Time.deltaTime);
 
@@ -78,7 +78,7 @@ namespace TerraMageTD
                 verticalVelocity.y = -1f;
             }
 
-            if (characterController.isGrounded && Input.GetKeyDown(KeyCode.Space))
+            if (characterController.isGrounded && TerraMageTerraMageInput.GetKeyDown(KeyCode.Space))
             {
                 verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             }
