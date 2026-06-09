@@ -24,6 +24,7 @@ namespace TerraMageTD
 
         private readonly List<Image> segmentImages = new List<Image>();
         private readonly List<Text> segmentLabels = new List<Text>();
+        private readonly List<Sprite> generatedSegmentSprites = new List<Sprite>();
 
         private Font defaultFont;
         private bool isOpen;
@@ -48,6 +49,7 @@ namespace TerraMageTD
         private void OnDestroy()
         {
             UnsubscribeFromLoadout();
+            DisposeGeneratedSegmentSprites();
         }
 
         private void Update()
@@ -110,6 +112,7 @@ namespace TerraMageTD
             }
 
             ClearRootChildren();
+            DisposeGeneratedSegmentSprites();
             segmentImages.Clear();
             segmentLabels.Clear();
 
@@ -130,7 +133,10 @@ namespace TerraMageTD
 
                 var segmentImage = segmentObject.AddComponent<Image>();
                 segmentImage.type = Image.Type.Simple;
-                segmentImage.sprite = CreateSegmentSprite($"TerraMage_WeaponWheelSegmentSprite_{slotIndex}", centerAngle, segmentSweep);
+                Sprite segmentSprite =
+                    CreateSegmentSprite($"TerraMage_WeaponWheelSegmentSprite_{slotIndex}", centerAngle, segmentSweep);
+                generatedSegmentSprites.Add(segmentSprite);
+                segmentImage.sprite = segmentSprite;
                 segmentImage.color = weapon != null ? weapon.UiColor : defaultSlotColor;
                 segmentImage.preserveAspect = true;
                 segmentImage.raycastTarget = false;
@@ -370,6 +376,26 @@ namespace TerraMageTD
             return sprite;
         }
 
+        private void DisposeGeneratedSegmentSprites()
+        {
+            foreach (Sprite sprite in generatedSegmentSprites)
+            {
+                if (sprite == null)
+                {
+                    continue;
+                }
+
+                Texture2D texture = sprite.texture;
+                DestroyUnityObject(sprite);
+                if (texture != null)
+                {
+                    DestroyUnityObject(texture);
+                }
+            }
+
+            generatedSegmentSprites.Clear();
+        }
+
         private void ClearRootChildren()
         {
             for (int childIndex = wheelRoot.childCount - 1; childIndex >= 0; childIndex--)
@@ -383,6 +409,23 @@ namespace TerraMageTD
                 {
                     DestroyImmediate(child);
                 }
+            }
+        }
+
+        private static void DestroyUnityObject(Object target)
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            if (Application.isPlaying)
+            {
+                Destroy(target);
+            }
+            else
+            {
+                DestroyImmediate(target);
             }
         }
 

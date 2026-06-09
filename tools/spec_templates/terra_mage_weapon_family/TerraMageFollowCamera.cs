@@ -15,14 +15,13 @@ namespace TerraMageTD
         [SerializeField] private float maxPitch = 45f;
         [SerializeField] private TerraMageWeaponWheelUI weaponWheelUI;
 
+        private float nextWeaponWheelLookupTime;
+
         public Transform Target => target;
 
         private void Awake()
         {
-            if (weaponWheelUI == null)
-            {
-                weaponWheelUI = Object.FindAnyObjectByType<TerraMageWeaponWheelUI>();
-            }
+            TryResolveWeaponWheel(true);
         }
 
         public void SetTarget(Transform newTarget)
@@ -46,10 +45,7 @@ namespace TerraMageTD
                 return;
             }
 
-            if (weaponWheelUI == null)
-            {
-                weaponWheelUI = Object.FindAnyObjectByType<TerraMageWeaponWheelUI>();
-            }
+            TryResolveWeaponWheel(false);
 
             if (weaponWheelUI != null && weaponWheelUI.IsOpen)
             {
@@ -59,6 +55,22 @@ namespace TerraMageTD
             yaw += TerraMageInput.GetAxisRaw("Mouse X") * mouseSensitivity * Time.deltaTime;
             pitch -= TerraMageInput.GetAxisRaw("Mouse Y") * mouseSensitivity * Time.deltaTime;
             pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+        }
+
+        private void TryResolveWeaponWheel(bool force)
+        {
+            if (weaponWheelUI != null)
+            {
+                return;
+            }
+
+            if (!force && Time.unscaledTime < nextWeaponWheelLookupTime)
+            {
+                return;
+            }
+
+            nextWeaponWheelLookupTime = Time.unscaledTime + 0.5f;
+            weaponWheelUI = Object.FindAnyObjectByType<TerraMageWeaponWheelUI>();
         }
 
         private void LateUpdate()

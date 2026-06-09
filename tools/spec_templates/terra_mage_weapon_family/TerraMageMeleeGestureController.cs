@@ -23,6 +23,8 @@ namespace TerraMageTD
     [DisallowMultipleComponent]
     public sealed class TerraMageMeleeGestureController : MonoBehaviour
     {
+        private const int MaxMeleeHitResults = 16;
+
         [SerializeField] private float gestureThreshold = 48f;
         [SerializeField] private TerraMageWeaponLoadout weaponLoadout;
         [SerializeField] private TerraMageWeaponWheelUI weaponWheelUI;
@@ -32,6 +34,7 @@ namespace TerraMageTD
 
         private Vector2 dragStart;
         private bool dragging;
+        private readonly RaycastHit[] meleeHitResults = new RaycastHit[MaxMeleeHitResults];
 
         public TerraMageMeleeRangeProfile RangeProfile => GetCurrentWeapon().MeleeProfile;
         public float CurrentMeleeReach => Mathf.Max(0.5f, GetCurrentWeapon().MeleeReach);
@@ -157,10 +160,11 @@ namespace TerraMageTD
         {
             Vector3 origin = transform.position + Vector3.up * 0.18f;
             Vector3 direction = aimCamera != null ? aimCamera.transform.forward : transform.forward;
-            RaycastHit[] hits = Physics.SphereCastAll(
+            int hitCount = Physics.SphereCastNonAlloc(
                 origin,
                 Mathf.Max(0.01f, meleeHitRadius),
                 direction,
+                meleeHitResults,
                 CurrentMeleeReach,
                 meleeHitMask,
                 QueryTriggerInteraction.Ignore);
@@ -168,8 +172,9 @@ namespace TerraMageTD
             float closestDistance = float.MaxValue;
             bestHit = default;
 
-            foreach (RaycastHit hit in hits)
+            for (int hitIndex = 0; hitIndex < hitCount; hitIndex++)
             {
+                RaycastHit hit = meleeHitResults[hitIndex];
                 if (hit.collider == null || hit.collider.transform.IsChildOf(transform))
                 {
                     continue;

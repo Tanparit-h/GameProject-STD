@@ -128,6 +128,11 @@ namespace TerraMageTD
         {
             EnsureWeaponSlots();
             int clampedSlot = Mathf.Clamp(slotIndex, 0, assignedWeapons.Count - 1);
+            if (selectedSlotIndex == clampedSlot)
+            {
+                return;
+            }
+
             selectedSlotIndex = clampedSlot;
             SelectionChanged?.Invoke(selectedSlotIndex, CurrentWeapon);
         }
@@ -163,6 +168,8 @@ namespace TerraMageTD
             {
                 assignedWeapons.RemoveRange(MaxWheelSlots, assignedWeapons.Count - MaxWheelSlots);
             }
+
+            selectedSlotIndex = Mathf.Clamp(selectedSlotIndex, 0, assignedWeapons.Count - 1);
         }
 
         private void RaiseLoadoutChanged()

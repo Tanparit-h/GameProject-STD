@@ -73,6 +73,7 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
             ],
             "TerraMageFollowCamera.cs": [
                 "SetWeaponWheelUI",
+                "TryResolveWeaponWheel",
                 "weaponWheelUI.IsOpen",
                 "Quaternion.Euler",
             ],
@@ -113,6 +114,7 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
             "TerraMageMeleeGestureController.cs": [
                 "PerformQuickAttack",
                 "CurrentMeleeReach",
+                "SphereCastNonAlloc",
                 "TryFindMeleeHit",
                 "weaponWheelUI",
             ],
@@ -130,6 +132,7 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
             "TerraMageWeaponWheelUI.cs": [
                 "CalculateSegmentSweep",
                 "CreateSegmentSprite",
+                "DisposeGeneratedSegmentSprites",
                 "EquipHoveredSlot",
                 "MouseDelta",
                 "OpenWheelKey",
