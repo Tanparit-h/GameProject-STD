@@ -4,13 +4,22 @@ Source concept: `D:\Planing\Sand_Mage_TD_Backup_Roadmap.md`
 
 ## Product Definition
 
-Sand Mage TD is a third-person multiplayer tower-defense and base-building game where small mage-builders shape simulated sand and materials inside seed-generated worlds. The core fantasy is physical: the player walks inside the world, lifts sand with magic, compresses it into structures, builds defenses, and survives enemy waves with friends or async invasion data.
+Sand Mage TD is a third-person multiplayer tower-defense and base-building game with a Minecraft-like sandbox/building feel. The player is not a full-size hero: they are a tiny mage, roughly 30 cm tall, moving through a world that feels huge, tactile, and physically buildable.
+
+The world is generated from a seed system. Each seed creates a playable sandbox with terrain, resources, hazards, enemy approaches, and base-building opportunities. The core fantasy is physical: the tiny mage walks inside the generated world, lifts sand with magic, compresses it into structures, builds defenses, and survives enemy waves with friends or async invasion data.
 
 ## Core Game Structure
 
 ### 1. Player Layer
 
 Goal: make the player feel like a tiny mage-builder inside a dangerous generated world.
+
+Scale identity:
+
+- Player height target: about 30 cm.
+- The world should feel large and chunky, similar to the sense of scale in a Minecraft-like sandbox.
+- Sand piles, rocks, cliffs, plants, and waves should feel oversized from the mage's perspective.
+- Building should feel like physically shaping the environment, not placing abstract UI-only tiles.
 
 Primary features:
 
@@ -115,6 +124,13 @@ MVP defenses:
 ### 5. World Generation Layer
 
 Goal: make seeds and biomes create different building problems.
+
+Design feel:
+
+- The world should support Minecraft-like exploration and construction clarity.
+- Terrain must be readable, modular, and easy to reason about for building.
+- The seed system should make each world feel like a new sandbox challenge.
+- The tiny mage scale means normal terrain features become meaningful obstacles and landmarks.
 
 Initial biome:
 
@@ -250,9 +266,10 @@ Purpose: prove the game feel before expanding scope.
 Player story:
 
 ```text
-The player walks as a tiny mage, lifts sand with magic, places it into a wall,
-compresses it into a hard block, saves it as a quick block, then uses that wall
-to protect a core from a small enemy wave.
+The player controls a tiny 30 cm mage in a Minecraft-like seed-generated sandbox.
+They walk through oversized sand, rocks, and water features, lift sand with magic,
+place it into a wall, compress it into a hard block, save it as a quick block,
+then use that wall to protect a core from a small enemy wave.
 ```
 
 Required systems:
@@ -274,6 +291,8 @@ Required systems:
 Acceptance criteria:
 
 - Player can move and aim reliably.
+- Player scale reads as a small mage, roughly 30 cm tall, inside a large generated world.
+- The scene communicates a Minecraft-like sandbox/building feel without using a block-only camera builder format.
 - Player can lift/place sand using the reticle.
 - Player can compress sand into a stable wall block.
 - Player can save/place one quick block template.
