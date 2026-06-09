@@ -30,6 +30,11 @@
       "id": "sand-mage-first-wall-v003",
       "file": "sand_mage_first_wall_v003.json",
       "status": "implementation_requested"
+    },
+    {
+      "id": "sand-mage-first-scene-v004",
+      "file": "sand_mage_first_scene_v004.json",
+      "status": "implementation_requested"
     }
   ]
 }

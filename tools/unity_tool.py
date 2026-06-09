@@ -122,6 +122,8 @@ def build_copy_plan(project_path: str | Path | None = None) -> list[tuple[Path, 
             "SandMageMaterialSystem.cs": "SandMageTD/SandMageMaterialSystem.cs",
             "SandMageActionBuildController.cs": "SandMageTD/SandMageActionBuildController.cs",
             "SandMageMeleeGestureController.cs": "SandMageTD/SandMageMeleeGestureController.cs",
+            "SandMageTinyMageController.cs": "SandMageTD/SandMageTinyMageController.cs",
+            "SandMageFollowCamera.cs": "SandMageTD/SandMageFollowCamera.cs",
         }
         for draft_name, target_name in script_map.items():
             source = PROGRAMMER_OUTPUT_DIR / draft_name
