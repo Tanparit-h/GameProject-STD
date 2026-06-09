@@ -537,6 +537,15 @@ Codex/Office response rule:
 - Use `python -m tools.office task <task-id> --run --response-only` when Codex only needs the QA-complete response.
 - This keeps token usage lower while preserving the full audit trail on disk.
 
+AI Office implementation guardrails:
+
+- Terra Mage gameplay scripts must not call `UnityEngine.Input` directly because the Unity project uses the Input System package.
+- Use `TerraMageInput` for keyboard, mouse, axis, and mouse position reads.
+- Never accept mechanical rename output containing doubled identifiers such as `TerraMageTerraMageInput`.
+- Before QA pass, search Unity and Programmer outputs for `TerraMageTerraMageInput` and fail if found.
+- Before QA pass, search Terra Mage gameplay scripts for direct `Input.` calls outside `TerraMageInput.cs` and fail if found.
+- If Unity Console reports `InvalidOperationException: You are trying to read Input using the UnityEngine.Input class`, Programmer must route that read through `TerraMageInput` instead of changing global Player Settings.
+
 ## Immediate Next AI Office Tasks
 
 ### Task 1: Create First Wall Feature Plan

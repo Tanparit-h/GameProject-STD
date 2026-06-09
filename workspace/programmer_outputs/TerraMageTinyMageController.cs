@@ -78,7 +78,7 @@ namespace TerraMageTD
                 verticalVelocity.y = -1f;
             }
 
-            if (characterController.isGrounded && TerraMageTerraMageInput.GetKeyDown(KeyCode.Space))
+            if (characterController.isGrounded && TerraMageInput.GetKeyDown(KeyCode.Space))
             {
                 verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             }

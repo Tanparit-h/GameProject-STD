@@ -17,6 +17,8 @@ from tools.task_registry import validate_registry
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 UNITY_PROJECT = PROJECT_ROOT / "game_project" / "STDProject"
 LATEST_REPORT = PROJECT_ROOT / "workspace" / "reports" / "latest_report.md"
+TERRA_MAGE_SCRIPT_DIR = UNITY_PROJECT / "Assets" / "Scripts" / "AIPrototype" / "TerraMageTD"
+PROGRAMMER_OUTPUT_DIR = PROJECT_ROOT / "workspace" / "programmer_outputs"
 
 
 def latest_report_task_context() -> tuple[str, str, str, str]:
@@ -101,6 +103,30 @@ def dashboard_index_clean() -> tuple[bool, str]:
     return True, "dashboard status clean"
 
 
+def terra_mage_input_guard() -> tuple[bool, str]:
+    problems: list[str] = []
+    search_roots = [TERRA_MAGE_SCRIPT_DIR, PROGRAMMER_OUTPUT_DIR]
+
+    for root in search_roots:
+        if not root.exists():
+            continue
+
+        for path in sorted(root.glob("TerraMage*.cs")):
+            text = path.read_text(encoding="utf-8", errors="replace")
+            display = path.relative_to(PROJECT_ROOT)
+
+            if "TerraMageTerraMageInput" in text:
+                problems.append(f"{display}: duplicate input adapter name TerraMageTerraMageInput")
+
+            if path.name != "TerraMageInput.cs" and re.search(r"(?<![A-Za-z0-9_])Input\.", text):
+                problems.append(f"{display}: use TerraMageInput instead of UnityEngine.Input")
+
+    if problems:
+        return False, "\n".join(problems)
+
+    return True, "Terra Mage input guard clean"
+
+
 def main() -> int:
     checks: list[tuple[str, bool, str]] = []
 
@@ -118,6 +144,9 @@ def main() -> int:
 
     tasks_ok, task_problems = validate_registry()
     checks.append(("task registry validation", tasks_ok, "\n".join(task_problems) or "task registry clean"))
+
+    input_guard_ok, input_guard_output = terra_mage_input_guard()
+    checks.append(("terra mage input guard", input_guard_ok, input_guard_output))
 
     unity_validation = run_unity_batchmode(log_name="unity_release_gate_validation.log")
     unity_validation_parsed = parse_unity_result_text(unity_validation)

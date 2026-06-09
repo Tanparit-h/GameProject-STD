@@ -75,22 +75,22 @@ namespace TerraMageTD
                 return;
             }
 
-            if (TerraMageTerraMageInput.GetKeyDown(KeyCode.Q))
+            if (TerraMageInput.GetKeyDown(KeyCode.Q))
             {
                 PullMaterialFromAim();
             }
 
-            if (TerraMageTerraMageInput.GetKeyDown(KeyCode.E))
+            if (TerraMageInput.GetKeyDown(KeyCode.E))
             {
                 CompressHeldMaterial();
             }
 
-            if (TerraMageTerraMageInput.GetKeyDown(KeyCode.R))
+            if (TerraMageInput.GetKeyDown(KeyCode.R))
             {
                 HeatHeldMaterial();
             }
 
-            if (TerraMageTerraMageInput.GetMouseButtonDown(0))
+            if (TerraMageInput.GetMouseButtonDown(0))
             {
                 UsePrimaryAction();
             }
