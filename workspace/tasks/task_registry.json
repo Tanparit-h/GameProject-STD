@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "tasks": [
+    {
+      "id": "feature-interaction-v1",
+      "file": "interaction_vertical_slice.json",
+      "status": "release_gate_clean"
+    }
+  ]
+}

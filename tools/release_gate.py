@@ -5,6 +5,7 @@ from pathlib import Path
 from tools.unity_tool import parse_unity_result_text, run_unity_batchmode
 from tools.report_index import collect_status
 from tools.creator_asset_validator import format_creator_validation, validate_creator_exports
+from tools.task_registry import validate_registry
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 UNITY_PROJECT = PROJECT_ROOT / "game_project" / "STDProject"
@@ -74,6 +75,9 @@ def main() -> int:
 
     creator_result = validate_creator_exports()
     checks.append(("creator export validation", bool(creator_result["passed"]), format_creator_validation(creator_result)))
+
+    tasks_ok, task_problems = validate_registry()
+    checks.append(("task registry validation", tasks_ok, "\n".join(task_problems) or "task registry clean"))
 
     unity_validation = run_unity_batchmode(log_name="unity_release_gate_validation.log")
     unity_validation_parsed = parse_unity_result_text(unity_validation)

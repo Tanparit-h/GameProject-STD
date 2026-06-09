@@ -27,6 +27,20 @@ $env:AI_STUDIO_TASK_FILE='workspace/tasks/interaction_vertical_slice.json'
 
 `AI_STUDIO_PHASE` and `AI_STUDIO_FEATURE_REQUEST` still work as overrides when no task file is provided.
 
+## Registry
+
+Tasks are listed in:
+
+```text
+workspace/tasks/task_registry.json
+```
+
+Validate the registry:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.task_registry
+```
+
 ## Approval Records
 
 Approval decisions are recorded as JSON Lines:
