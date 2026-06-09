@@ -31,6 +31,8 @@ Remaining product gaps:
 - Push/PR/release workflow after explicit approval
 - Better deterministic validation for role outputs beyond current guards
 
+Current user-level decisions are tracked in `workspace/reports/current_capability_matrix.md`.
+
 To make the AI Office workflow truly reusable, the graph needs a dedicated Unity implementation stage that can:
 
 - Apply approved Programmer/Creator outputs into the real Unity project.

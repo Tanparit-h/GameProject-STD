@@ -182,3 +182,4 @@ Checkpoint date: 2026-06-09
 - Dashboard/report index support added through `tools.report_index`.
 - Office CLI added through `tools.office`.
 - Door toggle task has been planned in `PROTOTYPE_PLAN` and marked `prototype_planned`.
+- Capability matrix added at `workspace/reports/current_capability_matrix.md`.
