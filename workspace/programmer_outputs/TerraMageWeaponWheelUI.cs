@@ -188,7 +188,7 @@ namespace TerraMageTD
 
             if (wheelCanvas == null)
             {
-                wheelCanvas = FindObjectOfType<Canvas>();
+                wheelCanvas = Object.FindAnyObjectByType<Canvas>();
             }
 
             if (wheelRoot == null && wheelCanvas != null)

@@ -22,7 +22,19 @@ namespace TerraMageTD
         public Camera AimCamera => aimCamera;
         public TerraMageMaterialPayload HeldPayload => heldPayload;
         public TerraMageWeaponAttackMode CurrentAttackMode => GetCurrentWeapon().AttackMode;
-        public float CurrentPullRange => GetCurrentWeapon().SupportsRanged ? GetCurrentWeapon().RangedPullRange : 0f;
+        public float CurrentPullRange
+        {
+            get
+            {
+                TerraMageWeaponDefinition weapon = GetCurrentWeapon();
+                if (!weapon.SupportsRanged)
+                {
+                    return 0f;
+                }
+
+                return weapon.RangedPullRange > 0f ? weapon.RangedPullRange : defaultPullRange;
+            }
+        }
         public float CurrentThrowForce => GetCurrentWeapon().SupportsRanged ? GetCurrentWeapon().RangedThrowForce : 0f;
 
         private void Awake()
