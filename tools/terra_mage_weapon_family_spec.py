@@ -46,7 +46,10 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
         {
             "TerraMageActionBuildController.cs": _read_template("TerraMageActionBuildController.cs"),
             "TerraMageAimSystem.cs": _read_template("TerraMageAimSystem.cs"),
+            "TerraMageFollowCamera.cs": _read_template("TerraMageFollowCamera.cs"),
+            "TerraMageInput.cs": _read_template("TerraMageInput.cs"),
             "TerraMageMeleeGestureController.cs": _read_template("TerraMageMeleeGestureController.cs"),
+            "TerraMageTinyMageController.cs": _read_template("TerraMageTinyMageController.cs"),
             "TerraMageWeaponDefinition.cs": _read_template("TerraMageWeaponDefinition.cs"),
             "TerraMageWeaponLoadout.cs": _read_template("TerraMageWeaponLoadout.cs"),
             "TerraMageWeaponWheelUI.cs": _read_template("TerraMageWeaponWheelUI.cs"),
@@ -65,12 +68,13 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
             "TerraMageTinyMageController.cs": [
                 "SetCameraPivot",
                 "ProjectOnPlane",
-                "Input.GetKeyDown(KeyCode.Space)",
+                "jumpBufferTimer",
+                "coyoteTimer",
             ],
             "TerraMageFollowCamera.cs": [
-                "Input.GetMouseButton(1)",
+                "SetWeaponWheelUI",
+                "weaponWheelUI.IsOpen",
                 "Quaternion.Euler",
-                "SetTarget",
             ],
             "TerraMageActionBuildController.cs": [
                 "TerraMageWeaponAttackMode",
@@ -101,6 +105,11 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
                 "CreateLooseEarth",
                 "CalculateImpactDamage",
             ],
+            "TerraMageInput.cs": [
+                "MouseDelta",
+                "GetAxisRaw",
+                "ToInputSystemKey",
+            ],
             "TerraMageMeleeGestureController.cs": [
                 "PerformQuickAttack",
                 "CurrentMeleeReach",
@@ -120,6 +129,7 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
             ],
             "TerraMageWeaponWheelUI.cs": [
                 "CalculateSegmentSweep",
+                "MouseDelta",
                 "OpenWheelKey",
                 "RebuildImmediately",
                 "VisualSegmentCount",

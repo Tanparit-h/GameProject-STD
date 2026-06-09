@@ -418,11 +418,16 @@ def terra_mage_tiny_mage_controller() -> str:
                 [SerializeField] private float runSpeed = 4.2f;
                 [SerializeField] private float jumpHeight = 0.55f;
                 [SerializeField] private float gravity = -9.81f;
+                [SerializeField] private float coyoteTime = 0.12f;
+                [SerializeField] private float jumpBufferTime = 0.14f;
+                [SerializeField] private float groundedStickVelocity = -0.6f;
                 [SerializeField] private Transform cameraPivot;
 
                 private CharacterController characterController;
                 private Vector3 verticalVelocity;
                 private Vector3 lastMoveDirection = Vector3.forward;
+                private float coyoteTimer;
+                private float jumpBufferTimer;
 
                 public bool IsGrounded => characterController != null && characterController.isGrounded;
                 public Transform CameraPivot => cameraPivot;
@@ -440,14 +445,26 @@ def terra_mage_tiny_mage_controller() -> str:
 
                 private void Update()
                 {
+                    UpdateJumpInput();
                     Move();
                     JumpAndGravity();
                 }
 
+                private void UpdateJumpInput()
+                {
+                    if (TerraMageInput.GetKeyDown(KeyCode.Space))
+                    {
+                        jumpBufferTimer = jumpBufferTime;
+                        return;
+                    }
+
+                    jumpBufferTimer = Mathf.Max(0f, jumpBufferTimer - Time.deltaTime);
+                }
+
                 private void Move()
                 {
-                    float horizontal = Input.GetAxisRaw("Horizontal");
-                    float vertical = Input.GetAxisRaw("Vertical");
+                    float horizontal = TerraMageInput.GetAxisRaw("Horizontal");
+                    float vertical = TerraMageInput.GetAxisRaw("Vertical");
                     Vector3 input = new Vector3(horizontal, 0f, vertical);
                     input = Vector3.ClampMagnitude(input, 1f);
 
@@ -466,7 +483,7 @@ def terra_mage_tiny_mage_controller() -> str:
                     }
 
                     Vector3 move = right * input.x + forward * input.z;
-                    bool running = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+                    bool running = TerraMageInput.GetKey(KeyCode.LeftShift) || TerraMageInput.GetKey(KeyCode.RightShift);
                     float speed = running ? runSpeed : walkSpeed;
                     characterController.Move(move * speed * Time.deltaTime);
 
@@ -482,14 +499,25 @@ def terra_mage_tiny_mage_controller() -> str:
 
                 private void JumpAndGravity()
                 {
-                    if (characterController.isGrounded && verticalVelocity.y < 0f)
+                    if (characterController.isGrounded)
                     {
-                        verticalVelocity.y = -1f;
+                        coyoteTimer = coyoteTime;
+                    }
+                    else
+                    {
+                        coyoteTimer = Mathf.Max(0f, coyoteTimer - Time.deltaTime);
                     }
 
-                    if (characterController.isGrounded && Input.GetKeyDown(KeyCode.Space))
+                    if (characterController.isGrounded && verticalVelocity.y < 0f)
+                    {
+                        verticalVelocity.y = groundedStickVelocity;
+                    }
+
+                    if (jumpBufferTimer > 0f && coyoteTimer > 0f)
                     {
                         verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+                        jumpBufferTimer = 0f;
+                        coyoteTimer = 0f;
                     }
 
                     verticalVelocity.y += gravity * Time.deltaTime;
@@ -519,8 +547,17 @@ def terra_mage_follow_camera() -> str:
                 [SerializeField] private float followSharpness = 12f;
                 [SerializeField] private float minPitch = -10f;
                 [SerializeField] private float maxPitch = 45f;
+                [SerializeField] private TerraMageWeaponWheelUI weaponWheelUI;
 
                 public Transform Target => target;
+
+                private void Awake()
+                {
+                    if (weaponWheelUI == null)
+                    {
+                        weaponWheelUI = Object.FindAnyObjectByType<TerraMageWeaponWheelUI>();
+                    }
+                }
 
                 public void SetTarget(Transform newTarget)
                 {
@@ -531,6 +568,11 @@ def terra_mage_follow_camera() -> str:
                     }
                 }
 
+                public void SetWeaponWheelUI(TerraMageWeaponWheelUI newWeaponWheelUI)
+                {
+                    weaponWheelUI = newWeaponWheelUI;
+                }
+
                 private void Update()
                 {
                     if (target == null)
@@ -538,12 +580,19 @@ def terra_mage_follow_camera() -> str:
                         return;
                     }
 
-                    if (Input.GetMouseButton(1))
+                    if (weaponWheelUI == null)
                     {
-                        yaw += Input.GetAxisRaw("Mouse X") * mouseSensitivity * Time.deltaTime;
-                        pitch -= Input.GetAxisRaw("Mouse Y") * mouseSensitivity * Time.deltaTime;
-                        pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+                        weaponWheelUI = Object.FindAnyObjectByType<TerraMageWeaponWheelUI>();
                     }
+
+                    if (weaponWheelUI != null && weaponWheelUI.IsOpen)
+                    {
+                        return;
+                    }
+
+                    yaw += TerraMageInput.GetAxisRaw("Mouse X") * mouseSensitivity * Time.deltaTime;
+                    pitch -= TerraMageInput.GetAxisRaw("Mouse Y") * mouseSensitivity * Time.deltaTime;
+                    pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
                 }
 
                 private void LateUpdate()
@@ -1596,10 +1645,10 @@ def terra_mage_third_person_aim_spec() -> ProgrammerOutputSpec:
             "TerraMageTinyMageController.cs": [
                 "SetCameraPivot",
                 "ProjectOnPlane",
-                "Input.GetKeyDown(KeyCode.Space)",
+                "TerraMageInput.GetKeyDown(KeyCode.Space)",
             ],
             "TerraMageFollowCamera.cs": [
-                "Input.GetMouseButton(1)",
+                "TerraMageInput.GetAxisRaw(\"Mouse X\")",
                 "Quaternion.Euler",
                 "SetTarget",
             ],

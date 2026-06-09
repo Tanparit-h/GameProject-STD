@@ -188,6 +188,12 @@ public static class TerraMageFirstSceneSetup
 
         meleeGestureController.SetWeaponWheelUI(wheelUI);
         actionBuildController.SetWeaponWheelUI(wheelUI);
+
+        var followCamera = Object.FindAnyObjectByType<TerraMageFollowCamera>();
+        if (followCamera != null)
+        {
+            followCamera.SetWeaponWheelUI(wheelUI);
+        }
     }
 
     private static void CreateCrosshairUi()

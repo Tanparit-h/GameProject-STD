@@ -12,6 +12,8 @@ namespace TerraMageTD
         [SerializeField] private RectTransform wheelRoot;
         [SerializeField] private float wheelDiameter = 320f;
         [SerializeField] private float labelRadius = 112f;
+        [SerializeField] private float deltaSelectionSensitivity = 1.15f;
+        [SerializeField] private float minSelectionMagnitude = 18f;
         [SerializeField] private KeyCode openWheelKey = KeyCode.Tab;
         [SerializeField] private Color defaultSlotColor = new Color(0.22f, 0.24f, 0.28f, 0.82f);
         [SerializeField] private Color highlightSlotColor = new Color(1f, 0.82f, 0.2f, 0.92f);
@@ -22,6 +24,7 @@ namespace TerraMageTD
         private Font defaultFont;
         private bool isOpen;
         private int hoverSlotIndex;
+        private Vector2 selectionVector;
 
         public TerraMageWeaponLoadout Loadout => loadout;
         public KeyCode OpenWheelKey => openWheelKey;
@@ -56,7 +59,8 @@ namespace TerraMageTD
                 isOpen = true;
                 SetWheelVisible(true);
                 hoverSlotIndex = loadout.SelectedSlotIndex;
-                UpdateHoverFromMouse();
+                selectionVector = Vector2.zero;
+                UpdateHoverFromMouseDelta();
             }
             else if (!shouldOpen && isOpen)
             {
@@ -67,7 +71,7 @@ namespace TerraMageTD
 
             if (isOpen)
             {
-                UpdateHoverFromMouse();
+                UpdateHoverFromMouseDelta();
             }
         }
 
@@ -238,16 +242,19 @@ namespace TerraMageTD
             }
         }
 
-        private void UpdateHoverFromMouse()
+        private void UpdateHoverFromMouseDelta()
         {
-            Vector2 direction = (Vector2)TerraMageInput.MousePosition() - new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
-            if (direction.sqrMagnitude < 16f)
+            selectionVector += TerraMageInput.MouseDelta() * Mathf.Max(0.01f, deltaSelectionSensitivity);
+            float maxMagnitude = Mathf.Max(labelRadius, wheelDiameter * 0.5f);
+            selectionVector = Vector2.ClampMagnitude(selectionVector, maxMagnitude);
+
+            if (selectionVector.sqrMagnitude < minSelectionMagnitude * minSelectionMagnitude)
             {
                 hoverSlotIndex = loadout.SelectedSlotIndex;
             }
             else
             {
-                float angle = NormalizeAngle(Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
+                float angle = NormalizeAngle(Mathf.Atan2(selectionVector.y, selectionVector.x) * Mathf.Rad2Deg);
                 hoverSlotIndex = GetSlotIndexFromAngle(angle, loadout.ActiveSlotCount);
             }
 
