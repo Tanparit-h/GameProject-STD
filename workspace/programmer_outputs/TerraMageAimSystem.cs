@@ -84,7 +84,8 @@ namespace TerraMageTD
             currentTarget = null;
             hasValidHit = false;
 
-            Ray ray = aimCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+            Vector2 mousePosition = TerraMageInput.MousePosition();
+            Ray ray = aimCamera.ScreenPointToRay(mousePosition);
             RaycastHit[] hits = Physics.RaycastAll(ray, maxAimDistance, aimMask, QueryTriggerInteraction.Ignore);
 
             float closestDistance = float.MaxValue;
