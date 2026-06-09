@@ -26,6 +26,9 @@ namespace TerraMageTD
         [SerializeField] private float gestureThreshold = 48f;
         [SerializeField] private TerraMageWeaponLoadout weaponLoadout;
         [SerializeField] private TerraMageWeaponWheelUI weaponWheelUI;
+        [SerializeField] private Camera aimCamera;
+        [SerializeField] private LayerMask meleeHitMask = ~0;
+        [SerializeField] private float meleeHitRadius = 0.12f;
 
         private Vector2 dragStart;
         private bool dragging;
@@ -33,6 +36,7 @@ namespace TerraMageTD
         public TerraMageMeleeRangeProfile RangeProfile => GetCurrentWeapon().MeleeProfile;
         public float CurrentMeleeReach => Mathf.Max(0.5f, GetCurrentWeapon().MeleeReach);
         public TerraMageWeaponDefinition CurrentWeapon => GetCurrentWeapon();
+        public Camera AimCamera => aimCamera;
 
         private void Awake()
         {
@@ -44,6 +48,11 @@ namespace TerraMageTD
             if (weaponWheelUI == null)
             {
                 weaponWheelUI = GetComponent<TerraMageWeaponWheelUI>();
+            }
+
+            if (aimCamera == null)
+            {
+                aimCamera = Camera.main;
             }
         }
 
@@ -77,6 +86,11 @@ namespace TerraMageTD
         public void SetWeaponWheelUI(TerraMageWeaponWheelUI newWheelUI)
         {
             weaponWheelUI = newWheelUI;
+        }
+
+        public void SetAimCamera(Camera newAimCamera)
+        {
+            aimCamera = newAimCamera;
         }
 
         public void BeginDrag(Vector2 mousePosition)
@@ -130,9 +144,45 @@ namespace TerraMageTD
                 return false;
             }
 
-            Debug.Log(
-                $"Terra Mage melee {gesture} with {weapon.DisplayName} using {RangeProfile} reach {CurrentMeleeReach:0.00}m");
+            if (!TryFindMeleeHit(out RaycastHit hit))
+            {
+                return false;
+            }
+
+            Debug.Log($"Terra Mage melee {gesture} hit {hit.collider.gameObject.name} with {weapon.DisplayName}");
             return true;
+        }
+
+        private bool TryFindMeleeHit(out RaycastHit bestHit)
+        {
+            Vector3 origin = transform.position + Vector3.up * 0.18f;
+            Vector3 direction = aimCamera != null ? aimCamera.transform.forward : transform.forward;
+            RaycastHit[] hits = Physics.SphereCastAll(
+                origin,
+                Mathf.Max(0.01f, meleeHitRadius),
+                direction,
+                CurrentMeleeReach,
+                meleeHitMask,
+                QueryTriggerInteraction.Ignore);
+
+            float closestDistance = float.MaxValue;
+            bestHit = default;
+
+            foreach (RaycastHit hit in hits)
+            {
+                if (hit.collider == null || hit.collider.transform.IsChildOf(transform))
+                {
+                    continue;
+                }
+
+                if (hit.distance < closestDistance)
+                {
+                    closestDistance = hit.distance;
+                    bestHit = hit;
+                }
+            }
+
+            return closestDistance < float.MaxValue;
         }
 
         private TerraMageWeaponDefinition GetCurrentWeapon()

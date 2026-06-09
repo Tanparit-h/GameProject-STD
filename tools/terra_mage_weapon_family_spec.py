@@ -45,6 +45,7 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
     file_contents.update(
         {
             "TerraMageActionBuildController.cs": _read_template("TerraMageActionBuildController.cs"),
+            "TerraMageAimSystem.cs": _read_template("TerraMageAimSystem.cs"),
             "TerraMageMeleeGestureController.cs": _read_template("TerraMageMeleeGestureController.cs"),
             "TerraMageWeaponDefinition.cs": _read_template("TerraMageWeaponDefinition.cs"),
             "TerraMageWeaponLoadout.cs": _read_template("TerraMageWeaponLoadout.cs"),
@@ -80,7 +81,7 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
             "TerraMageAimSystem.cs": [
                 "ViewportPointToRay",
                 "RaycastAll",
-                "Aim debug:",
+                "CurrentTarget",
             ],
             "TerraMageAimTarget.cs": [
                 "SetHighlighted",
@@ -101,9 +102,9 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
                 "CalculateImpactDamage",
             ],
             "TerraMageMeleeGestureController.cs": [
-                "UnarmedPunch",
                 "PerformQuickAttack",
                 "CurrentMeleeReach",
+                "TryFindMeleeHit",
                 "weaponWheelUI",
             ],
             "TerraMageWeaponDefinition.cs": [
@@ -115,7 +116,7 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
                 "ConfigureDemoLoadout",
                 "AssignWeapon",
                 "ActiveSlotCount",
-                "IsSlotLocked",
+                "shard_sling",
             ],
             "TerraMageWeaponWheelUI.cs": [
                 "CalculateSegmentSweep",
@@ -137,7 +138,7 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
             ],
             "TerraMage_WeaponWheelCombat_ImplementationReport.md": [
                 "weapon wheel",
-                "bare hands",
+                "Stone Gauntlet",
                 "Tab",
                 "scene validation",
             ],

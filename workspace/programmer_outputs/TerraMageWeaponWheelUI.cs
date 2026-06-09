@@ -13,7 +13,6 @@ namespace TerraMageTD
         [SerializeField] private float wheelDiameter = 320f;
         [SerializeField] private float labelRadius = 112f;
         [SerializeField] private KeyCode openWheelKey = KeyCode.Tab;
-        [SerializeField] private Color lockedSlotColor = new Color(0.92f, 0.92f, 0.96f, 0.82f);
         [SerializeField] private Color defaultSlotColor = new Color(0.22f, 0.24f, 0.28f, 0.82f);
         [SerializeField] private Color highlightSlotColor = new Color(1f, 0.82f, 0.2f, 0.92f);
 
@@ -125,7 +124,7 @@ namespace TerraMageTD
 
                 var segmentImage = segmentObject.AddComponent<Image>();
                 segmentImage.type = Image.Type.Simple;
-                segmentImage.color = slotIndex == 0 ? lockedSlotColor : weapon.UiColor;
+                segmentImage.color = weapon != null ? weapon.UiColor : defaultSlotColor;
                 segmentImages.Add(segmentImage);
 
                 var labelObject = new GameObject($"TerraMage_WeaponWheelLabel_{slotIndex}", typeof(RectTransform));
@@ -260,9 +259,7 @@ namespace TerraMageTD
             for (int slotIndex = 0; slotIndex < segmentImages.Count; slotIndex++)
             {
                 TerraMageWeaponDefinition weapon = loadout != null ? loadout.GetWeapon(slotIndex) : null;
-                Color baseColor = slotIndex == 0
-                    ? lockedSlotColor
-                    : weapon != null ? weapon.UiColor : defaultSlotColor;
+                Color baseColor = weapon != null ? weapon.UiColor : defaultSlotColor;
 
                 if (slotIndex == loadout.SelectedSlotIndex && !isOpen)
                 {

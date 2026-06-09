@@ -17,6 +17,7 @@ public static class TerraMageFirstSceneSetup
         var player = CreatePlayer();
         CreateCameraRig(player);
         CreateAimTargetRange();
+        CreateCrosshairUi();
         CreateWeaponWheelUi(player);
         CreateLight();
 
@@ -134,6 +135,10 @@ public static class TerraMageFirstSceneSetup
 
         var actionBuildController = player.GetComponent<TerraMageActionBuildController>();
         actionBuildController.SetAimCamera(camera);
+        actionBuildController.SetAimSystem(aimSystem);
+
+        var meleeGestureController = player.GetComponent<TerraMageMeleeGestureController>();
+        meleeGestureController.SetAimCamera(camera);
     }
 
     private static void CreateWeaponWheelUi(GameObject player)
@@ -183,6 +188,37 @@ public static class TerraMageFirstSceneSetup
 
         meleeGestureController.SetWeaponWheelUI(wheelUI);
         actionBuildController.SetWeaponWheelUI(wheelUI);
+    }
+
+    private static void CreateCrosshairUi()
+    {
+        var canvasObject = new GameObject("TerraMage_CrosshairCanvas");
+        var canvas = canvasObject.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 10;
+
+        var scaler = canvasObject.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+        canvasObject.AddComponent<GraphicRaycaster>();
+
+        CreateCrosshairLine("TerraMage_CrosshairHorizontal", canvasObject.transform, new Vector2(22f, 3f));
+        CreateCrosshairLine("TerraMage_CrosshairVertical", canvasObject.transform, new Vector2(3f, 22f));
+    }
+
+    private static void CreateCrosshairLine(string objectName, Transform parent, Vector2 size)
+    {
+        var lineObject = new GameObject(objectName, typeof(RectTransform));
+        var rect = lineObject.GetComponent<RectTransform>();
+        rect.SetParent(parent, false);
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = Vector2.zero;
+        rect.sizeDelta = size;
+
+        var image = lineObject.AddComponent<RawImage>();
+        image.color = new Color(0.95f, 0.98f, 1f, 0.86f);
     }
 
     private static void CreateAimTargetRange()

@@ -2,7 +2,7 @@
 
 ## Goal
 
-Extend Terra Mage with a weapon wheel that keeps slot 0 locked to bare hands, then drive melee or ranged combat from the selected weapon.
+Extend Terra Mage with a weapon wheel that switches between two demo weapons, then drive melee or ranged combat from the selected weapon.
 
 ## Implemented Programmer Outputs
 
@@ -24,17 +24,16 @@ Extend Terra Mage with a weapon wheel that keeps slot 0 locked to bare hands, th
 ## Weapon Wheel Rules
 
 - Hold `Tab` to open the weapon wheel.
-- Slot 0 stays locked to `Bare Hands`.
+- Slot 0 is the `Stone Gauntlet` melee weapon.
+- Slot 1 is the `Shard Sling` ranged weapon.
 - Only active assigned entries render on the wheel.
 - Segment coverage always fills the full circle with no empty gaps.
 - Two active entries divide the wheel into 2 equal halves.
-- Three active entries divide the wheel into 3 equal segments.
 
 ## Combat Integration
 
-- `Bare Hands` uses an unarmed punch profile.
-- Melee weapons change melee reach and gesture profile.
-- Ranged weapons switch the primary action to ranged material attacks.
+- Melee attacks debug only when the weapon sweep hits an object.
+- Ranged attacks debug the target currently aimed through the center crosshair.
 - scene validation checks that weapon selection changes melee/range behavior.
 
 ## Validation Target

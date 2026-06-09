@@ -14,15 +14,29 @@ namespace TerraMageTD
         [SerializeField] private TerraMageWeaponLoadout weaponLoadout;
         [SerializeField] private TerraMageMeleeGestureController meleeGestureController;
         [SerializeField] private TerraMageWeaponWheelUI weaponWheelUI;
+        [SerializeField] private TerraMageAimSystem aimSystem;
 
         private TerraMageMaterialPayload heldPayload;
         private bool hasPayload;
 
         public bool HasPayload => hasPayload;
         public Camera AimCamera => aimCamera;
+        public TerraMageAimSystem AimSystem => aimSystem;
         public TerraMageMaterialPayload HeldPayload => heldPayload;
         public TerraMageWeaponAttackMode CurrentAttackMode => GetCurrentWeapon().AttackMode;
-        public float CurrentPullRange => GetCurrentWeapon().SupportsRanged ? GetCurrentWeapon().RangedPullRange : 0f;
+        public float CurrentPullRange
+        {
+            get
+            {
+                TerraMageWeaponDefinition weapon = GetCurrentWeapon();
+                if (!weapon.SupportsRanged)
+                {
+                    return 0f;
+                }
+
+                return weapon.RangedPullRange > 0f ? weapon.RangedPullRange : defaultPullRange;
+            }
+        }
         public float CurrentThrowForce => GetCurrentWeapon().SupportsRanged ? GetCurrentWeapon().RangedThrowForce : 0f;
 
         private void Awake()
@@ -46,11 +60,25 @@ namespace TerraMageTD
             {
                 weaponWheelUI = GetComponent<TerraMageWeaponWheelUI>();
             }
+
+            if (aimSystem == null && aimCamera != null)
+            {
+                aimSystem = aimCamera.GetComponent<TerraMageAimSystem>();
+            }
         }
 
         public void SetAimCamera(Camera newAimCamera)
         {
             aimCamera = newAimCamera;
+            if (aimSystem == null && aimCamera != null)
+            {
+                aimSystem = aimCamera.GetComponent<TerraMageAimSystem>();
+            }
+        }
+
+        public void SetAimSystem(TerraMageAimSystem newAimSystem)
+        {
+            aimSystem = newAimSystem;
         }
 
         public void SetWeaponLoadout(TerraMageWeaponLoadout newLoadout)
@@ -75,22 +103,22 @@ namespace TerraMageTD
                 return;
             }
 
-            if (Input.GetKeyDown(KeyCode.Q))
+            if (TerraMageInput.GetKeyDown(KeyCode.Q))
             {
                 PullMaterialFromAim();
             }
 
-            if (Input.GetKeyDown(KeyCode.E))
+            if (TerraMageInput.GetKeyDown(KeyCode.E))
             {
                 CompressHeldMaterial();
             }
 
-            if (Input.GetKeyDown(KeyCode.R))
+            if (TerraMageInput.GetKeyDown(KeyCode.R))
             {
                 HeatHeldMaterial();
             }
 
-            if (Input.GetMouseButtonDown(0))
+            if (TerraMageInput.GetMouseButtonDown(0))
             {
                 UsePrimaryAction();
             }
@@ -108,6 +136,7 @@ namespace TerraMageTD
                 return;
             }
 
+            DebugRangedAimTarget();
             ThrowHeldMaterial();
         }
 
@@ -118,7 +147,7 @@ namespace TerraMageTD
                 return;
             }
 
-            Ray ray = aimCamera.ScreenPointToRay(Input.mousePosition);
+            Ray ray = aimCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
             if (!Physics.Raycast(ray, out RaycastHit hit, Mathf.Max(1f, CurrentPullRange), materialMask))
             {
                 return;
@@ -167,6 +196,18 @@ namespace TerraMageTD
             float damage = TerraMageMaterialSystem.CalculateImpactDamage(heldPayload, velocity, 1f);
             Debug.Log($"Terra Mage threw {heldPayload.Kind} with {GetCurrentWeapon().DisplayName} for {damage:0.0} damage");
             hasPayload = false;
+        }
+
+        private void DebugRangedAimTarget()
+        {
+            TerraMageWeaponDefinition weapon = GetCurrentWeapon();
+            if (aimSystem != null && aimSystem.HasValidHit && aimSystem.CurrentTarget != null)
+            {
+                Debug.Log($"Terra Mage ranged {weapon.DisplayName} aimed at {aimSystem.CurrentTarget.DisplayName}");
+                return;
+            }
+
+            Debug.Log($"Terra Mage ranged {weapon.DisplayName} has no target under crosshair.");
         }
 
         private TerraMageWeaponDefinition GetCurrentWeapon()

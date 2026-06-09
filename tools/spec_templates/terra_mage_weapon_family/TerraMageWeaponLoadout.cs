@@ -22,8 +22,8 @@ namespace TerraMageTD
 
         private void Awake()
         {
-            EnsureBareHandsSlot();
-            if (assignedWeapons.Count == 1)
+            EnsureWeaponSlots();
+            if (!IsDemoLoadoutConfigured())
             {
                 ConfigureDemoLoadout();
             }
@@ -31,7 +31,7 @@ namespace TerraMageTD
 
         private void OnValidate()
         {
-            EnsureBareHandsSlot();
+            EnsureWeaponSlots();
             selectedSlotIndex = Mathf.Clamp(selectedSlotIndex, 0, assignedWeapons.Count - 1);
         }
 
@@ -39,7 +39,6 @@ namespace TerraMageTD
         {
             assignedWeapons = new List<TerraMageWeaponDefinition>
             {
-                TerraMageWeaponDefinition.CreateBareHands(),
                 TerraMageWeaponDefinition.CreateMelee(
                     "stone_gauntlet",
                     "Stone Gauntlet",
@@ -48,14 +47,6 @@ namespace TerraMageTD
                     1.35f,
                     new Color(0.78f, 0.66f, 0.42f, 0.95f),
                     "Close-range melee gauntlet"),
-                TerraMageWeaponDefinition.CreateMelee(
-                    "earth_spear",
-                    "Earth Spear",
-                    TerraMageMeleeRangeProfile.LongReach,
-                    TerraMageMeleeGesture.Overhead,
-                    2.3f,
-                    new Color(0.42f, 0.78f, 0.55f, 0.95f),
-                    "Long melee reach profile"),
                 TerraMageWeaponDefinition.CreateRanged(
                     "shard_sling",
                     "Shard Sling",
@@ -73,7 +64,7 @@ namespace TerraMageTD
 
         public TerraMageWeaponDefinition GetWeapon(int slotIndex)
         {
-            EnsureBareHandsSlot();
+            EnsureWeaponSlots();
 
             if (slotIndex < 0 || slotIndex >= assignedWeapons.Count)
             {
@@ -85,13 +76,13 @@ namespace TerraMageTD
 
         public bool IsSlotLocked(int slotIndex)
         {
-            return slotIndex == 0;
+            return false;
         }
 
         public bool AssignWeapon(int slotIndex, TerraMageWeaponDefinition weapon)
         {
-            EnsureBareHandsSlot();
-            if (weapon == null || slotIndex <= 0 || slotIndex >= MaxWheelSlots)
+            EnsureWeaponSlots();
+            if (weapon == null || slotIndex < 0 || slotIndex >= MaxWheelSlots)
             {
                 return false;
             }
@@ -120,13 +111,14 @@ namespace TerraMageTD
 
         public bool RemoveWeapon(int slotIndex)
         {
-            EnsureBareHandsSlot();
-            if (slotIndex <= 0 || slotIndex >= assignedWeapons.Count)
+            EnsureWeaponSlots();
+            if (slotIndex < 0 || slotIndex >= assignedWeapons.Count)
             {
                 return false;
             }
 
             assignedWeapons.RemoveAt(slotIndex);
+            EnsureWeaponSlots();
             selectedSlotIndex = Mathf.Clamp(selectedSlotIndex, 0, assignedWeapons.Count - 1);
             RaiseLoadoutChanged();
             return true;
@@ -134,13 +126,13 @@ namespace TerraMageTD
 
         public void SelectSlot(int slotIndex)
         {
-            EnsureBareHandsSlot();
+            EnsureWeaponSlots();
             int clampedSlot = Mathf.Clamp(slotIndex, 0, assignedWeapons.Count - 1);
             selectedSlotIndex = clampedSlot;
             SelectionChanged?.Invoke(selectedSlotIndex, CurrentWeapon);
         }
 
-        private void EnsureBareHandsSlot()
+        private void EnsureWeaponSlots()
         {
             if (assignedWeapons == null)
             {
@@ -149,11 +141,14 @@ namespace TerraMageTD
 
             if (assignedWeapons.Count == 0)
             {
-                assignedWeapons.Add(TerraMageWeaponDefinition.CreateBareHands());
-            }
-            else if (assignedWeapons[0] == null || assignedWeapons[0].WeaponId != "bare_hands")
-            {
-                assignedWeapons[0] = TerraMageWeaponDefinition.CreateBareHands();
+                assignedWeapons.Add(TerraMageWeaponDefinition.CreateMelee(
+                    "stone_gauntlet",
+                    "Stone Gauntlet",
+                    TerraMageMeleeRangeProfile.ShortStaff,
+                    TerraMageMeleeGesture.Punch,
+                    1.35f,
+                    new Color(0.78f, 0.66f, 0.42f, 0.95f),
+                    "Close-range melee gauntlet"));
             }
 
             for (int index = assignedWeapons.Count - 1; index >= 1; index--)
@@ -174,6 +169,15 @@ namespace TerraMageTD
         {
             SelectionChanged?.Invoke(selectedSlotIndex, CurrentWeapon);
             LoadoutChanged?.Invoke();
+        }
+
+        private bool IsDemoLoadoutConfigured()
+        {
+            return assignedWeapons.Count == 2
+                && assignedWeapons[0] != null
+                && assignedWeapons[0].WeaponId == "stone_gauntlet"
+                && assignedWeapons[1] != null
+                && assignedWeapons[1].WeaponId == "shard_sling";
         }
     }
 }

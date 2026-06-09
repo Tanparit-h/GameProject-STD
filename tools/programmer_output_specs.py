@@ -829,11 +829,6 @@ def terra_mage_aim_system() -> str:
                 private void Update()
                 {
                     EvaluateAim();
-
-                    if (Input.GetMouseButtonDown(0))
-                    {
-                        LogAimDistance();
-                    }
                 }
 
                 private void EvaluateAim()
@@ -918,18 +913,6 @@ def terra_mage_aim_system() -> str:
                     }
                 }
 
-                private void LogAimDistance()
-                {
-                    if (currentTarget == null || !hasValidHit)
-                    {
-                        Debug.Log("Aim debug: no target locked.");
-                        return;
-                    }
-
-                    Transform origin = distanceOrigin != null ? distanceOrigin : aimCamera.transform;
-                    float distance = Vector3.Distance(origin.position, currentTarget.GetAimPoint());
-                    Debug.Log($"Aim debug: {currentTarget.DisplayName} distance = {distance:0.00}m");
-                }
             }
         }
         """
@@ -1628,7 +1611,7 @@ def terra_mage_third_person_aim_spec() -> ProgrammerOutputSpec:
             "TerraMageAimSystem.cs": [
                 "ViewportPointToRay",
                 "RaycastAll",
-                "Aim debug:",
+                "CurrentTarget",
             ],
             "TerraMageAimTarget.cs": [
                 "SetHighlighted",

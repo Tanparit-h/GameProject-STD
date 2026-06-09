@@ -63,6 +63,16 @@ public static class TerraMageFirstSceneValidator
             throw new InvalidOperationException("TerraMageAimSystem must reference TerraMage_AimMarker.");
         }
 
+        if (actionBuildController.AimSystem != aimSystem)
+        {
+            throw new InvalidOperationException("TerraMageActionBuildController must use TerraMageAimSystem for ranged target debug.");
+        }
+
+        if (meleeGestureController.AimCamera != cameraComponent)
+        {
+            throw new InvalidOperationException("TerraMageMeleeGestureController must use TerraMage_Camera for melee hit checks.");
+        }
+
         RequireObject("TerraMage_AimMarker");
         RequireObject("TerraMage_Ground");
         RequireObject("TerraMage_CoreMarker");
@@ -95,20 +105,21 @@ public static class TerraMageFirstSceneValidator
             throw new InvalidOperationException("TerraMage_BlinkingTarget must use Blink mode.");
         }
 
-        if (!weaponLoadout.IsSlotLocked(0))
+        if (weaponLoadout.ActiveSlotCount != 2)
         {
-            throw new InvalidOperationException("Slot 0 must stay locked to bare hands.");
+            throw new InvalidOperationException("Demo loadout must include exactly one melee weapon and one ranged weapon.");
         }
 
-        if (weaponLoadout.ActiveSlotCount >= 10)
+        var meleeWeapon = weaponLoadout.GetWeapon(0);
+        if (meleeWeapon == null || meleeWeapon.DisplayName != "Stone Gauntlet")
         {
-            throw new InvalidOperationException("Demo loadout must use fewer than 10 active slots.");
+            throw new InvalidOperationException("Slot 0 must be the Stone Gauntlet melee weapon.");
         }
 
-        var bareHands = weaponLoadout.GetWeapon(0);
-        if (bareHands == null || bareHands.DisplayName != "Bare Hands")
+        var rangedWeapon = weaponLoadout.GetWeapon(1);
+        if (rangedWeapon == null || rangedWeapon.DisplayName != "Shard Sling")
         {
-            throw new InvalidOperationException("Slot 0 must be bare hands.");
+            throw new InvalidOperationException("Slot 1 must be the Shard Sling ranged weapon.");
         }
 
         if (weaponWheelUI.OpenWheelKey != KeyCode.Tab)
@@ -139,25 +150,17 @@ public static class TerraMageFirstSceneValidator
         }
 
         weaponLoadout.SelectSlot(0);
-        if (meleeGestureController.RangeProfile != TerraMageMeleeRangeProfile.UnarmedPunch)
-        {
-            throw new InvalidOperationException("Bare hands must use the unarmed punch melee profile.");
-        }
-
-        float bareHandsReach = meleeGestureController.CurrentMeleeReach;
-
-        weaponLoadout.SelectSlot(1);
         if (actionBuildController.CurrentAttackMode != TerraMageWeaponAttackMode.Melee)
         {
             throw new InvalidOperationException("Assigned melee weapons must keep melee attack mode.");
         }
 
-        if (meleeGestureController.CurrentMeleeReach <= bareHandsReach)
+        if (meleeGestureController.CurrentMeleeReach <= 0f)
         {
-            throw new InvalidOperationException("Melee weapon selection must change attack reach.");
+            throw new InvalidOperationException("Melee weapon selection must expose melee reach.");
         }
 
-        weaponLoadout.SelectSlot(weaponLoadout.ActiveSlotCount - 1);
+        weaponLoadout.SelectSlot(1);
         if (weaponLoadout.CurrentWeapon.DisplayName != "Shard Sling")
         {
             throw new InvalidOperationException("Demo loadout must include a ranged Shard Sling profile.");
@@ -171,21 +174,6 @@ public static class TerraMageFirstSceneValidator
         if (actionBuildController.CurrentPullRange <= 0f || actionBuildController.CurrentThrowForce <= 0f)
         {
             throw new InvalidOperationException("Ranged weapon selection must expose ranged combat values.");
-        }
-
-        bool replacedBareHands = weaponLoadout.AssignWeapon(
-            0,
-            TerraMageWeaponDefinition.CreateMelee(
-                "invalid_replace",
-                "Invalid Replace",
-                TerraMageMeleeRangeProfile.ShortStaff,
-                TerraMageMeleeGesture.RightSwing,
-                1.5f,
-                Color.red,
-                "Should fail"));
-        if (replacedBareHands)
-        {
-            throw new InvalidOperationException("Slot 0 must not accept reassignment.");
         }
 
         Debug.Log("TerraMageFirstSceneValidator passed.");

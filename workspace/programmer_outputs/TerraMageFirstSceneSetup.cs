@@ -135,6 +135,10 @@ public static class TerraMageFirstSceneSetup
 
         var actionBuildController = player.GetComponent<TerraMageActionBuildController>();
         actionBuildController.SetAimCamera(camera);
+        actionBuildController.SetAimSystem(aimSystem);
+
+        var meleeGestureController = player.GetComponent<TerraMageMeleeGestureController>();
+        meleeGestureController.SetAimCamera(camera);
     }
 
     private static void CreateWeaponWheelUi(GameObject player)
