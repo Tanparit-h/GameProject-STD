@@ -176,6 +176,11 @@ public static class TerraMageFirstSceneValidator
             throw new InvalidOperationException("Ranged weapon selection must expose ranged combat values.");
         }
 
+        if (weaponWheelUI.HoverSlotIndex != weaponLoadout.SelectedSlotIndex)
+        {
+            throw new InvalidOperationException("Weapon wheel hover must stay synced with the selected weapon after selection.");
+        }
+
         Debug.Log("TerraMageFirstSceneValidator passed.");
     }
 

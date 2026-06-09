@@ -64,7 +64,7 @@ namespace TerraMageTD
             }
             else if (!shouldOpen && isOpen)
             {
-                loadout.SelectSlot(hoverSlotIndex);
+                EquipHoveredSlot();
                 HideImmediately();
                 return;
             }
@@ -231,6 +231,11 @@ namespace TerraMageTD
 
         private void HandleSelectionChanged(int _, TerraMageWeaponDefinition __)
         {
+            if (!isOpen && loadout != null)
+            {
+                hoverSlotIndex = loadout.SelectedSlotIndex;
+            }
+
             UpdateVisualState();
         }
 
@@ -244,6 +249,7 @@ namespace TerraMageTD
 
         private void UpdateHoverFromMouseDelta()
         {
+            int previousHoverSlot = hoverSlotIndex;
             selectionVector += TerraMageInput.MouseDelta() * Mathf.Max(0.01f, deltaSelectionSensitivity);
             float maxMagnitude = Mathf.Max(labelRadius, wheelDiameter * 0.5f);
             selectionVector = Vector2.ClampMagnitude(selectionVector, maxMagnitude);
@@ -258,7 +264,27 @@ namespace TerraMageTD
                 hoverSlotIndex = GetSlotIndexFromAngle(angle, loadout.ActiveSlotCount);
             }
 
+            if (hoverSlotIndex != previousHoverSlot)
+            {
+                EquipHoveredSlot();
+            }
+
             UpdateVisualState();
+        }
+
+        private void EquipHoveredSlot()
+        {
+            if (loadout == null)
+            {
+                return;
+            }
+
+            int previousSlot = loadout.SelectedSlotIndex;
+            loadout.SelectSlot(hoverSlotIndex);
+            if (previousSlot != loadout.SelectedSlotIndex)
+            {
+                Debug.Log($"Terra Mage equipped {loadout.CurrentWeapon.DisplayName}");
+            }
         }
 
         private void UpdateVisualState()
