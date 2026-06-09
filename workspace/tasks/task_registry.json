@@ -5,6 +5,11 @@
       "id": "feature-interaction-v1",
       "file": "interaction_vertical_slice.json",
       "status": "release_gate_clean"
+    },
+    {
+      "id": "feature-door-toggle-v1",
+      "file": "door_toggle_prototype.json",
+      "status": "backlog"
     }
   ]
 }
