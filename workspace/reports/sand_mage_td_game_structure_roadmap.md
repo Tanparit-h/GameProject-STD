@@ -94,7 +94,56 @@ First milestone:
 - Save it as a quick block.
 - Place it repeatedly with material cost.
 
-### 4. Tower Defense Layer
+### 4. Action-Build Fusion Layer
+
+Goal: merge combat actions and building actions into one physical material system.
+
+Core idea:
+
+- The player does not only attack with fixed weapons.
+- The player pulls, compresses, heats, throws, pours, melts, glues, carves, and redirects world materials.
+- The same material can become a wall, projectile, trap, repair patch, molten stream, or tower component depending on the spell/action used.
+
+Primary action verbs:
+
+- Absorb or pull loose material from the world.
+- Compress loose material into a dense block or sphere.
+- Throw compressed blocks as physics projectiles.
+- Heat sand until it becomes molten glass material.
+- Pour molten material onto enemies, terrain, or structures.
+- Cool molten material into glass barriers, spikes, or lens components.
+- Glue sand into sticky traps or reinforced patches.
+- Push, knock back, or redirect enemies using material force.
+
+Physics damage model:
+
+- Damage depends on mass, velocity, material hardness, heat state, and impact angle.
+- A compressed sand sphere can be thrown as a blunt projectile.
+- A stone chunk does higher impact damage but is harder to lift.
+- Molten sand/glass deals heat damage over time and can leave hazardous ground.
+- Wet sand has lower throw damage but can slow or weigh down enemies.
+- GlueSand reduces enemy movement and can bind small enemies in place.
+
+Elemental construction model:
+
+- Earth/Sand: pull, place, compress, repair, build walls.
+- Heat/Fire: melt sand into glass, create molten pours, weaken glue over time.
+- Water: wet sand, channel flow, push enemies, power water traps.
+- Wind: lift lighter material, scatter dry sand, alter projectile arcs.
+- Stone: carve, reinforce, create heavy projectiles.
+
+MVP action-build examples:
+
+- Pull sand into a floating mass, compress it into a ball, then throw it at a Runner.
+- Pull sand into a wall shape, compress it, and use it as base defense.
+- Heat lifted sand into molten glass and pour it onto the ground as a temporary hazard.
+- Cool molten material into a fragile glass barrier or spike.
+
+Design rule:
+
+- Every major action should either create a tactical combat effect, change the buildable world, or both.
+
+### 5. Tower Defense Layer
 
 Goal: make the built base matter under pressure.
 
@@ -117,11 +166,12 @@ MVP enemies:
 
 MVP defenses:
 
+- Player-thrown compressed sand sphere.
 - Sand Cannon.
 - Glue Trap or Water Cannon.
 - Basic wall/maze structure.
 
-### 5. World Generation Layer
+### 6. World Generation Layer
 
 Goal: make seeds and biomes create different building problems.
 
@@ -158,7 +208,7 @@ Seed data:
 - Weather profile.
 - Resource nodes.
 
-### 6. Weather Layer
+### 7. Weather Layer
 
 Goal: make the environment attack the base too.
 
@@ -180,7 +230,7 @@ Gameplay effects:
 - Rain changes sand moisture.
 - Heat dries sand and supports glass tech.
 
-### 7. Technology Layer
+### 8. Technology Layer
 
 Goal: make progression change building strategy.
 
@@ -206,7 +256,7 @@ Expansion tech:
 - Auto repair.
 - Resource conveyor.
 
-### 8. Multiplayer Layer
+### 9. Multiplayer Layer
 
 Goal: support both safe async sharing and later live co-op.
 
@@ -269,7 +319,8 @@ Player story:
 The player controls a tiny 30 cm mage in a Minecraft-like seed-generated sandbox.
 They walk through oversized sand, rocks, and water features, lift sand with magic,
 place it into a wall, compress it into a hard block, save it as a quick block,
-then use that wall to protect a core from a small enemy wave.
+then compress another mass into a physics projectile and use both building and
+action spells to protect a core from a small enemy wave.
 ```
 
 Required systems:
@@ -280,7 +331,10 @@ Required systems:
 - Beach seed test scene.
 - Small sand grid.
 - Lift/place/compress spell.
+- Physics throw for compressed sand.
+- Basic material heat action.
 - PackedSand block.
+- Molten sand/glass hazard placeholder.
 - Quick block prototype.
 - Core health.
 - Runner enemy.
@@ -295,6 +349,9 @@ Acceptance criteria:
 - The scene communicates a Minecraft-like sandbox/building feel without using a block-only camera builder format.
 - Player can lift/place sand using the reticle.
 - Player can compress sand into a stable wall block.
+- Player can compress loose material into a throwable sphere.
+- Thrown compressed material can damage or knock back a basic enemy.
+- Heating sand can create a simple molten/glass hazard placeholder.
 - Player can save/place one quick block template.
 - Enemy can spawn, move toward the core, and damage it.
 - A built wall can slow or block the enemy route.
