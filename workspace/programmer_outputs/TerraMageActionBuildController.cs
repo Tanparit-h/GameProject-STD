@@ -1,8 +1,8 @@
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace SandMageTD
+namespace TerraMageTD
 {
-    public sealed class SandMageActionBuildController : MonoBehaviour
+    public sealed class TerraMageActionBuildController : MonoBehaviour
     {
         [SerializeField] private Camera aimCamera;
         [SerializeField] private float pullRange = 8f;
@@ -11,11 +11,11 @@ namespace SandMageTD
         [SerializeField] private float heatPerUse = 0.55f;
         [SerializeField] private LayerMask materialMask = ~0;
 
-        private SandMageMaterialPayload heldPayload;
+        private TerraMageMaterialPayload heldPayload;
         private bool hasPayload;
 
         public bool HasPayload => hasPayload;
-        public SandMageMaterialPayload HeldPayload => heldPayload;
+        public TerraMageMaterialPayload HeldPayload => heldPayload;
 
         private void Awake()
         {
@@ -61,9 +61,9 @@ namespace SandMageTD
                 return;
             }
 
-            heldPayload = SandMageMaterialSystem.CreateLooseSand(hit.point);
+            heldPayload = TerraMageMaterialSystem.CreateLooseEarth(hit.point);
             hasPayload = true;
-            Debug.Log($"Sand Mage pulled {heldPayload.Kind} from {hit.point}");
+            Debug.Log($"Terra Mage pulled {heldPayload.Kind} from {hit.point}");
         }
 
         public void CompressHeldMaterial()
@@ -73,8 +73,8 @@ namespace SandMageTD
                 return;
             }
 
-            heldPayload = SandMageMaterialSystem.Compress(heldPayload, compressMultiplier);
-            Debug.Log($"Sand Mage compressed payload into {heldPayload.Kind} mass {heldPayload.Mass:0.0}");
+            heldPayload = TerraMageMaterialSystem.Compress(heldPayload, compressMultiplier);
+            Debug.Log($"Terra Mage compressed payload into {heldPayload.Kind} mass {heldPayload.Mass:0.0}");
         }
 
         public void HeatHeldMaterial()
@@ -84,8 +84,8 @@ namespace SandMageTD
                 return;
             }
 
-            heldPayload = SandMageMaterialSystem.Heat(heldPayload, heatPerUse);
-            Debug.Log($"Sand Mage heated payload into {heldPayload.Kind} heat {heldPayload.Heat:0.0}");
+            heldPayload = TerraMageMaterialSystem.Heat(heldPayload, heatPerUse);
+            Debug.Log($"Terra Mage heated payload into {heldPayload.Kind} heat {heldPayload.Heat:0.0}");
         }
 
         public void ThrowHeldMaterial()
@@ -96,8 +96,8 @@ namespace SandMageTD
             }
 
             Vector3 velocity = aimCamera.transform.forward * throwForce;
-            float damage = SandMageMaterialSystem.CalculateImpactDamage(heldPayload, velocity, 1f);
-            Debug.Log($"Sand Mage threw {heldPayload.Kind} with expected physics damage {damage:0.0}");
+            float damage = TerraMageMaterialSystem.CalculateImpactDamage(heldPayload, velocity, 1f);
+            Debug.Log($"Terra Mage threw {heldPayload.Kind} with expected physics damage {damage:0.0}");
             hasPayload = false;
         }
     }

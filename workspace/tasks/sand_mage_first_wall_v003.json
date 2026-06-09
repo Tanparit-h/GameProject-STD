@@ -1,9 +1,0 @@
-{
-  "id": "sand-mage-first-wall-v003",
-  "phase": "IMPLEMENTATION",
-  "title": "Sand Mage First Wall v0.0.3 implementation",
-  "request": "Implement the first real Sand Mage TD v0.0.3 slice. This is no longer a draft or prototype-only task. Programmer AI leads first. Creator AI and Blender work are secondary and must wait until Programmer AI requests specific assets. Build the gameplay foundation for a tiny 30 cm mage in a Minecraft-like seed-generated sandbox: action-build fusion, material pull/compress/throw/heat, mouse-drag melee left/right/overhead, weapon wheel melee range profiles, and programmer-authored asset request notes. Keep the implementation scoped to validated Unity scripts and AI Office outputs.",
-  "approval": {
-    "implementation": true
-  }
-}

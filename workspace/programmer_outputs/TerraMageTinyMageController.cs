@@ -1,9 +1,9 @@
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace SandMageTD
+namespace TerraMageTD
 {
     [RequireComponent(typeof(CharacterController))]
-    public sealed class SandMageTinyMageController : MonoBehaviour
+    public sealed class TerraMageTinyMageController : MonoBehaviour
     {
         [SerializeField] private float walkSpeed = 2.2f;
         [SerializeField] private float runSpeed = 4.2f;

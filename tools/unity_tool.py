@@ -1,4 +1,4 @@
-import os
+﻿import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -119,11 +119,11 @@ def build_copy_plan(project_path: str | Path | None = None) -> list[tuple[Path, 
         script_map = {
             "InteractSystem_Draft.cs": "InteractSystem.cs",
             "InteractableObject_Draft.cs": "InteractableObject.cs",
-            "SandMageMaterialSystem.cs": "SandMageTD/SandMageMaterialSystem.cs",
-            "SandMageActionBuildController.cs": "SandMageTD/SandMageActionBuildController.cs",
-            "SandMageMeleeGestureController.cs": "SandMageTD/SandMageMeleeGestureController.cs",
-            "SandMageTinyMageController.cs": "SandMageTD/SandMageTinyMageController.cs",
-            "SandMageFollowCamera.cs": "SandMageTD/SandMageFollowCamera.cs",
+            "TerraMageMaterialSystem.cs": "TerraMageTD/TerraMageMaterialSystem.cs",
+            "TerraMageActionBuildController.cs": "TerraMageTD/TerraMageActionBuildController.cs",
+            "TerraMageMeleeGestureController.cs": "TerraMageTD/TerraMageMeleeGestureController.cs",
+            "TerraMageTinyMageController.cs": "TerraMageTD/TerraMageTinyMageController.cs",
+            "TerraMageFollowCamera.cs": "TerraMageTD/TerraMageFollowCamera.cs",
         }
         for draft_name, target_name in script_map.items():
             source = PROGRAMMER_OUTPUT_DIR / draft_name

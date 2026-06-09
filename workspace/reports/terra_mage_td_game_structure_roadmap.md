@@ -1,4 +1,4 @@
-# Sand Mage TD - Game Structure And Production Roadmap
+﻿# Terra Mage TD - Game Structure And Production Roadmap
 
 Plan version: 0.0.3
 
@@ -8,9 +8,11 @@ Source concept: `D:\Planing\Sand_Mage_TD_Backup_Roadmap.md`
 
 ## Product Definition
 
-Sand Mage TD is a third-person multiplayer tower-defense and base-building game with a Minecraft-like sandbox/building feel. The player is not a full-size hero: they are a tiny mage, roughly 30 cm tall, moving through a world that feels huge, tactile, and physically buildable.
+Terra Mage TD is a third-person multiplayer tower-defense and base-building game with a Minecraft-like sandbox/building feel. The player is not a full-size hero: they are a tiny mage, roughly 30 cm tall, moving through a world that feels huge, tactile, and physically buildable.
 
-The world is generated from a seed system. Each seed creates a playable sandbox with terrain, resources, hazards, enemy approaches, and base-building opportunities. The core fantasy is physical: the tiny mage walks inside the generated world, lifts sand with magic, compresses it into structures, builds defenses, and survives enemy waves with friends or async invasion data.
+The world is generated from a seed system. Each seed creates a playable sandbox with terrain, resources, hazards, enemy approaches, and base-building opportunities. The core fantasy is physical: the tiny mage walks inside the generated world, pulls loose earth and terrain material with magic, compresses it into packed dirt blocks, builds defenses, and survives enemy waves with friends or async invasion data.
+
+The original Sand Mage name came from the idea of using Noita-like sand physics as the whole ground simulation. That identity is now adjusted: Terra Mage keeps the material-fantasy core, but the production target is lighter. Terrain reads as packed dirt/earth blocks, while loose material motion can be represented with particle-like effects rather than a fully detailed per-cell sand simulation.
 
 ## Core Game Structure
 
@@ -22,7 +24,7 @@ Scale identity:
 
 - Player height target: about 30 cm.
 - The world should feel large and chunky, similar to the sense of scale in a Minecraft-like sandbox.
-- Sand piles, rocks, cliffs, plants, and waves should feel oversized from the mage's perspective.
+- Earth piles, packed dirt blocks, rocks, cliffs, plants, and waves should feel oversized from the mage's perspective.
 - Building should feel like physically shaping the environment, not placing abstract UI-only tiles.
 
 Primary features:
@@ -56,44 +58,44 @@ Character creation and art style:
 First playable target:
 
 - Walk, jump, sprint, aim, interact.
-- Lift sand/material.
+- Lift loose earth/material.
 - Place material.
 - Compress material into a stable packed block.
 
 ### 2. Material Simulation Layer
 
-Goal: make sand/material manipulation the signature mechanic.
+Goal: make earth/material manipulation the signature mechanic.
 
 Initial materials:
 
 - Empty.
-- DrySand.
-- WetSand.
-- PackedSand.
+- LooseEarth.
+- SoftEarth.
+- PackedEarth.
 - Stone.
 - Water.
 - Glass.
 
 Later materials:
 
-- ReinforcedSand.
-- GlueSand.
+- ReinforcedEarth.
+- GlueEarth.
 - CutStone.
 - Wood.
 - Core.
 
-Simulation rules:
+Material presentation rules:
 
-- Dry sand falls and flows.
-- Wet sand is heavier and slightly sticky.
-- Packed sand becomes a stable build block.
+- Loose earth appears to break apart with particle-like motion.
+- Soft earth is heavier and slightly sticky.
+- Packed earth becomes a stable build block.
 - Stone is durable and useful for walls/projectiles.
-- Water flows through channels and erodes weak sand.
+- Water flows through channels and erodes weak earth.
 - Glass is fragile but enables lens/beam tech.
 
 MVP constraint:
 
-- Prefer a small deterministic grid simulation over full realistic 3D voxel destruction.
+- Prefer packed dirt blocks plus lightweight particle-look effects over full realistic 3D voxel destruction or full Noita-level sand simulation.
 
 ### 3. Building Layer
 
@@ -111,7 +113,7 @@ Features:
 
 First milestone:
 
-- Build a sand wall.
+- Build a packed dirt wall.
 - Compress it.
 - Save it as a quick block.
 - Place it repeatedly with material cost.
@@ -132,34 +134,34 @@ Primary action verbs:
 - Compress loose material into a dense block or sphere.
 - Throw compressed blocks as physics projectiles.
 - Swing melee weapons with directional mouse-drag attacks.
-- Heat sand until it becomes molten glass material.
+- Heat earth/silica-rich material until it becomes molten glass material.
 - Pour molten material onto enemies, terrain, or structures.
 - Cool molten material into glass barriers, spikes, or lens components.
-- Glue sand into sticky traps or reinforced patches.
+- Glue earth into sticky traps or reinforced patches.
 - Push, knock back, or redirect enemies using material force.
 
 Physics damage model:
 
 - Damage depends on mass, velocity, material hardness, heat state, and impact angle.
-- A compressed sand sphere can be thrown as a blunt projectile.
+- A compressed packed-earth sphere can be thrown as a blunt projectile.
 - A stone chunk does higher impact damage but is harder to lift.
-- Molten sand/glass deals heat damage over time and can leave hazardous ground.
-- Wet sand has lower throw damage but can slow or weigh down enemies.
-- GlueSand reduces enemy movement and can bind small enemies in place.
+- Molten glass material deals heat damage over time and can leave hazardous ground.
+- Soft earth has lower throw damage but can slow or weigh down enemies.
+- GlueEarth reduces enemy movement and can bind small enemies in place.
 
 Elemental construction model:
 
 - Earth/Sand: pull, place, compress, repair, build walls.
-- Heat/Fire: melt sand into glass, create molten pours, weaken glue over time.
-- Water: wet sand, channel flow, push enemies, power water traps.
-- Wind: lift lighter material, scatter dry sand, alter projectile arcs.
+- Heat/Fire: melt silica-rich earth into glass, create molten pours, weaken glue over time.
+- Water: soften earth, channel flow, push enemies, power water traps.
+- Wind: lift loose particles, scatter dry earth, alter projectile arcs.
 - Stone: carve, reinforce, create heavy projectiles.
 
 MVP action-build examples:
 
-- Pull sand into a floating mass, compress it into a ball, then throw it at a Runner.
-- Pull sand into a wall shape, compress it, and use it as base defense.
-- Heat lifted sand into molten glass and pour it onto the ground as a temporary hazard.
+- Pull loose earth into a floating mass, compress it into a ball, then throw it at a Runner.
+- Pull loose earth into a wall shape, compress it, and use it as base defense.
+- Heat lifted earth into molten glass-like material and pour it onto the ground as a temporary hazard.
 - Cool molten material into a fragile glass barrier or spike.
 - Drag mouse left/right/overhead to strike an enemy or hit a loose block into motion.
 - Switch melee range through the weapon wheel before engaging enemies near the base wall.
@@ -191,7 +193,7 @@ MVP enemies:
 
 MVP defenses:
 
-- Player-thrown compressed sand sphere.
+- Player-thrown compressed packed-earth sphere.
 - Sand Cannon.
 - Glue Trap or Water Cannon.
 - Basic wall/maze structure.
@@ -209,7 +211,7 @@ Design feel:
 
 Initial biome:
 
-- Beach with sand, water, sea-wave hazard, and simple resource zones.
+- Beach or shoreline with packed earth/sand-like soil, water, sea-wave hazard, and simple resource zones.
 
 Expansion biomes:
 
@@ -250,10 +252,10 @@ Later weather:
 
 Gameplay effects:
 
-- Wind blows weak dry sand.
+- Wind blows loose earth particles.
 - Wave erodes coastal foundations.
-- Rain changes sand moisture.
-- Heat dries sand and supports glass tech.
+- Rain changes earth moisture.
+- Heat dries earth and supports glass tech.
 
 ### 8. Technology Layer
 
@@ -274,7 +276,7 @@ Initial tech:
 
 Expansion tech:
 
-- Reinforced packed sand.
+- Reinforced packed earth.
 - Bind spell.
 - Lens tower.
 - Water pressure gates.
@@ -306,7 +308,7 @@ Sync principle:
 
 - Host authoritative simulation.
 - Clients send high-level actions.
-- Do not sync every sand cell every frame.
+- Do not sync every material particle or terrain cell every frame.
 
 ## Recommended Unity Structure
 
@@ -334,7 +336,7 @@ Assets/
 
 ## First Production Vertical Slice
 
-Name: Sand Mage First Wall
+Name: Terra Mage First Wall
 
 Purpose: prove the game feel before expanding scope.
 
@@ -342,7 +344,7 @@ Player story:
 
 ```text
 The player controls a tiny 30 cm mage in a Minecraft-like seed-generated sandbox.
-They walk through oversized sand, rocks, and water features, lift sand with magic,
+They walk through oversized packed dirt blocks, earth piles, rocks, and water features, lift loose earth with magic,
 place it into a wall, compress it into a hard block, save it as a quick block,
 then compress another mass into a physics projectile and use both building and
 action spells to protect a core from a small enemy wave.
@@ -356,12 +358,12 @@ Required systems:
 - Weapon wheel range switching placeholder.
 - Interact raycast.
 - Beach seed test scene.
-- Small sand grid.
+- Small earth/material interaction grid or block set.
 - Lift/place/compress spell.
-- Physics throw for compressed sand.
+- Physics throw for compressed earth.
 - Basic material heat action.
-- PackedSand block.
-- Molten sand/glass hazard placeholder.
+- PackedEarth block.
+- Molten glass hazard placeholder.
 - Quick block prototype.
 - Core health.
 - Runner enemy.
@@ -377,11 +379,11 @@ Acceptance criteria:
 - Player character reads as a simple chunky cartoon mage with robe/cloak/staff class identity.
 - Mouse drag can trigger left swing, right swing, and overhead melee actions.
 - Weapon wheel can switch at least two melee range profiles.
-- Player can lift/place sand using the reticle.
-- Player can compress sand into a stable wall block.
+- Player can lift/place loose earth using the reticle.
+- Player can compress earth into a stable packed dirt wall block.
 - Player can compress loose material into a throwable sphere.
 - Thrown compressed material can damage or knock back a basic enemy.
-- Heating sand can create a simple molten/glass hazard placeholder.
+- Heating earth can create a simple molten/glass hazard placeholder.
 - Player can save/place one quick block template.
 - Enemy can spawn, move toward the core, and damage it.
 - A built wall can slow or block the enemy route.
@@ -417,21 +419,21 @@ Exit:
 
 Deliver:
 
-- Small sand/material grid.
-- DrySand placement.
+- Small earth/material grid or packed block set.
+- LooseEarth placement.
 - Lift material action.
 - Place material action.
 - Compress action.
 
 Exit:
 
-- Player can create a simple wall from sand and compress it.
+- Player can create a simple wall from loose earth and compress it.
 
 ### Week 3: Building And Quick Blocks
 
 Deliver:
 
-- PackedSand block.
+- PackedEarth block.
 - Quick block save data.
 - Quick block placement.
 - Resource cost placeholder.
@@ -448,7 +450,7 @@ Deliver:
 - Deterministic seed input.
 - Beach test terrain.
 - Water boundary.
-- Stone/sand resource areas.
+- Stone/earth resource areas.
 - Core placement zone.
 
 Exit:
@@ -544,11 +546,11 @@ Phase: PROTOTYPE_PLAN
 Outputs:
 
 - Designer routing.
-- Creator asset list for mage, sand, wall, core, runner.
+- Creator asset list for mage, earth particles, packed dirt wall, core, runner.
 - Programmer Unity implementation plan.
 - QA targets.
 
-### Task 2: Draft Unity Architecture For Sand Mage First Wall
+### Task 2: Draft Unity Architecture For Terra Mage First Wall
 
 Phase: PROTOTYPE_PLAN
 
@@ -566,7 +568,7 @@ Phase: PROTOTYPE_PLAN
 
 Outputs under `workspace/creator_outputs/`:
 
-- Tiny sand mage placeholder.
+- Tiny terra mage placeholder.
 - Sand cell/block placeholders.
 - Core placeholder.
 - Runner enemy placeholder.
@@ -587,9 +589,9 @@ Outputs:
 
 ## Production Readiness Decision
 
-The AI Office is ready to receive the Sand Mage TD production command. The correct next production command should define:
+The AI Office is ready to receive the Terra Mage TD production command. The correct next production command should define:
 
-- Target slice: `Sand Mage First Wall`.
+- Target slice: `Terra Mage First Wall`.
 - Allowed phase: `PROTOTYPE_PLAN` or `IMPLEMENTATION`.
 - Unity modification approval: yes/no.
 - Art style target.

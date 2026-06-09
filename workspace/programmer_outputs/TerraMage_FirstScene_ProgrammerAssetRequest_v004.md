@@ -1,4 +1,4 @@
-# Sand Mage First Scene v0.0.4 - Programmer Asset Request
+﻿# Terra Mage First Scene v0.0.4 - Programmer Asset Request
 
 Programmer AI requests no Blender asset yet. The first scene must use Unity primitives so gameplay can be validated before Creator work.
 

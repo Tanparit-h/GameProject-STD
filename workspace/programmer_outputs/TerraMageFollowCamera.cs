@@ -1,8 +1,8 @@
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace SandMageTD
+namespace TerraMageTD
 {
-    public sealed class SandMageFollowCamera : MonoBehaviour
+    public sealed class TerraMageFollowCamera : MonoBehaviour
     {
         [SerializeField] private Transform target;
         [SerializeField] private Vector3 offset = new Vector3(0f, 1.2f, -2.4f);

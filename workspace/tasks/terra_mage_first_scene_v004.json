@@ -1,0 +1,9 @@
+{
+  "id": "terra-mage-first-scene-v004",
+  "phase": "IMPLEMENTATION",
+  "title": "Terra Mage first playable scene with mock character",
+  "request": "Create the first playable Terra Mage scene and a mock tiny mage character that can walk, run, and jump inside the scene. Programmer AI leads first. Use primitive mock art only; Creator/Blender assets stay secondary until Programmer requests specific assets. The scene must be set up and validated in Unity batchmode.",
+  "approval": {
+    "implementation": true
+  }
+}
