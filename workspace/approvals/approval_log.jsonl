@@ -1,1 +1,2 @@
 {"timestamp": "2026-06-08T23:55:38.713457+00:00", "task_id": "feature-interaction-v1", "phase": "IMPLEMENTATION", "decision": "approved", "owner": "codex", "reason": "Implementation vertical slice passed release gate."}
+{"timestamp": "2026-06-09T00:15:35.281226+00:00", "task_id": "feature-door-toggle-v1", "phase": "IMPLEMENTATION", "decision": "skipped", "owner": "codex", "reason": "Task is PROTOTYPE_PLAN only; Unity implementation requires approval."}

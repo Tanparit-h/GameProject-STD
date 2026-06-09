@@ -2,65 +2,77 @@ import bpy
 import os
 from mathutils import Vector
 
-# Set export directory
+# ตั้งค่าโฟลเดอร์สำหรับ export
 export_dir = os.getenv("AI_STUDIO_EXPORT_DIR")
 if not export_dir:
     export_dir = os.path.join(os.getcwd(), "exports")
 os.makedirs(export_dir, exist_ok=True)
 
-# Clear existing objects
+# ล้าง scene ก่อนสร้าง object
 bpy.ops.object.select_all(action="SELECT")
 bpy.ops.object.delete()
 
 def create_material(name, color):
     mat = bpy.data.materials.new(name)
-    mat.diffuse_color = color  # RGBA 4 values
+    mat.diffuse_color = color  # RGBA 4 ค่า
     return mat
 
-def create_text_label(text, location, align_x="CENTER", align_y="CENTER"):
-    bpy.ops.object.text_add(location=location)
+# สร้าง Cube Placeholder
+cube = bpy.ops.mesh.primitive_cube_add(location=(0, 0, 0))
+cube_obj = bpy.context.object
+cube_obj.scale = (1, 1, 1)
+cube_mat = create_material("Cube_Material", (0.0, 0.0, 1.0, 1.0))
+cube_obj.data.materials.append(cube_mat)
+
+# สร้าง Door Placeholder (Rectangle)
+door = bpy.ops.mesh.primitive_cube_add(location=(2, 0, 0))
+door_obj = bpy.context.object
+door_obj.scale = (1, 0.2, 1)  # ปรับเป็น Rectangle
+door_mat = create_material("Door_Material", (0.0, 1.0, 0.0, 1.0))
+door_obj.data.materials.append(door_mat)
+
+# สร้าง Sphere Placeholder
+sphere = bpy.ops.mesh.primitive_uv_sphere_add(location=(-2, 0, 0))
+sphere_obj = bpy.context.object
+sphere_mat = create_material("Sphere_Material", (1.0, 1.0, 0.0, 1.0))
+sphere_obj.data.materials.append(sphere_mat)
+
+# สร้าง Text Label สำหรับ Object
+def add_text_label(obj, text, align_x="CENTER", align_y="CENTER"):
+    bpy.ops.object.text_add(location=obj.location)
     text_obj = bpy.context.object
     text_obj.data.body = text
     text_obj.data.align_x = align_x
     text_obj.data.align_y = align_y
-    text_obj.data.size = 0.05
-    text_obj.data.extrude = 0.01
-    text_obj.data.bevel_depth = 0.005
+    text_obj.data.size = 20  # ปรับขนาดตัวอักษร
+    text_obj.location = obj.location + Vector((0, 0.5, 0))  # ปรับตำแหน่งให้อยู่เหนือ object
+    text_mat = create_material("Text_Material", (1.0, 1.0, 1.0, 1.0))
+    text_obj.data.materials.append(text_mat)
     return text_obj
 
-# Create placeholder objects
-# 1. Cube (Interactable Box)
-cube = bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, 0.5))
-cube_obj = bpy.context.object
-cube_mat = create_material("Cube_Material", (0.2, 0.4, 0.8, 1.0))
-cube_obj.data.materials.append(cube_mat)
-cube_label = create_text_label("Interactable Box", (0, 0, 0.75))
+# สร้าง Text Label สำหรับ Cube
+cube_text = add_text_label(cube_obj, "Cube Placeholder", align_x="CENTER", align_y="CENTER")
 
-# 2. Rectangle (Interactable Door)
-door = bpy.ops.mesh.primitive_cube_add(size=1, location=(1.5, 0, 0.5))
-door_obj = bpy.context.object
-door_obj.scale = (2, 0.2, 1)  # Create rectangle shape
-door_mat = create_material("Door_Material", (0.8, 0.2, 0.4, 1.0))
-door_obj.data.materials.append(door_mat)
-door_label = create_text_label("Interactable Door", (1.5, 0, 0.75))
+# สร้าง Text Label สำหรับ Door
+door_text = add_text_label(door_obj, "Door Placeholder", align_x="CENTER", align_y="CENTER")
 
-# 3. Sphere (Interactable Sphere)
-sphere = bpy.ops.mesh.primitive_uv_sphere_add(radius=0.5, location=(-1.5, 0, 0.5))
-sphere_obj = bpy.context.object
-sphere_mat = create_material("Sphere_Material", (0.4, 0.8, 0.2, 1.0))
-sphere_obj.data.materials.append(sphere_mat)
-sphere_label = create_text_label("Interactable Sphere", (-1.5, 0, 0.75))
+# สร้าง Text Label สำหรับ Sphere
+sphere_text = add_text_label(sphere_obj, "Sphere Placeholder", align_x="CENTER", align_y="CENTER")
 
-# Set up camera and light
-camera = bpy.ops.object.camera_add(location=(0, -5, 3), rotation=(1.1, 0, 0))
-camera_obj = bpy.context.object
-bpy.context.scene.camera = camera_obj
+# ตั้งค่า camera และ light
+bpy.ops.object.camera_add(location=(5, 5, 5), rotation=(1.1, 0, 0))
+camera = bpy.context.object
+bpy.context.scene.camera = camera
 
-light = bpy.ops.object.light_add(type='SUN', location=(0, 5, 5))
-light_obj = bpy.context.object
-light_obj.data.energy = 5
+bpy.ops.object.light_add(type='SUN', radius=0.1)
+light = bpy.context.object
+light.data.energy = 5
 
-# Export as GLB
-export_path = os.path.join(export_dir, "interactable_placeholders.glb")
+# ปรับการ render
+bpy.context.scene.render.engine = 'CYCLES'
+bpy.context.scene.cycles.device = 'GPU'
+
+# สร้างไฟล์ export
+export_path = os.path.join(export_dir, "door_placeholder.glb")
 bpy.ops.export_scene.gltf(filepath=export_path, export_format="GLB")
 print("EXPORTED:", export_path)
