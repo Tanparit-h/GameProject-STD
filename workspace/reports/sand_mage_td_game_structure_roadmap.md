@@ -527,6 +527,14 @@ Manager brief
 -> commit checkpoint
 ```
 
+Codex/Office response rule:
+
+- After Codex sends a task to Office AI, Codex should wait for the final Office response instead of consuming every intermediate role output.
+- Office AI must write the full detailed report to `workspace/reports/latest_report.md`.
+- After QA AI finishes review, Office AI must write the compact handoff response for Codex to `workspace/reports/codex_response.md`.
+- Use `python -m tools.office task <task-id> --run --response-only` when Codex only needs the QA-complete response.
+- This keeps token usage lower while preserving the full audit trail on disk.
+
 ## Immediate Next AI Office Tasks
 
 ### Task 1: Create First Wall Feature Plan

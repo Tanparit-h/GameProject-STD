@@ -53,6 +53,14 @@ Run a registered task:
 .\.venv\Scripts\python.exe -m tools.task_runner feature-interaction-v1 --run
 ```
 
+Run a registered task and return only the QA-complete Office response for Codex:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.office task feature-interaction-v1 --run --response-only
+```
+
+Use response-only mode when Codex has already handed the task to Office AI and should wait for the final QA-reviewed handoff instead of reading every role log. The detailed report is still written to `workspace/reports/latest_report.md`; the compact handoff is written to `workspace/reports/codex_response.md`.
+
 ## Approval Records
 
 Approval decisions are recorded as JSON Lines:

@@ -46,6 +46,7 @@ def main() -> int:
     task_parser = subparsers.add_parser("task")
     task_parser.add_argument("task_id")
     task_parser.add_argument("--run", action="store_true")
+    task_parser.add_argument("--response-only", action="store_true")
 
     args = parser.parse_args()
 
@@ -66,7 +67,7 @@ def main() -> int:
     if args.command == "tasks":
         return print_tasks()
     if args.command == "task":
-        print(run_task(args.task_id, dry_run=not args.run))
+        print(run_task(args.task_id, dry_run=not args.run, response_only=args.response_only))
         return 0
 
     return 1

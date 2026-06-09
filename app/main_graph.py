@@ -1221,6 +1221,40 @@ Programmer required: {state["programmer_required"]}
     report_path = output_dir / "latest_report.md"
     report_path.write_text(report, encoding="utf-8")
 
+    codex_response = f"""# AI Office Response To Codex
+
+## Status
+
+{final_status}
+
+## Phase
+
+{state["phase"]}
+
+## QA Gate Summary
+
+- Creator gate: {state["creator_gate_status"] or "SKIPPED"}
+- Programmer gate: {state["programmer_gate_status"] or "SKIPPED"}
+- Unity gate: {state["unity_gate_status"] or "SKIPPED"}
+
+## Approval Summary
+
+- Creator approval: {state["creator_approval_status"] or "SKIPPED"}
+- Programmer approval: {state["programmer_approval_status"] or "SKIPPED"}
+- Unity approval: {state["unity_approval_status"] or "SKIPPED"}
+
+## Output Files
+
+{chr(10).join(f"- {path}" for path in state["programmer_file_paths"]) or "- none"}
+
+## Codex Next Action
+
+Read `workspace/reports/latest_report.md` only if detailed role output is needed. Otherwise use this response as the complete Office AI handoff after QA review.
+"""
+
+    codex_response_path = output_dir / "codex_response.md"
+    codex_response_path.write_text(codex_response, encoding="utf-8")
+
     state["final_status"] = f"{final_status} | Report written: {report_path}"
     return state
 
