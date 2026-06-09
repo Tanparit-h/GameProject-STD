@@ -25,6 +25,11 @@
       "id": "feature-quest-marker-v1",
       "file": "quest_marker_prototype.json",
       "status": "backlog"
+    },
+    {
+      "id": "sand-mage-first-wall-v003",
+      "file": "sand_mage_first_wall_v003.json",
+      "status": "implementation_requested"
     }
   ]
 }

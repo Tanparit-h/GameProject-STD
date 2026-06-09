@@ -1,5 +1,9 @@
 # Sand Mage TD - Game Structure And Production Roadmap
 
+Plan version: 0.0.3
+
+Version status: frozen for first implementation execution.
+
 Source concept: `D:\Planing\Sand_Mage_TD_Backup_Roadmap.md`
 
 ## Product Definition

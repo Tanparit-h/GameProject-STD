@@ -11,6 +11,7 @@ WORKSPACE_DIR = PROJECT_ROOT / "workspace"
 LOG_DIR = WORKSPACE_DIR / "logs"
 CREATOR_EXPORT_DIR = WORKSPACE_DIR / "creator_outputs" / "exports"
 PROGRAMMER_OUTPUT_DIR = WORKSPACE_DIR / "programmer_outputs"
+CREATOR_COPY_ALLOWLIST = PROGRAMMER_OUTPUT_DIR / "CreatorAssetCopyAllowlist.txt"
 
 DEFAULT_UNITY_PROJECT = PROJECT_ROOT / "game_project" / "STDProject"
 
@@ -101,14 +102,26 @@ def build_copy_plan(project_path: str | Path | None = None) -> list[tuple[Path, 
 
     plan: list[tuple[Path, Path]] = []
 
-    if CREATOR_EXPORT_DIR.exists():
+    allowed_assets: set[str] = set()
+    if CREATOR_COPY_ALLOWLIST.exists():
+        allowed_assets = {
+            line.strip()
+            for line in CREATOR_COPY_ALLOWLIST.read_text(encoding="utf-8", errors="replace").splitlines()
+            if line.strip() and not line.strip().startswith("#")
+        }
+
+    if CREATOR_EXPORT_DIR.exists() and allowed_assets:
         for source in sorted(CREATOR_EXPORT_DIR.glob("*.glb")):
-            plan.append((source.resolve(), project / "Assets" / "AIAssets" / source.name))
+            if source.name in allowed_assets:
+                plan.append((source.resolve(), project / "Assets" / "AIAssets" / source.name))
 
     if PROGRAMMER_OUTPUT_DIR.exists():
         script_map = {
             "InteractSystem_Draft.cs": "InteractSystem.cs",
             "InteractableObject_Draft.cs": "InteractableObject.cs",
+            "SandMageMaterialSystem.cs": "SandMageTD/SandMageMaterialSystem.cs",
+            "SandMageActionBuildController.cs": "SandMageTD/SandMageActionBuildController.cs",
+            "SandMageMeleeGestureController.cs": "SandMageTD/SandMageMeleeGestureController.cs",
         }
         for draft_name, target_name in script_map.items():
             source = PROGRAMMER_OUTPUT_DIR / draft_name
