@@ -39,6 +39,12 @@ Dashboard index:
 .\.venv\Scripts\python.exe -m tools.report_index
 ```
 
+Static dashboard:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.dashboard
+```
+
 Prototype plan workflow:
 
 ```powershell
