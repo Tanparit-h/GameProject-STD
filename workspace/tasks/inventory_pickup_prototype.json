@@ -1,0 +1,9 @@
+{
+  "id": "feature-inventory-pickup-v1",
+  "phase": "PROTOTYPE_PLAN",
+  "title": "Inventory pickup prototype",
+  "request": "Plan a prototype where the player presses E near an item placeholder to collect it into a simple inventory list. Include creator placeholder asset plan, programmer draft logic, QA targets, edge cases, and implementation notes, but do not modify Unity yet.",
+  "approval": {
+    "implementation": false
+  }
+}

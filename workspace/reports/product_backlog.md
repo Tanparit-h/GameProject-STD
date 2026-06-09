@@ -35,7 +35,7 @@ Goal:
 
 Acceptance criteria:
 
-- At least three registered feature archetypes.
+- At least five registered feature archetypes.
 - Each has a task file and deterministic validation expectations.
 - Release gate validates registry consistency.
 

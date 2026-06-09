@@ -10,6 +10,21 @@
       "id": "feature-door-toggle-v1",
       "file": "door_toggle_prototype.json",
       "status": "prototype_planned"
+    },
+    {
+      "id": "feature-dialogue-prompt-v1",
+      "file": "dialogue_prompt_prototype.json",
+      "status": "backlog"
+    },
+    {
+      "id": "feature-inventory-pickup-v1",
+      "file": "inventory_pickup_prototype.json",
+      "status": "backlog"
+    },
+    {
+      "id": "feature-quest-marker-v1",
+      "file": "quest_marker_prototype.json",
+      "status": "backlog"
     }
   ]
 }
