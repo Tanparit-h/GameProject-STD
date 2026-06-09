@@ -98,6 +98,7 @@ public static class TerraMageFirstSceneSetup
         staff.transform.localRotation = Quaternion.Euler(12f, 0f, 0f);
         staff.transform.localScale = new Vector3(0.015f, 0.22f, 0.015f);
         Tint(staff, new Color(0.45f, 0.28f, 0.18f));
+        meleeGestureController.SetWeaponVisual(staff.transform);
 
         return player;
     }

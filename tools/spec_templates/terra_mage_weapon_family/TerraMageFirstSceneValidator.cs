@@ -73,6 +73,11 @@ public static class TerraMageFirstSceneValidator
             throw new InvalidOperationException("TerraMageMeleeGestureController must use TerraMage_Camera for melee hit checks.");
         }
 
+        if (meleeGestureController.WeaponVisual == null)
+        {
+            throw new InvalidOperationException("TerraMageMeleeGestureController must reference TerraMage_MockStaff for swing animation.");
+        }
+
         RequireObject("TerraMage_AimMarker");
         RequireObject("TerraMage_Ground");
         RequireObject("TerraMage_CoreMarker");
