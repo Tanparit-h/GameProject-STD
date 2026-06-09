@@ -45,6 +45,14 @@ Static dashboard:
 .\.venv\Scripts\python.exe -m tools.dashboard
 ```
 
+Office CLI:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.office status
+.\.venv\Scripts\python.exe -m tools.office dashboard
+.\.venv\Scripts\python.exe -m tools.office release-gate
+```
+
 Prototype plan workflow:
 
 ```powershell
