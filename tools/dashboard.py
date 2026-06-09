@@ -25,6 +25,7 @@ def h(value: object) -> str:
 def render_dashboard() -> str:
     status = collect_status()
     approvals = read_approvals()
+    latest = status.get("latest_report_summary", {})
 
     tasks = "".join(
         "<li>"
@@ -119,6 +120,15 @@ def render_dashboard() -> str:
     .bad {{ color: var(--bad); }}
     .neutral {{ color: var(--neutral); }}
     ul {{ margin: 0; padding-left: 18px; }}
+    pre {{
+      margin: 0;
+      padding: 10px;
+      border-radius: 6px;
+      background: #f3f4f1;
+      border: 1px solid var(--line);
+      overflow: auto;
+      font-family: Consolas, monospace;
+    }}
     table {{
       width: 100%;
       border-collapse: collapse;
@@ -162,6 +172,21 @@ def render_dashboard() -> str:
         <dt>Report clean</dt><dd><span class="pill {status_class(status["latest_report_clean"])}">{h(status["latest_report_clean"])}</span></dd>
         <dt>Approvals</dt><dd>{h(status["approval_count"])}</dd>
       </dl>
+    </section>
+    <section>
+      <h2>Latest Run</h2>
+      <dl>
+        <dt>Task</dt><dd>{h(latest.get("task_id", "none") or "none")}</dd>
+        <dt>Family</dt><dd>{h(latest.get("task_family", "none") or "none")}</dd>
+        <dt>Phase</dt><dd>{h(latest.get("phase", "none") or "none")}</dd>
+        <dt>Final</dt><dd><span class="pill {status_class(latest.get("final_status", ""))}">{h(latest.get("final_status", "none") or "none")}</span></dd>
+      </dl>
+    </section>
+    <section>
+      <h2>Live Monitor</h2>
+      <p>Run:</p>
+      <pre>.\\.venv\\Scripts\\python.exe -m tools.office monitor</pre>
+      <p>Then open <code>http://127.0.0.1:8765</code> for live jobs, role activity, and order dispatch.</p>
     </section>
     <section>
       <h2>Task Queue</h2>

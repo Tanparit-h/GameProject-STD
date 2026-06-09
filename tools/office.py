@@ -4,6 +4,7 @@ import sys
 
 from tools.family_scaffold import scaffold_programmer_family
 from tools.dashboard import write_dashboard
+from tools.office_monitor import DEFAULT_HOST, DEFAULT_PORT, serve_monitor
 from tools.programmer_output_specs import list_programmer_family_definitions
 from tools.report_index import collect_status, write_report_index
 from tools.release_notes import write_release_notes
@@ -60,6 +61,9 @@ def main() -> int:
     subparsers.add_parser("release-notes")
     subparsers.add_parser("tasks")
     subparsers.add_parser("families")
+    monitor_parser = subparsers.add_parser("monitor")
+    monitor_parser.add_argument("--host", default=DEFAULT_HOST)
+    monitor_parser.add_argument("--port", type=int, default=DEFAULT_PORT)
 
     scaffold_parser = subparsers.add_parser("scaffold-family")
     scaffold_parser.add_argument("family_key")
@@ -89,6 +93,8 @@ def main() -> int:
         return print_tasks()
     if args.command == "families":
         return print_families()
+    if args.command == "monitor":
+        return serve_monitor(host=args.host, port=args.port)
     if args.command == "scaffold-family":
         return scaffold_family(args.family_key)
     if args.command == "task":

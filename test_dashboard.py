@@ -10,6 +10,8 @@ class DashboardTests(unittest.TestCase):
         self.assertIn("AI Game Studio Dashboard", html)
         self.assertIn("Repository", html)
         self.assertIn("Release State", html)
+        self.assertIn("Latest Run", html)
+        self.assertIn("Live Monitor", html)
         self.assertIn("Task Queue", html)
         self.assertIn("Approvals", html)
 

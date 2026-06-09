@@ -29,6 +29,13 @@ class OfficeCliTests(unittest.TestCase):
             with redirect_stdout(StringIO()):
                 self.assertEqual(main(), 1)
 
+    def test_monitor_command_routes_to_monitor_service(self):
+        with patch("tools.office.serve_monitor", return_value=0) as mocked_monitor:
+            with patch("sys.argv", ["office", "monitor", "--host", "127.0.0.1", "--port", "9001"]):
+                with redirect_stdout(StringIO()):
+                    self.assertEqual(main(), 0)
+        mocked_monitor.assert_called_once_with(host="127.0.0.1", port=9001)
+
 
 if __name__ == "__main__":
     unittest.main()

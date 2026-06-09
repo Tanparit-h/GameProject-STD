@@ -20,18 +20,30 @@ class ReportIndexTests(unittest.TestCase):
             "tasks",
             "approval_count",
             "task_details",
+            "latest_report_summary",
         ]:
             self.assertIn(key, status)
 
     def test_collect_status_accepts_implementation_report(self):
         report = (
+            "## Task Metadata\n\n"
+            "Task id: feature-interaction-v1\n\n"
+            "Task file: workspace\\\\tasks\\\\interaction_vertical_slice.json\n\n"
+            "Task family: interaction_vertical_slice\n\n"
+            "---\n\n"
             "## Phase\n\nIMPLEMENTATION\n"
+            "---\n\n"
+            "## 4.1 Creator Gate Status\n\nSKIPPED\n\n---\n\n"
+            "## 7.1 Programmer Gate Status\n\nCLEAN_PASS\n\n---\n\n"
+            "## 9.5 Unity Evidence Report\n\n"
+            "## 9.6 Unity Gate Status\n\nCLEAN_PASS\n\n---\n\n"
             "DETERMINISTIC_UNITY_GATE\n"
             "Validation passed: True\n"
             "Scene setup passed: True\n"
             "Scene validation passed: True\n"
             "CLEAN_PASS\n"
-            "ROLE_GRAPH_OK\n"
+            "\n---\n\n"
+            "## Final Status\n\nROLE_GRAPH_OK\n"
         )
         original_exists = Path.exists
         original_read_text = Path.read_text
@@ -51,6 +63,8 @@ class ReportIndexTests(unittest.TestCase):
                 status = collect_status()
 
         self.assertTrue(status["latest_report_clean"])
+        self.assertEqual(status["latest_report_summary"]["task_family"], "interaction_vertical_slice")
+        self.assertEqual(status["latest_report_summary"]["final_status"], "ROLE_GRAPH_OK")
 
 
 if __name__ == "__main__":
