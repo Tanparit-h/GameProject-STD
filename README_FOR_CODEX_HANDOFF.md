@@ -15,6 +15,7 @@ NEXT_STEPS.md
 CODEX_TASK.md
 workspace/reports/production_readiness_checklist.md
 workspace/reports/index.md
+workspace/reports/office_user_manual.md
 ```
 
 Current milestone:

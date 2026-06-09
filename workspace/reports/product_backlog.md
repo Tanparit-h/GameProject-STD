@@ -27,6 +27,11 @@ Acceptance criteria:
 - Shows approval records.
 - Provides commands or buttons for dry-run, prototype plan, implementation run, and dashboard refresh.
 
+Current support:
+
+- Office CLI and generated static dashboard exist.
+- User manual exists at `workspace/reports/office_user_manual.md`.
+
 ### P0: Multi-Feature Regression
 
 Goal:
