@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace TerraMageTD
 {
@@ -18,6 +19,7 @@ namespace TerraMageTD
         private RaycastHit currentHit;
         private bool hasValidHit;
         private Renderer markerRenderer;
+        private const string CrosshairCanvasName = "TerraMage_CrosshairCanvas";
 
         public Camera AimCamera => aimCamera;
         public Transform DistanceOrigin => distanceOrigin;
@@ -41,6 +43,8 @@ namespace TerraMageTD
             {
                 markerRenderer = aimMarker.GetComponent<Renderer>();
             }
+
+            EnsureCrosshairUi();
         }
 
         public void SetAimCamera(Camera newAimCamera)
@@ -84,8 +88,7 @@ namespace TerraMageTD
             currentTarget = null;
             hasValidHit = false;
 
-            Vector2 mousePosition = TerraMageInput.MousePosition();
-            Ray ray = aimCamera.ScreenPointToRay(mousePosition);
+            Ray ray = aimCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
             RaycastHit[] hits = Physics.RaycastAll(ray, maxAimDistance, aimMask, QueryTriggerInteraction.Ignore);
 
             float closestDistance = float.MaxValue;
@@ -163,6 +166,42 @@ namespace TerraMageTD
             Transform origin = distanceOrigin != null ? distanceOrigin : aimCamera.transform;
             float distance = Vector3.Distance(origin.position, currentTarget.GetAimPoint());
             Debug.Log($"Aim debug: {currentTarget.DisplayName} distance = {distance:0.00}m");
+        }
+
+        private static void EnsureCrosshairUi()
+        {
+            if (GameObject.Find(CrosshairCanvasName) != null)
+            {
+                return;
+            }
+
+            var canvasObject = new GameObject(CrosshairCanvasName);
+            var canvas = canvasObject.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 10;
+
+            var scaler = canvasObject.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
+            canvasObject.AddComponent<GraphicRaycaster>();
+
+            CreateCrosshairLine("TerraMage_CrosshairHorizontal", canvasObject.transform, new Vector2(22f, 3f));
+            CreateCrosshairLine("TerraMage_CrosshairVertical", canvasObject.transform, new Vector2(3f, 22f));
+        }
+
+        private static void CreateCrosshairLine(string objectName, Transform parent, Vector2 size)
+        {
+            var lineObject = new GameObject(objectName, typeof(RectTransform));
+            var rect = lineObject.GetComponent<RectTransform>();
+            rect.SetParent(parent, false);
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta = size;
+
+            var image = lineObject.AddComponent<RawImage>();
+            image.color = new Color(0.95f, 0.98f, 1f, 0.86f);
         }
     }
 }

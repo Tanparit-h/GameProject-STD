@@ -130,7 +130,7 @@ namespace TerraMageTD
                 return;
             }
 
-            Ray ray = aimCamera.ScreenPointToRay(TerraMageInput.MousePosition());
+            Ray ray = aimCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
             if (!Physics.Raycast(ray, out RaycastHit hit, Mathf.Max(1f, CurrentPullRange), materialMask))
             {
                 return;
