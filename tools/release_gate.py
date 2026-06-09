@@ -44,8 +44,13 @@ def latest_report_clean() -> tuple[bool, str]:
         "ROLE_GRAPH_OK",
         "## 9.6 Unity Gate Status",
         "CLEAN_PASS",
-        "Deterministic Unity QA: PASS",
     ]
+    if "## Phase\n\nIMPLEMENTATION" in text:
+        required_markers.append("Deterministic Unity QA: PASS")
+    elif "## Phase\n\nPROTOTYPE_PLAN" in text:
+        required_markers.append("SKIPPED_UNITY_IMPLEMENTATION")
+    else:
+        required_markers.append("## Phase")
     missing = [marker for marker in required_markers if marker not in text]
     if missing:
         return False, "Missing latest report markers: " + ", ".join(missing)

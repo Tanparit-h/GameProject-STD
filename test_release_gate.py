@@ -1,6 +1,10 @@
 import unittest
 
+from pathlib import Path
+from unittest.mock import patch
+
 from tools.release_gate import dashboard_index_clean, latest_report_clean
+import tools.release_gate as release_gate
 
 
 class ReleaseGateTests(unittest.TestCase):
@@ -15,6 +19,19 @@ class ReleaseGateTests(unittest.TestCase):
 
         self.assertIsInstance(ok, bool)
         self.assertIsInstance(message, str)
+
+    def test_latest_report_clean_accepts_prototype_plan_skip(self):
+        report = (
+            "## Phase\n\nPROTOTYPE_PLAN\n"
+            "## 9.1 Unity Implementation Result\n\nSKIPPED_UNITY_IMPLEMENTATION\n"
+            "## 9.6 Unity Gate Status\n\nCLEAN_PASS\n"
+            "## Final Status\n\nROLE_GRAPH_OK\n"
+        )
+        with patch.object(release_gate, "LATEST_REPORT", Path("mock_report.md")):
+            with patch("pathlib.Path.exists", return_value=True), patch("pathlib.Path.read_text", return_value=report):
+                ok, _ = latest_report_clean()
+
+        self.assertTrue(ok)
 
 
 if __name__ == "__main__":

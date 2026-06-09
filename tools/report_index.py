@@ -8,6 +8,7 @@ WORKSPACE_DIR = PROJECT_ROOT / "workspace"
 REPORTS_DIR = WORKSPACE_DIR / "reports"
 TASKS_DIR = WORKSPACE_DIR / "tasks"
 APPROVAL_LOG = WORKSPACE_DIR / "approvals" / "approval_log.jsonl"
+LATEST_REPORT = REPORTS_DIR / "latest_report.md"
 UNITY_PROJECT = PROJECT_ROOT / "game_project" / "STDProject"
 
 
@@ -26,7 +27,7 @@ def run_git(args: list[str], cwd: Path) -> str:
 
 
 def collect_status() -> dict[str, object]:
-    latest_report = REPORTS_DIR / "latest_report.md"
+    latest_report = LATEST_REPORT
     latest_text = latest_report.read_text(encoding="utf-8", errors="replace") if latest_report.exists() else ""
 
     report_files = sorted(path.name for path in REPORTS_DIR.glob("*.md")) if REPORTS_DIR.exists() else []
@@ -42,13 +43,13 @@ def collect_status() -> dict[str, object]:
         "unity_head": run_git(["log", "--oneline", "-1"], UNITY_PROJECT),
         "unity_status": run_git(["status", "--short"], UNITY_PROJECT) or "clean",
         "latest_report_exists": latest_report.exists(),
-        "latest_report_clean": all(
-            marker in latest_text
-            for marker in [
-                "ROLE_GRAPH_OK",
-                "CLEAN_PASS",
-                "Deterministic Unity QA: PASS",
-            ]
+        "latest_report_clean": (
+            "ROLE_GRAPH_OK" in latest_text
+            and "CLEAN_PASS" in latest_text
+            and (
+                ("## Phase\n\nIMPLEMENTATION" in latest_text and "Deterministic Unity QA: PASS" in latest_text)
+                or ("## Phase\n\nPROTOTYPE_PLAN" in latest_text and "SKIPPED_UNITY_IMPLEMENTATION" in latest_text)
+            )
         ),
         "reports": report_files,
         "tasks": task_files,
