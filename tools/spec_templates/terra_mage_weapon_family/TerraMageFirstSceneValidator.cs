@@ -37,6 +37,7 @@ public static class TerraMageFirstSceneValidator
         RequireObject("TerraMage_MockBody");
         RequireObject("TerraMage_MockHood");
         RequireObject("TerraMage_MockStaff");
+        RequireObject("TerraMage_StaffSwingRoot");
 
         var cameraObject = RequireObject("TerraMage_Camera");
         var cameraComponent = RequireComponent<Camera>(cameraObject, "TerraMage_Camera");
@@ -76,6 +77,11 @@ public static class TerraMageFirstSceneValidator
         if (meleeGestureController.WeaponVisual == null)
         {
             throw new InvalidOperationException("TerraMageMeleeGestureController must reference TerraMage_MockStaff for swing animation.");
+        }
+
+        if (meleeGestureController.WeaponSwingRoot == null)
+        {
+            throw new InvalidOperationException("TerraMageMeleeGestureController must reference TerraMage_StaffSwingRoot for visible swing animation.");
         }
 
         RequireObject("TerraMage_AimMarker");

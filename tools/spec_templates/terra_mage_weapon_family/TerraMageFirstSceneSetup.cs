@@ -91,13 +91,19 @@ public static class TerraMageFirstSceneSetup
         hood.transform.localScale = Vector3.one * 0.13f;
         Tint(hood, new Color(0.92f, 0.95f, 1f));
 
+        var staffPivot = new GameObject("TerraMage_StaffSwingRoot");
+        staffPivot.transform.SetParent(player.transform);
+        staffPivot.transform.localPosition = new Vector3(0.13f, 0.08f, 0.03f);
+        staffPivot.transform.localRotation = Quaternion.identity;
+
         var staff = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         staff.name = "TerraMage_MockStaff";
-        staff.transform.SetParent(player.transform);
-        staff.transform.localPosition = new Vector3(0.13f, 0.18f, 0.03f);
+        staff.transform.SetParent(staffPivot.transform);
+        staff.transform.localPosition = new Vector3(0f, 0.1f, 0f);
         staff.transform.localRotation = Quaternion.Euler(12f, 0f, 0f);
         staff.transform.localScale = new Vector3(0.015f, 0.22f, 0.015f);
         Tint(staff, new Color(0.45f, 0.28f, 0.18f));
+        meleeGestureController.SetWeaponSwingRoot(staffPivot.transform);
         meleeGestureController.SetWeaponVisual(staff.transform);
 
         return player;

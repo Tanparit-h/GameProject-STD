@@ -113,10 +113,13 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
             ],
             "TerraMageMeleeGestureController.cs": [
                 "BeginWeaponSwing",
+                "EnsureWeaponSwingRoot",
+                "GetAnimatedWeaponRoot",
                 "PerformQuickAttack",
                 "CurrentMeleeReach",
                 "SphereCastNonAlloc",
                 "SetWeaponVisual",
+                "SetWeaponSwingRoot",
                 "TryFindMeleeHit",
                 "UpdateWeaponSwing",
                 "weaponWheelUI",

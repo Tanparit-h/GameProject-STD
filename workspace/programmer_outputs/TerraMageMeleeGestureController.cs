@@ -30,15 +30,16 @@ namespace TerraMageTD
         [SerializeField] private TerraMageWeaponWheelUI weaponWheelUI;
         [SerializeField] private Camera aimCamera;
         [SerializeField] private Transform weaponVisual;
+        [SerializeField] private Transform weaponSwingRoot;
         [SerializeField] private LayerMask meleeHitMask = ~0;
         [SerializeField] private float meleeHitRadius = 0.12f;
-        [SerializeField] private float swingDuration = 0.18f;
+        [SerializeField] private float swingDuration = 0.26f;
 
         private Vector2 dragStart;
         private bool dragging;
         private readonly RaycastHit[] meleeHitResults = new RaycastHit[MaxMeleeHitResults];
-        private Quaternion weaponRestLocalRotation;
-        private Vector3 weaponRestLocalPosition;
+        private Quaternion swingRootRestLocalRotation;
+        private Vector3 swingRootRestLocalPosition;
         private Quaternion swingTargetLocalRotation;
         private float swingTimer;
         private bool hasWeaponRestPose;
@@ -48,6 +49,7 @@ namespace TerraMageTD
         public TerraMageWeaponDefinition CurrentWeapon => GetCurrentWeapon();
         public Camera AimCamera => aimCamera;
         public Transform WeaponVisual => weaponVisual;
+        public Transform WeaponSwingRoot => weaponSwingRoot;
 
         private void Awake()
         {
@@ -122,6 +124,13 @@ namespace TerraMageTD
         public void SetWeaponVisual(Transform newWeaponVisual)
         {
             weaponVisual = newWeaponVisual;
+            EnsureWeaponSwingRoot();
+            CacheWeaponRestPose();
+        }
+
+        public void SetWeaponSwingRoot(Transform newWeaponSwingRoot)
+        {
+            weaponSwingRoot = newWeaponSwingRoot;
             CacheWeaponRestPose();
         }
 
@@ -223,21 +232,24 @@ namespace TerraMageTD
 
         private void CacheWeaponRestPose()
         {
-            if (weaponVisual == null)
+            EnsureWeaponSwingRoot();
+            Transform animatedRoot = GetAnimatedWeaponRoot();
+            if (animatedRoot == null)
             {
                 hasWeaponRestPose = false;
                 return;
             }
 
-            weaponRestLocalPosition = weaponVisual.localPosition;
-            weaponRestLocalRotation = weaponVisual.localRotation;
-            swingTargetLocalRotation = weaponRestLocalRotation;
+            swingRootRestLocalPosition = animatedRoot.localPosition;
+            swingRootRestLocalRotation = animatedRoot.localRotation;
+            swingTargetLocalRotation = swingRootRestLocalRotation;
             hasWeaponRestPose = true;
         }
 
         private void BeginWeaponSwing(TerraMageMeleeGesture gesture)
         {
-            if (weaponVisual == null)
+            Transform animatedRoot = GetAnimatedWeaponRoot();
+            if (animatedRoot == null)
             {
                 return;
             }
@@ -248,38 +260,66 @@ namespace TerraMageTD
             }
 
             swingTimer = Mathf.Max(0.01f, swingDuration);
-            swingTargetLocalRotation = weaponRestLocalRotation * GetSwingOffset(gesture);
+            swingTargetLocalRotation = swingRootRestLocalRotation * GetSwingOffset(gesture);
         }
 
         private void UpdateWeaponSwing()
         {
-            if (weaponVisual == null || !hasWeaponRestPose)
+            Transform animatedRoot = GetAnimatedWeaponRoot();
+            if (animatedRoot == null || !hasWeaponRestPose)
             {
                 return;
             }
 
             if (swingTimer <= 0f)
             {
-                weaponVisual.localPosition = weaponRestLocalPosition;
-                weaponVisual.localRotation = weaponRestLocalRotation;
+                animatedRoot.localPosition = swingRootRestLocalPosition;
+                animatedRoot.localRotation = swingRootRestLocalRotation;
                 return;
             }
 
             swingTimer = Mathf.Max(0f, swingTimer - Time.deltaTime);
             float normalizedTime = 1f - (swingTimer / Mathf.Max(0.01f, swingDuration));
             float strikeWeight = Mathf.Sin(normalizedTime * Mathf.PI);
-            weaponVisual.localPosition = weaponRestLocalPosition + new Vector3(0f, 0f, 0.035f * strikeWeight);
-            weaponVisual.localRotation = Quaternion.Slerp(weaponRestLocalRotation, swingTargetLocalRotation, strikeWeight);
+            animatedRoot.localPosition = swingRootRestLocalPosition + new Vector3(0f, 0.012f * strikeWeight, 0.08f * strikeWeight);
+            animatedRoot.localRotation = Quaternion.Slerp(swingRootRestLocalRotation, swingTargetLocalRotation, strikeWeight);
+        }
+
+        private void EnsureWeaponSwingRoot()
+        {
+            if (weaponVisual == null || weaponSwingRoot != null)
+            {
+                return;
+            }
+
+            if (weaponVisual.parent != null && weaponVisual.parent.name == "TerraMage_StaffSwingRoot")
+            {
+                weaponSwingRoot = weaponVisual.parent;
+                return;
+            }
+
+            var rootObject = new GameObject("TerraMage_StaffSwingRoot");
+            Transform originalParent = weaponVisual.parent;
+            rootObject.transform.SetParent(originalParent, false);
+            rootObject.transform.position = weaponVisual.TransformPoint(new Vector3(0f, -0.16f, 0f));
+            rootObject.transform.rotation = originalParent != null ? originalParent.rotation : Quaternion.identity;
+            weaponSwingRoot = rootObject.transform;
+            weaponVisual.SetParent(weaponSwingRoot, true);
+        }
+
+        private Transform GetAnimatedWeaponRoot()
+        {
+            return weaponSwingRoot != null ? weaponSwingRoot : weaponVisual;
         }
 
         private static Quaternion GetSwingOffset(TerraMageMeleeGesture gesture)
         {
             return gesture switch
             {
-                TerraMageMeleeGesture.LeftSwing => Quaternion.Euler(8f, -18f, 72f),
-                TerraMageMeleeGesture.RightSwing => Quaternion.Euler(8f, 18f, -72f),
-                TerraMageMeleeGesture.Overhead => Quaternion.Euler(-78f, 0f, 0f),
-                _ => Quaternion.Euler(-42f, 12f, -34f),
+                TerraMageMeleeGesture.LeftSwing => Quaternion.Euler(18f, -42f, 128f),
+                TerraMageMeleeGesture.RightSwing => Quaternion.Euler(18f, 42f, -128f),
+                TerraMageMeleeGesture.Overhead => Quaternion.Euler(-128f, 0f, 0f),
+                _ => Quaternion.Euler(-82f, 26f, -72f),
             };
         }
 
