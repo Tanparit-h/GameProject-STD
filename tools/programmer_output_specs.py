@@ -84,6 +84,45 @@ def is_door_toggle_interaction_request(feature_request: str, task_id: str = "") 
     return has_door and has_toggle and has_interaction
 
 
+def is_inventory_pickup_request(feature_request: str, task_id: str = "") -> bool:
+    normalized_request = _normalize(feature_request)
+    normalized_task_id = _normalize(task_id)
+
+    if normalized_task_id == "feature-inventory-pickup-v1":
+        return True
+
+    has_inventory = "inventory" in normalized_request
+    has_pickup = "pickup" in normalized_request or "collect" in normalized_request
+    has_interaction = "interact" in normalized_request or "press e" in normalized_request
+    return has_inventory and has_pickup and has_interaction
+
+
+def is_quest_marker_request(feature_request: str, task_id: str = "") -> bool:
+    normalized_request = _normalize(feature_request)
+    normalized_task_id = _normalize(task_id)
+
+    if normalized_task_id == "feature-quest-marker-v1":
+        return True
+
+    has_quest = "quest" in normalized_request or "objective" in normalized_request
+    has_marker = "marker" in normalized_request or "point" in normalized_request
+    has_target = "target" in normalized_request or "reached" in normalized_request
+    return has_quest and has_marker and has_target
+
+
+def is_dialogue_prompt_request(feature_request: str, task_id: str = "") -> bool:
+    normalized_request = _normalize(feature_request)
+    normalized_task_id = _normalize(task_id)
+
+    if normalized_task_id == "feature-dialogue-prompt-v1":
+        return True
+
+    has_dialogue = "dialogue" in normalized_request or "npc" in normalized_request
+    has_prompt = "prompt" in normalized_request or "continue" in normalized_request
+    has_interaction = "interact" in normalized_request or "press e" in normalized_request
+    return has_dialogue and has_prompt and has_interaction
+
+
 def default_interact_system() -> str:
     return _clean(
         """
@@ -860,6 +899,1381 @@ def door_toggle_programmer_output_spec() -> ProgrammerOutputSpec:
         },
         scene_setup_method="AIDoorToggleSceneSetup.SetupScene",
         scene_validation_method="AIDoorToggleSceneValidator.ValidateScene",
+    )
+
+
+def inventory_state() -> str:
+    return _clean(
+        """
+        using System.Collections.Generic;
+        using UnityEngine;
+
+        [DisallowMultipleComponent]
+        public sealed class InventoryState : MonoBehaviour
+        {
+            private readonly List<string> collectedItemIds = new();
+
+            public IReadOnlyList<string> CollectedItemIds => collectedItemIds;
+            public int ItemCount => collectedItemIds.Count;
+            public string LastCollectedItemId => ItemCount > 0 ? collectedItemIds[ItemCount - 1] : string.Empty;
+
+            public bool ContainsItem(string itemId)
+            {
+                return !string.IsNullOrWhiteSpace(itemId) && collectedItemIds.Contains(itemId);
+            }
+
+            public bool AddItem(string itemId)
+            {
+                if (string.IsNullOrWhiteSpace(itemId) || collectedItemIds.Contains(itemId))
+                {
+                    return false;
+                }
+
+                collectedItemIds.Add(itemId);
+                Debug.Log($"Inventory collected {itemId}. Total items: {ItemCount}.");
+                return true;
+            }
+        }
+        """
+    )
+
+
+def pickup_interactable() -> str:
+    return _clean(
+        """
+        using UnityEngine;
+
+        [DisallowMultipleComponent]
+        public sealed class PickupInteractable : InteractableObject
+        {
+            [SerializeField] private string itemId = "sun_shard";
+            [SerializeField] private InventoryState inventory;
+            [SerializeField] private Collider pickupCollider;
+            [SerializeField] private GameObject visualRoot;
+            [SerializeField] private bool collected;
+
+            public string ItemId => itemId;
+            public InventoryState Inventory => inventory;
+            public bool IsCollected => collected;
+            public bool VisualVisible => visualRoot == null || visualRoot.activeSelf;
+
+            private void Awake()
+            {
+                if (pickupCollider == null)
+                {
+                    pickupCollider = GetComponent<Collider>();
+                }
+
+                if (visualRoot == null)
+                {
+                    visualRoot = gameObject;
+                }
+
+                ApplyCollectedState();
+            }
+
+            public void ConfigurePickup(
+                InventoryState targetInventory,
+                string pickupItemId,
+                string pickupName,
+                Collider targetCollider,
+                GameObject targetVisual)
+            {
+                inventory = targetInventory;
+                itemId = string.IsNullOrWhiteSpace(pickupItemId) ? "sun_shard" : pickupItemId;
+                pickupCollider = targetCollider != null ? targetCollider : GetComponent<Collider>();
+                visualRoot = targetVisual != null ? targetVisual : gameObject;
+                collected = false;
+                Configure(pickupName, true);
+                ApplyCollectedState();
+            }
+
+            public override void Interact()
+            {
+                if (!TryBeginInteract())
+                {
+                    return;
+                }
+
+                if (inventory == null)
+                {
+                    Debug.Log($"{DisplayName} cannot be collected because no inventory is assigned.");
+                    return;
+                }
+
+                if (!inventory.AddItem(itemId))
+                {
+                    Debug.Log($"{DisplayName} was already collected.");
+                    return;
+                }
+
+                collected = true;
+                Configure(DisplayName, false);
+                ApplyCollectedState();
+                Debug.Log($"Pickup collected {DisplayName} ({itemId}).");
+            }
+
+            private void ApplyCollectedState()
+            {
+                if (pickupCollider != null)
+                {
+                    pickupCollider.enabled = !collected;
+                }
+
+                if (visualRoot != null)
+                {
+                    visualRoot.SetActive(!collected);
+                }
+            }
+        }
+        """
+    )
+
+
+def inventory_pickup_scene_setup() -> str:
+    return _clean(
+        """
+        using UnityEditor;
+        using UnityEditor.SceneManagement;
+        using UnityEngine;
+
+        public static class AIInventoryPickupSceneSetup
+        {
+            private const string ScenePath = "Assets/Scenes/InventoryPickupScene.unity";
+
+            public static void SetupScene()
+            {
+                if (TryValidateExistingScene())
+                {
+                    Debug.Log("AIInventoryPickupSceneSetup skipped rebuild because scene already matches spec.");
+                    return;
+                }
+
+                var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                CreateGround();
+                var inventory = CreatePlayer();
+                CreatePickup(inventory);
+                CreateLight();
+
+                EditorSceneManager.MarkSceneDirty(scene);
+                EditorSceneManager.SaveScene(scene, ScenePath);
+                Debug.Log("AIInventoryPickupSceneSetup complete.");
+            }
+
+            private static bool TryValidateExistingScene()
+            {
+                if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
+                {
+                    return false;
+                }
+
+                try
+                {
+                    AIInventoryPickupSceneValidator.ValidateScene();
+                    return true;
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.Log($"AIInventoryPickupSceneSetup rebuilding scene: {ex.Message}");
+                    return false;
+                }
+            }
+
+            private static void CreateGround()
+            {
+                var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                ground.name = "AIInventory_Ground";
+                ground.transform.position = new Vector3(0f, -0.05f, 0f);
+                ground.transform.localScale = new Vector3(12f, 0.1f, 12f);
+                Tint(ground, new Color(0.24f, 0.29f, 0.33f));
+            }
+
+            private static InventoryState CreatePlayer()
+            {
+                var player = new GameObject("AIInventory_Player");
+                player.transform.position = new Vector3(0f, 1f, -2f);
+
+                var trigger = player.AddComponent<SphereCollider>();
+                trigger.isTrigger = true;
+                trigger.radius = 2.5f;
+
+                var body = player.AddComponent<Rigidbody>();
+                body.isKinematic = true;
+                body.useGravity = false;
+
+                player.AddComponent<InteractSystem>();
+                var inventory = player.AddComponent<InventoryState>();
+
+                var marker = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                marker.name = "AIInventory_PlayerMarker";
+                marker.transform.SetParent(player.transform, false);
+                marker.transform.localPosition = Vector3.zero;
+                marker.transform.localScale = new Vector3(0.6f, 1f, 0.6f);
+                Tint(marker, new Color(0.18f, 0.64f, 0.93f));
+
+                return inventory;
+            }
+
+            private static void CreatePickup(InventoryState inventory)
+            {
+                var pickup = new GameObject("AIInventory_Pickup");
+                pickup.transform.position = new Vector3(0f, 1f, 0f);
+
+                var colliderComponent = pickup.AddComponent<BoxCollider>();
+                colliderComponent.size = new Vector3(0.8f, 0.8f, 0.8f);
+
+                var visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                visual.name = "AIInventory_PickupVisual";
+                visual.transform.SetParent(pickup.transform, false);
+                visual.transform.localPosition = Vector3.zero;
+                visual.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
+                Object.DestroyImmediate(visual.GetComponent<Collider>());
+                Tint(visual, new Color(0.94f, 0.78f, 0.22f));
+
+                var pickupInteractable = pickup.AddComponent<PickupInteractable>();
+                pickupInteractable.ConfigurePickup(inventory, "sun_shard", "Sun Shard", colliderComponent, visual);
+            }
+
+            private static void CreateLight()
+            {
+                var lightObject = new GameObject("AIInventory_Light");
+                lightObject.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+                var light = lightObject.AddComponent<Light>();
+                light.type = LightType.Directional;
+                light.intensity = 1.1f;
+            }
+
+            private static void Tint(GameObject targetObject, Color tint)
+            {
+                foreach (var renderer in targetObject.GetComponentsInChildren<Renderer>())
+                {
+                    var sourceMaterials = renderer.sharedMaterials;
+                    var tintedMaterials = new Material[sourceMaterials.Length];
+
+                    for (int i = 0; i < sourceMaterials.Length; i++)
+                    {
+                        var sourceMaterial = sourceMaterials[i];
+                        if (sourceMaterial == null)
+                        {
+                            continue;
+                        }
+
+                        var tintedMaterial = new Material(sourceMaterial);
+                        if (tintedMaterial.HasProperty("_Color"))
+                        {
+                            tintedMaterial.color = tint;
+                        }
+
+                        tintedMaterials[i] = tintedMaterial;
+                    }
+
+                    renderer.sharedMaterials = tintedMaterials;
+                }
+            }
+        }
+        """
+    )
+
+
+def inventory_pickup_scene_validator() -> str:
+    return _clean(
+        """
+        using System;
+        using UnityEditor.SceneManagement;
+        using UnityEngine;
+
+        public static class AIInventoryPickupSceneValidator
+        {
+            private const string ScenePath = "Assets/Scenes/InventoryPickupScene.unity";
+
+            public static void ValidateScene()
+            {
+                EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+
+                var player = RequireObject("AIInventory_Player");
+                RequireComponent<InteractSystem>(player, "AIInventory_Player");
+                var inventory = RequireComponent<InventoryState>(player, "AIInventory_Player");
+
+                var trigger = RequireComponent<SphereCollider>(player, "AIInventory_Player");
+                if (!trigger.isTrigger)
+                {
+                    throw new InvalidOperationException("AIInventory_Player SphereCollider must be a trigger.");
+                }
+
+                var body = RequireComponent<Rigidbody>(player, "AIInventory_Player");
+                if (!body.isKinematic)
+                {
+                    throw new InvalidOperationException("AIInventory_Player Rigidbody must be kinematic.");
+                }
+
+                RequireObject("AIInventory_Ground");
+                RequireObject("AIInventory_PlayerMarker");
+                var pickupObject = RequireObject("AIInventory_Pickup");
+                var visual = RequireObject("AIInventory_PickupVisual");
+                var pickup = RequireComponent<PickupInteractable>(pickupObject, "AIInventory_Pickup");
+                var colliderComponent = RequireComponent<BoxCollider>(pickupObject, "AIInventory_Pickup");
+
+                if (pickup.Inventory != inventory)
+                {
+                    throw new InvalidOperationException("Pickup must reference the player inventory.");
+                }
+
+                if (pickup.DisplayName != "Sun Shard")
+                {
+                    throw new InvalidOperationException("Pickup prompt should display Sun Shard.");
+                }
+
+                if (pickup.ItemId != "sun_shard")
+                {
+                    throw new InvalidOperationException("Pickup item id must stay deterministic.");
+                }
+
+                if (pickup.IsCollected || inventory.ItemCount != 0)
+                {
+                    throw new InvalidOperationException("Pickup scene must start with an empty inventory.");
+                }
+
+                if (!visual.activeSelf || !colliderComponent.enabled)
+                {
+                    throw new InvalidOperationException("Pickup should start visible and collectible.");
+                }
+
+                pickup.Interact();
+
+                if (!pickup.IsCollected)
+                {
+                    throw new InvalidOperationException("Interacting with the pickup must collect it.");
+                }
+
+                if (inventory.ItemCount != 1 || !inventory.ContainsItem("sun_shard"))
+                {
+                    throw new InvalidOperationException("Collected item must be stored in the player inventory.");
+                }
+
+                if (inventory.LastCollectedItemId != "sun_shard")
+                {
+                    throw new InvalidOperationException("Inventory should report the last collected item.");
+                }
+
+                if (pickup.CanInteract)
+                {
+                    throw new InvalidOperationException("Collected pickup should no longer be interactable.");
+                }
+
+                if (visual.activeSelf || colliderComponent.enabled)
+                {
+                    throw new InvalidOperationException("Collected pickup should hide its visual and collider.");
+                }
+
+                Debug.Log("AIInventoryPickupSceneValidator passed.");
+            }
+
+            private static GameObject RequireObject(string objectName)
+            {
+                var found = GameObject.Find(objectName);
+                if (found == null)
+                {
+                    throw new InvalidOperationException($"Required scene object is missing: {objectName}");
+                }
+
+                return found;
+            }
+
+            private static T RequireComponent<T>(GameObject target, string objectName) where T : Component
+            {
+                var component = target.GetComponent<T>();
+                if (component == null)
+                {
+                    throw new InvalidOperationException($"{objectName} is missing required component {typeof(T).Name}.");
+                }
+
+                return component;
+            }
+        }
+        """
+    )
+
+
+def inventory_pickup_report() -> str:
+    return _clean(
+        """
+        # Inventory Pickup - Implementation Report
+
+        ## Goal
+
+        Deliver a real Unity interaction where the player presses `E` near a pickup placeholder and stores it in a simple inventory list.
+
+        ## Implemented Programmer Outputs
+
+        - `InteractSystem.cs`
+        - `InteractableObject.cs`
+        - `InventoryState.cs`
+        - `PickupInteractable.cs`
+        - `AIInventoryPickupSceneSetup.cs`
+        - `AIInventoryPickupSceneValidator.cs`
+
+        ## Behavior Summary
+
+        - Reuse the shared trigger-based interaction flow.
+        - Collect the `Sun Shard` pickup into `InventoryState`.
+        - Disable the pickup after collection so it cannot be collected twice.
+        - Validate inventory contents and visual state changes in batchmode.
+
+        ## Validation Target
+
+        - Scene: `Assets/Scenes/InventoryPickupScene.unity`
+        - Setup method: `AIInventoryPickupSceneSetup.SetupScene`
+        - Validation method: `AIInventoryPickupSceneValidator.ValidateScene`
+        """
+    )
+
+
+def inventory_pickup_programmer_output_spec() -> ProgrammerOutputSpec:
+    return ProgrammerOutputSpec(
+        key="inventory_pickup",
+        file_contents={
+            "InteractSystem.cs": default_interact_system(),
+            "InteractableObject.cs": default_interactable_object(),
+            "InventoryState.cs": inventory_state(),
+            "PickupInteractable.cs": pickup_interactable(),
+            "AIInventoryPickupSceneSetup.cs": inventory_pickup_scene_setup(),
+            "AIInventoryPickupSceneValidator.cs": inventory_pickup_scene_validator(),
+            "InventoryPickup_ImplementationReport.md": inventory_pickup_report(),
+        },
+        required_snippets={
+            "InteractSystem.cs": [
+                "FindClosestInteractable",
+                "GetComponentInParent<InteractableObject>()",
+                "UpdatePromptFeedback",
+                "Input.GetKeyDown",
+            ],
+            "InteractableObject.cs": [
+                "public virtual void Interact()",
+                "TryBeginInteract",
+                "Configure(",
+            ],
+            "InventoryState.cs": [
+                "CollectedItemIds",
+                "ContainsItem",
+                "Inventory collected",
+            ],
+            "PickupInteractable.cs": [
+                "ConfigurePickup",
+                "inventory.AddItem",
+                "Pickup collected",
+            ],
+            "AIInventoryPickupSceneSetup.cs": [
+                "TryValidateExistingScene",
+                "AIInventory_Pickup",
+                "InventoryState",
+                "AIInventoryPickupSceneSetup complete.",
+            ],
+            "AIInventoryPickupSceneValidator.cs": [
+                "ValidateScene",
+                "must collect it",
+                "sun_shard",
+                "AIInventoryPickupSceneValidator passed.",
+            ],
+            "InventoryPickup_ImplementationReport.md": [
+                "simple inventory list",
+                "Sun Shard",
+                "AIInventoryPickupSceneValidator.ValidateScene",
+            ],
+        },
+        scene_setup_method="AIInventoryPickupSceneSetup.SetupScene",
+        scene_validation_method="AIInventoryPickupSceneValidator.ValidateScene",
+    )
+
+
+def quest_marker_objective() -> str:
+    return _clean(
+        """
+        using UnityEngine;
+
+        [DisallowMultipleComponent]
+        public sealed class QuestMarkerObjective : MonoBehaviour
+        {
+            [SerializeField] private string objectiveName = "Ancient Beacon";
+            [SerializeField] private float reachRadius = 1.2f;
+            [SerializeField] private bool reached;
+
+            public string ObjectiveName => objectiveName;
+            public float ReachRadius => reachRadius;
+            public bool Reached => reached;
+
+            public void ConfigureObjective(string targetName, float targetReachRadius)
+            {
+                objectiveName = string.IsNullOrWhiteSpace(targetName) ? "Ancient Beacon" : targetName;
+                reachRadius = Mathf.Clamp(targetReachRadius, 0.5f, 5f);
+                reached = false;
+            }
+
+            public bool EvaluateReached(Vector3 playerPosition)
+            {
+                if (reached)
+                {
+                    return true;
+                }
+
+                float distance = Vector3.Distance(playerPosition, transform.position);
+                if (distance <= reachRadius)
+                {
+                    reached = true;
+                    Debug.Log($"Quest objective reached: {objectiveName}.");
+                }
+
+                return reached;
+            }
+        }
+        """
+    )
+
+
+def quest_marker_tracker() -> str:
+    return _clean(
+        """
+        using UnityEngine;
+
+        [DisallowMultipleComponent]
+        public sealed class QuestMarkerTracker : MonoBehaviour
+        {
+            [SerializeField] private QuestMarkerObjective targetObjective;
+            [SerializeField] private Transform markerVisual;
+            [SerializeField] private Vector3 lastDirection = Vector3.forward;
+            [SerializeField] private float currentDistance;
+            [SerializeField] private bool markerVisible;
+
+            public QuestMarkerObjective TargetObjective => targetObjective;
+            public Transform MarkerVisual => markerVisual;
+            public Vector3 LastDirection => lastDirection;
+            public float CurrentDistance => currentDistance;
+            public bool MarkerVisible => markerVisible;
+
+            private void Update()
+            {
+                RefreshMarker();
+            }
+
+            public void Configure(QuestMarkerObjective objective, Transform visual)
+            {
+                targetObjective = objective;
+                markerVisual = visual;
+                RefreshMarker();
+            }
+
+            public void RefreshMarker()
+            {
+                if (targetObjective == null || markerVisual == null)
+                {
+                    return;
+                }
+
+                currentDistance = Vector3.Distance(transform.position, targetObjective.transform.position);
+                if (targetObjective.EvaluateReached(transform.position))
+                {
+                    markerVisible = false;
+                    markerVisual.gameObject.SetActive(false);
+                    return;
+                }
+
+                var flatOffset = targetObjective.transform.position - transform.position;
+                flatOffset.y = 0f;
+                lastDirection = flatOffset.sqrMagnitude < 0.001f ? Vector3.forward : flatOffset.normalized;
+                markerVisible = true;
+                markerVisual.gameObject.SetActive(true);
+                markerVisual.rotation = Quaternion.LookRotation(lastDirection, Vector3.up);
+                Debug.Log($"Quest marker updated toward {targetObjective.ObjectiveName}: {currentDistance:0.00}m");
+            }
+        }
+        """
+    )
+
+
+def quest_marker_scene_setup() -> str:
+    return _clean(
+        """
+        using UnityEditor;
+        using UnityEditor.SceneManagement;
+        using UnityEngine;
+
+        public static class AIQuestMarkerSceneSetup
+        {
+            private const string ScenePath = "Assets/Scenes/QuestMarkerScene.unity";
+
+            public static void SetupScene()
+            {
+                if (TryValidateExistingScene())
+                {
+                    Debug.Log("AIQuestMarkerSceneSetup skipped rebuild because scene already matches spec.");
+                    return;
+                }
+
+                var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                CreateGround();
+                CreatePlayer();
+                CreateLight();
+
+                EditorSceneManager.MarkSceneDirty(scene);
+                EditorSceneManager.SaveScene(scene, ScenePath);
+                Debug.Log("AIQuestMarkerSceneSetup complete.");
+            }
+
+            private static bool TryValidateExistingScene()
+            {
+                if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
+                {
+                    return false;
+                }
+
+                try
+                {
+                    AIQuestMarkerSceneValidator.ValidateScene();
+                    return true;
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.Log($"AIQuestMarkerSceneSetup rebuilding scene: {ex.Message}");
+                    return false;
+                }
+            }
+
+            private static void CreateGround()
+            {
+                var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                ground.name = "AIQuest_Ground";
+                ground.transform.position = new Vector3(0f, -0.05f, 0f);
+                ground.transform.localScale = new Vector3(16f, 0.1f, 16f);
+                Tint(ground, new Color(0.23f, 0.27f, 0.31f));
+            }
+
+            private static void CreatePlayer()
+            {
+                var player = new GameObject("AIQuest_Player");
+                player.transform.position = new Vector3(0f, 1f, -4f);
+
+                var tracker = player.AddComponent<QuestMarkerTracker>();
+
+                var marker = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                marker.name = "AIQuest_MarkerVisual";
+                marker.transform.SetParent(player.transform, false);
+                marker.transform.localPosition = new Vector3(0f, 1.5f, 0f);
+                marker.transform.localScale = new Vector3(0.14f, 0.3f, 0.14f);
+                Tint(marker, new Color(0.18f, 0.82f, 0.46f));
+
+                var playerMarker = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                playerMarker.name = "AIQuest_PlayerMarker";
+                playerMarker.transform.SetParent(player.transform, false);
+                playerMarker.transform.localPosition = Vector3.zero;
+                playerMarker.transform.localScale = new Vector3(0.6f, 1f, 0.6f);
+                Tint(playerMarker, new Color(0.2f, 0.64f, 0.93f));
+
+                var objective = CreateObjective();
+                tracker.Configure(objective, marker.transform);
+            }
+
+            private static QuestMarkerObjective CreateObjective()
+            {
+                var existing = GameObject.Find("AIQuest_Objective");
+                if (existing != null)
+                {
+                    return existing.GetComponent<QuestMarkerObjective>();
+                }
+
+                var objective = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                objective.name = "AIQuest_Objective";
+                objective.transform.position = new Vector3(0f, 1f, 4f);
+                objective.transform.localScale = new Vector3(1.2f, 2.4f, 1.2f);
+                Tint(objective, new Color(0.94f, 0.48f, 0.22f));
+
+                var objectiveComponent = objective.AddComponent<QuestMarkerObjective>();
+                objectiveComponent.ConfigureObjective("Ancient Beacon", 1.25f);
+                return objectiveComponent;
+            }
+
+            private static void CreateLight()
+            {
+                var lightObject = new GameObject("AIQuest_Light");
+                lightObject.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+                var light = lightObject.AddComponent<Light>();
+                light.type = LightType.Directional;
+                light.intensity = 1.15f;
+            }
+
+            private static void Tint(GameObject targetObject, Color tint)
+            {
+                foreach (var renderer in targetObject.GetComponentsInChildren<Renderer>())
+                {
+                    var sourceMaterials = renderer.sharedMaterials;
+                    var tintedMaterials = new Material[sourceMaterials.Length];
+
+                    for (int i = 0; i < sourceMaterials.Length; i++)
+                    {
+                        var sourceMaterial = sourceMaterials[i];
+                        if (sourceMaterial == null)
+                        {
+                            continue;
+                        }
+
+                        var tintedMaterial = new Material(sourceMaterial);
+                        if (tintedMaterial.HasProperty("_Color"))
+                        {
+                            tintedMaterial.color = tint;
+                        }
+
+                        tintedMaterials[i] = tintedMaterial;
+                    }
+
+                    renderer.sharedMaterials = tintedMaterials;
+                }
+            }
+        }
+        """
+    )
+
+
+def quest_marker_scene_validator() -> str:
+    return _clean(
+        """
+        using System;
+        using UnityEditor.SceneManagement;
+        using UnityEngine;
+
+        public static class AIQuestMarkerSceneValidator
+        {
+            private const string ScenePath = "Assets/Scenes/QuestMarkerScene.unity";
+
+            public static void ValidateScene()
+            {
+                EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+
+                RequireObject("AIQuest_Ground");
+                var player = RequireObject("AIQuest_Player");
+                RequireObject("AIQuest_PlayerMarker");
+                var markerVisual = RequireObject("AIQuest_MarkerVisual");
+                var objectiveObject = RequireObject("AIQuest_Objective");
+
+                var tracker = RequireComponent<QuestMarkerTracker>(player, "AIQuest_Player");
+                var objective = RequireComponent<QuestMarkerObjective>(objectiveObject, "AIQuest_Objective");
+                RequireComponent<Collider>(objectiveObject, "AIQuest_Objective");
+
+                if (tracker.TargetObjective != objective)
+                {
+                    throw new InvalidOperationException("Quest marker tracker must reference the objective.");
+                }
+
+                if (tracker.MarkerVisual != markerVisual.transform)
+                {
+                    throw new InvalidOperationException("Quest marker tracker must reference the marker visual.");
+                }
+
+                tracker.RefreshMarker();
+                if (!tracker.MarkerVisible || !markerVisual.activeSelf)
+                {
+                    throw new InvalidOperationException("Quest marker should be visible before the target is reached.");
+                }
+
+                if (objective.Reached)
+                {
+                    throw new InvalidOperationException("Objective should start unreached.");
+                }
+
+                var expectedDirection = objective.transform.position - player.transform.position;
+                expectedDirection.y = 0f;
+                expectedDirection.Normalize();
+                if (Vector3.Dot(tracker.LastDirection, expectedDirection) < 0.99f)
+                {
+                    throw new InvalidOperationException("Quest marker must point from the player toward the objective.");
+                }
+
+                player.transform.position = objective.transform.position + new Vector3(0.15f, 0f, 0.15f);
+                tracker.RefreshMarker();
+
+                if (!objective.Reached)
+                {
+                    throw new InvalidOperationException("Objective should mark reached when the player arrives.");
+                }
+
+                if (tracker.MarkerVisible || markerVisual.activeSelf)
+                {
+                    throw new InvalidOperationException("Quest marker should update and hide after the target is reached.");
+                }
+
+                Debug.Log("AIQuestMarkerSceneValidator passed.");
+            }
+
+            private static GameObject RequireObject(string objectName)
+            {
+                var found = GameObject.Find(objectName);
+                if (found == null)
+                {
+                    throw new InvalidOperationException($"Required scene object is missing: {objectName}");
+                }
+
+                return found;
+            }
+
+            private static T RequireComponent<T>(GameObject target, string objectName) where T : Component
+            {
+                var component = target.GetComponent<T>();
+                if (component == null)
+                {
+                    throw new InvalidOperationException($"{objectName} is missing required component {typeof(T).Name}.");
+                }
+
+                return component;
+            }
+        }
+        """
+    )
+
+
+def quest_marker_report() -> str:
+    return _clean(
+        """
+        # Quest Marker - Implementation Report
+
+        ## Goal
+
+        Deliver a real Unity objective marker that points the player toward a target placeholder and updates when the target is reached.
+
+        ## Implemented Programmer Outputs
+
+        - `QuestMarkerObjective.cs`
+        - `QuestMarkerTracker.cs`
+        - `AIQuestMarkerSceneSetup.cs`
+        - `AIQuestMarkerSceneValidator.cs`
+
+        ## Behavior Summary
+
+        - Point a marker visual from the player toward the `Ancient Beacon` objective.
+        - Track the remaining distance each refresh.
+        - Hide the marker once the player reaches the objective radius.
+        - Validate direction, distance, and reached-state transitions in batchmode.
+
+        ## Validation Target
+
+        - Scene: `Assets/Scenes/QuestMarkerScene.unity`
+        - Setup method: `AIQuestMarkerSceneSetup.SetupScene`
+        - Validation method: `AIQuestMarkerSceneValidator.ValidateScene`
+        """
+    )
+
+
+def quest_marker_programmer_output_spec() -> ProgrammerOutputSpec:
+    return ProgrammerOutputSpec(
+        key="quest_marker",
+        file_contents={
+            "QuestMarkerObjective.cs": quest_marker_objective(),
+            "QuestMarkerTracker.cs": quest_marker_tracker(),
+            "AIQuestMarkerSceneSetup.cs": quest_marker_scene_setup(),
+            "AIQuestMarkerSceneValidator.cs": quest_marker_scene_validator(),
+            "QuestMarker_ImplementationReport.md": quest_marker_report(),
+        },
+        required_snippets={
+            "QuestMarkerObjective.cs": [
+                "ConfigureObjective",
+                "EvaluateReached",
+                "Quest objective reached",
+            ],
+            "QuestMarkerTracker.cs": [
+                "RefreshMarker",
+                "Quest marker updated toward",
+                "markerVisual.gameObject.SetActive(false)",
+            ],
+            "AIQuestMarkerSceneSetup.cs": [
+                "TryValidateExistingScene",
+                "AIQuest_Objective",
+                "QuestMarkerTracker",
+                "AIQuestMarkerSceneSetup complete.",
+            ],
+            "AIQuestMarkerSceneValidator.cs": [
+                "ValidateScene",
+                "must point from the player toward the objective",
+                "hide after the target is reached",
+                "AIQuestMarkerSceneValidator passed.",
+            ],
+            "QuestMarker_ImplementationReport.md": [
+                "objective marker",
+                "Ancient Beacon",
+                "AIQuestMarkerSceneValidator.ValidateScene",
+            ],
+        },
+        scene_setup_method="AIQuestMarkerSceneSetup.SetupScene",
+        scene_validation_method="AIQuestMarkerSceneValidator.ValidateScene",
+    )
+
+
+def dialogue_prompt_state() -> str:
+    return _clean(
+        """
+        using UnityEngine;
+
+        [DisallowMultipleComponent]
+        public sealed class DialoguePromptState : MonoBehaviour
+        {
+            [SerializeField] private GameObject promptPanel;
+            [SerializeField] private string openingLine = "Welcome, traveler.";
+            [SerializeField] private string continueLine = "The ruins are just ahead.";
+            [SerializeField] private string currentLine = string.Empty;
+            [SerializeField] private bool isVisible;
+            [SerializeField] private bool canContinue;
+            [SerializeField] private bool hasCompleted;
+
+            public GameObject PromptPanel => promptPanel;
+            public string CurrentLine => currentLine;
+            public bool IsVisible => isVisible;
+            public bool CanContinue => canContinue;
+            public bool HasCompleted => hasCompleted;
+
+            public void Configure(GameObject targetPanel, string firstLine, string nextLine)
+            {
+                promptPanel = targetPanel;
+                openingLine = string.IsNullOrWhiteSpace(firstLine) ? "Welcome, traveler." : firstLine;
+                continueLine = string.IsNullOrWhiteSpace(nextLine) ? "The ruins are just ahead." : nextLine;
+                currentLine = string.Empty;
+                isVisible = false;
+                canContinue = false;
+                hasCompleted = false;
+                SetPanelVisible(false);
+            }
+
+            public void BeginDialogue()
+            {
+                currentLine = openingLine;
+                isVisible = true;
+                canContinue = true;
+                hasCompleted = false;
+                SetPanelVisible(true);
+                Debug.Log($"Dialogue prompt shown: {currentLine}");
+            }
+
+            public void ContinueDialogue()
+            {
+                currentLine = continueLine;
+                isVisible = true;
+                canContinue = false;
+                hasCompleted = true;
+                SetPanelVisible(true);
+                Debug.Log($"Dialogue prompt continued: {currentLine}");
+            }
+
+            private void SetPanelVisible(bool visible)
+            {
+                if (promptPanel != null)
+                {
+                    promptPanel.SetActive(visible);
+                }
+            }
+        }
+        """
+    )
+
+
+def dialogue_prompt_interactable() -> str:
+    return _clean(
+        """
+        using UnityEngine;
+
+        [DisallowMultipleComponent]
+        public sealed class DialoguePromptInteractable : InteractableObject
+        {
+            [SerializeField] private DialoguePromptState dialogueState;
+
+            public DialoguePromptState DialogueState => dialogueState;
+
+            public void ConfigureDialogue(DialoguePromptState state, string npcName)
+            {
+                dialogueState = state;
+                Configure(npcName, true);
+            }
+
+            public override void Interact()
+            {
+                if (!TryBeginInteract())
+                {
+                    return;
+                }
+
+                if (dialogueState == null)
+                {
+                    Debug.Log($"{DisplayName} cannot start dialogue because no prompt state is assigned.");
+                    return;
+                }
+
+                if (!dialogueState.IsVisible)
+                {
+                    dialogueState.BeginDialogue();
+                    return;
+                }
+
+                if (dialogueState.CanContinue)
+                {
+                    dialogueState.ContinueDialogue();
+                    return;
+                }
+
+                Debug.Log($"Dialogue already completed for {DisplayName}.");
+            }
+        }
+        """
+    )
+
+
+def dialogue_prompt_scene_setup() -> str:
+    return _clean(
+        """
+        using UnityEditor;
+        using UnityEditor.SceneManagement;
+        using UnityEngine;
+
+        public static class AIDialoguePromptSceneSetup
+        {
+            private const string ScenePath = "Assets/Scenes/DialoguePromptScene.unity";
+
+            public static void SetupScene()
+            {
+                if (TryValidateExistingScene())
+                {
+                    Debug.Log("AIDialoguePromptSceneSetup skipped rebuild because scene already matches spec.");
+                    return;
+                }
+
+                var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                CreateGround();
+                CreatePlayer();
+                CreateDialogueNpc();
+                CreateLight();
+
+                EditorSceneManager.MarkSceneDirty(scene);
+                EditorSceneManager.SaveScene(scene, ScenePath);
+                Debug.Log("AIDialoguePromptSceneSetup complete.");
+            }
+
+            private static bool TryValidateExistingScene()
+            {
+                if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
+                {
+                    return false;
+                }
+
+                try
+                {
+                    AIDialoguePromptSceneValidator.ValidateScene();
+                    return true;
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.Log($"AIDialoguePromptSceneSetup rebuilding scene: {ex.Message}");
+                    return false;
+                }
+            }
+
+            private static void CreateGround()
+            {
+                var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                ground.name = "AIDialogue_Ground";
+                ground.transform.position = new Vector3(0f, -0.05f, 0f);
+                ground.transform.localScale = new Vector3(12f, 0.1f, 12f);
+                Tint(ground, new Color(0.24f, 0.28f, 0.32f));
+            }
+
+            private static void CreatePlayer()
+            {
+                var player = new GameObject("AIDialogue_Player");
+                player.transform.position = new Vector3(0f, 1f, -2f);
+
+                var trigger = player.AddComponent<SphereCollider>();
+                trigger.isTrigger = true;
+                trigger.radius = 2.5f;
+
+                var body = player.AddComponent<Rigidbody>();
+                body.isKinematic = true;
+                body.useGravity = false;
+
+                player.AddComponent<InteractSystem>();
+
+                var marker = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                marker.name = "AIDialogue_PlayerMarker";
+                marker.transform.SetParent(player.transform, false);
+                marker.transform.localPosition = Vector3.zero;
+                marker.transform.localScale = new Vector3(0.6f, 1f, 0.6f);
+                Tint(marker, new Color(0.2f, 0.64f, 0.93f));
+            }
+
+            private static void CreateDialogueNpc()
+            {
+                var npcRoot = new GameObject("AIDialogue_Npc");
+                npcRoot.transform.position = new Vector3(0f, 1f, 0f);
+
+                var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                body.name = "AIDialogue_NpcVisual";
+                body.transform.SetParent(npcRoot.transform, false);
+                body.transform.localPosition = Vector3.zero;
+                body.transform.localScale = new Vector3(0.9f, 1.2f, 0.9f);
+                Tint(body, new Color(0.88f, 0.58f, 0.26f));
+
+                var promptPanel = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                promptPanel.name = "AIDialogue_PromptPanel";
+                promptPanel.transform.SetParent(npcRoot.transform, false);
+                promptPanel.transform.localPosition = new Vector3(0f, 1.8f, 0f);
+                promptPanel.transform.localScale = new Vector3(1.8f, 0.35f, 0.12f);
+                Tint(promptPanel, new Color(0.11f, 0.15f, 0.19f));
+                promptPanel.SetActive(false);
+
+                var state = npcRoot.AddComponent<DialoguePromptState>();
+                state.Configure(promptPanel, "Welcome, traveler.", "The ruins are just ahead.");
+
+                var interactable = npcRoot.AddComponent<DialoguePromptInteractable>();
+                interactable.ConfigureDialogue(state, "Guide NPC");
+            }
+
+            private static void CreateLight()
+            {
+                var lightObject = new GameObject("AIDialogue_Light");
+                lightObject.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+                var light = lightObject.AddComponent<Light>();
+                light.type = LightType.Directional;
+                light.intensity = 1.1f;
+            }
+
+            private static void Tint(GameObject targetObject, Color tint)
+            {
+                foreach (var renderer in targetObject.GetComponentsInChildren<Renderer>())
+                {
+                    var sourceMaterials = renderer.sharedMaterials;
+                    var tintedMaterials = new Material[sourceMaterials.Length];
+
+                    for (int i = 0; i < sourceMaterials.Length; i++)
+                    {
+                        var sourceMaterial = sourceMaterials[i];
+                        if (sourceMaterial == null)
+                        {
+                            continue;
+                        }
+
+                        var tintedMaterial = new Material(sourceMaterial);
+                        if (tintedMaterial.HasProperty("_Color"))
+                        {
+                            tintedMaterial.color = tint;
+                        }
+
+                        tintedMaterials[i] = tintedMaterial;
+                    }
+
+                    renderer.sharedMaterials = tintedMaterials;
+                }
+            }
+        }
+        """
+    )
+
+
+def dialogue_prompt_scene_validator() -> str:
+    return _clean(
+        """
+        using System;
+        using UnityEditor.SceneManagement;
+        using UnityEngine;
+
+        public static class AIDialoguePromptSceneValidator
+        {
+            private const string ScenePath = "Assets/Scenes/DialoguePromptScene.unity";
+
+            public static void ValidateScene()
+            {
+                EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+
+                var player = RequireObject("AIDialogue_Player");
+                RequireComponent<InteractSystem>(player, "AIDialogue_Player");
+                var trigger = RequireComponent<SphereCollider>(player, "AIDialogue_Player");
+                if (!trigger.isTrigger)
+                {
+                    throw new InvalidOperationException("AIDialogue_Player SphereCollider must be a trigger.");
+                }
+
+                var body = RequireComponent<Rigidbody>(player, "AIDialogue_Player");
+                if (!body.isKinematic)
+                {
+                    throw new InvalidOperationException("AIDialogue_Player Rigidbody must be kinematic.");
+                }
+
+                RequireObject("AIDialogue_Ground");
+                RequireObject("AIDialogue_PlayerMarker");
+                RequireObject("AIDialogue_NpcVisual");
+                var npc = RequireObject("AIDialogue_Npc");
+                var state = RequireComponent<DialoguePromptState>(npc, "AIDialogue_Npc");
+                var interactable = RequireComponent<DialoguePromptInteractable>(npc, "AIDialogue_Npc");
+                var promptPanel = state.PromptPanel;
+
+                if (promptPanel == null || promptPanel.name != "AIDialogue_PromptPanel")
+                {
+                    throw new InvalidOperationException("Dialogue prompt state must reference the prompt panel.");
+                }
+
+                if (interactable.DialogueState != state)
+                {
+                    throw new InvalidOperationException("Dialogue interactable must reference the dialogue state.");
+                }
+
+                if (interactable.DisplayName != "Guide NPC")
+                {
+                    throw new InvalidOperationException("NPC prompt should identify Guide NPC.");
+                }
+
+                if (promptPanel.activeSelf || state.IsVisible || state.CanContinue || state.HasCompleted)
+                {
+                    throw new InvalidOperationException("Dialogue scene must start with a hidden prompt.");
+                }
+
+                interactable.Interact();
+                if (!state.IsVisible || !state.CanContinue)
+                {
+                    throw new InvalidOperationException("First interaction must open the dialogue prompt.");
+                }
+
+                if (state.CurrentLine != "Welcome, traveler.")
+                {
+                    throw new InvalidOperationException("First dialogue line is incorrect.");
+                }
+
+                if (!promptPanel.activeSelf)
+                {
+                    throw new InvalidOperationException("Prompt panel should become visible when dialogue starts.");
+                }
+
+                interactable.Interact();
+                if (state.CanContinue || !state.HasCompleted)
+                {
+                    throw new InvalidOperationException("Second interaction must consume the single continue action.");
+                }
+
+                if (state.CurrentLine != "The ruins are just ahead.")
+                {
+                    throw new InvalidOperationException("Continue dialogue line is incorrect.");
+                }
+
+                if (!promptPanel.activeSelf)
+                {
+                    throw new InvalidOperationException("Prompt panel should remain visible after continuing dialogue.");
+                }
+
+                Debug.Log("AIDialoguePromptSceneValidator passed.");
+            }
+
+            private static GameObject RequireObject(string objectName)
+            {
+                var found = GameObject.Find(objectName);
+                if (found == null)
+                {
+                    throw new InvalidOperationException($"Required scene object is missing: {objectName}");
+                }
+
+                return found;
+            }
+
+            private static T RequireComponent<T>(GameObject target, string objectName) where T : Component
+            {
+                var component = target.GetComponent<T>();
+                if (component == null)
+                {
+                    throw new InvalidOperationException($"{objectName} is missing required component {typeof(T).Name}.");
+                }
+
+                return component;
+            }
+        }
+        """
+    )
+
+
+def dialogue_prompt_report() -> str:
+    return _clean(
+        """
+        # Dialogue Prompt - Implementation Report
+
+        ## Goal
+
+        Deliver a real Unity interaction where the player presses `E` near an NPC placeholder and advances through a short dialogue prompt with one continue action.
+
+        ## Implemented Programmer Outputs
+
+        - `InteractSystem.cs`
+        - `InteractableObject.cs`
+        - `DialoguePromptState.cs`
+        - `DialoguePromptInteractable.cs`
+        - `AIDialoguePromptSceneSetup.cs`
+        - `AIDialoguePromptSceneValidator.cs`
+
+        ## Behavior Summary
+
+        - Reuse the shared interaction trigger for the NPC prompt.
+        - Show an opening dialogue line on the first interaction.
+        - Consume one continue action on the second interaction.
+        - Validate prompt visibility and deterministic dialogue lines in batchmode.
+
+        ## Validation Target
+
+        - Scene: `Assets/Scenes/DialoguePromptScene.unity`
+        - Setup method: `AIDialoguePromptSceneSetup.SetupScene`
+        - Validation method: `AIDialoguePromptSceneValidator.ValidateScene`
+        """
+    )
+
+
+def dialogue_prompt_programmer_output_spec() -> ProgrammerOutputSpec:
+    return ProgrammerOutputSpec(
+        key="dialogue_prompt",
+        file_contents={
+            "InteractSystem.cs": default_interact_system(),
+            "InteractableObject.cs": default_interactable_object(),
+            "DialoguePromptState.cs": dialogue_prompt_state(),
+            "DialoguePromptInteractable.cs": dialogue_prompt_interactable(),
+            "AIDialoguePromptSceneSetup.cs": dialogue_prompt_scene_setup(),
+            "AIDialoguePromptSceneValidator.cs": dialogue_prompt_scene_validator(),
+            "DialoguePrompt_ImplementationReport.md": dialogue_prompt_report(),
+        },
+        required_snippets={
+            "InteractSystem.cs": [
+                "FindClosestInteractable",
+                "GetComponentInParent<InteractableObject>()",
+                "UpdatePromptFeedback",
+                "Input.GetKeyDown",
+            ],
+            "InteractableObject.cs": [
+                "public virtual void Interact()",
+                "TryBeginInteract",
+                "Configure(",
+            ],
+            "DialoguePromptState.cs": [
+                "BeginDialogue",
+                "ContinueDialogue",
+                "Dialogue prompt shown",
+            ],
+            "DialoguePromptInteractable.cs": [
+                "ConfigureDialogue",
+                "dialogueState.BeginDialogue()",
+                "dialogueState.ContinueDialogue()",
+            ],
+            "AIDialoguePromptSceneSetup.cs": [
+                "TryValidateExistingScene",
+                "AIDialogue_PromptPanel",
+                "DialoguePromptState",
+                "AIDialoguePromptSceneSetup complete.",
+            ],
+            "AIDialoguePromptSceneValidator.cs": [
+                "ValidateScene",
+                "First interaction must open the dialogue prompt.",
+                "Second interaction must consume the single continue action.",
+                "AIDialoguePromptSceneValidator passed.",
+            ],
+            "DialoguePrompt_ImplementationReport.md": [
+                "short dialogue prompt",
+                "one continue action",
+                "AIDialoguePromptSceneValidator.ValidateScene",
+            ],
+        },
+        scene_setup_method="AIDialoguePromptSceneSetup.SetupScene",
+        scene_validation_method="AIDialoguePromptSceneValidator.ValidateScene",
     )
 
 
@@ -2284,26 +3698,26 @@ def programmer_family_definitions() -> dict[str, ProgrammerFamilyDefinition]:
         "dialogue_prompt": ProgrammerFamilyDefinition(
             key="dialogue_prompt",
             title="Dialogue Prompt",
-            support_level="scaffold_only",
-            description="Planned deterministic family for NPC dialogue prompt workflows.",
-            detector=lambda *_: False,
-            spec_builder=None,
+            support_level="supported",
+            description="NPC dialogue prompt with deterministic scene setup and validation.",
+            detector=is_dialogue_prompt_request,
+            spec_builder=dialogue_prompt_programmer_output_spec,
         ),
         "inventory_pickup": ProgrammerFamilyDefinition(
             key="inventory_pickup",
             title="Inventory Pickup",
-            support_level="scaffold_only",
-            description="Planned deterministic family for pickup and inventory workflows.",
-            detector=lambda *_: False,
-            spec_builder=None,
+            support_level="supported",
+            description="Pickup and inventory workflow with deterministic scene setup and validation.",
+            detector=is_inventory_pickup_request,
+            spec_builder=inventory_pickup_programmer_output_spec,
         ),
         "quest_marker": ProgrammerFamilyDefinition(
             key="quest_marker",
             title="Quest Marker",
-            support_level="scaffold_only",
-            description="Planned deterministic family for quest/objective marker workflows.",
-            detector=lambda *_: False,
-            spec_builder=None,
+            support_level="supported",
+            description="Objective marker workflow with deterministic scene setup and validation.",
+            detector=is_quest_marker_request,
+            spec_builder=quest_marker_programmer_output_spec,
         ),
         "terra_mage_first_wall": ProgrammerFamilyDefinition(
             key="terra_mage_first_wall",

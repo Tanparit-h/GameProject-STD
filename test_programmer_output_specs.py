@@ -32,17 +32,20 @@ class ProgrammerOutputSpecsTests(unittest.TestCase):
 
         self.assertIn("interaction_vertical_slice", supported)
         self.assertIn("door_toggle_interaction", supported)
+        self.assertIn("inventory_pickup", supported)
+        self.assertIn("quest_marker", supported)
+        self.assertIn("dialogue_prompt", supported)
         self.assertIn("terra_mage_third_person_aim", supported)
         self.assertIn("terra_mage_weapon_family", supported)
-        self.assertNotIn("dialogue_prompt", supported)
+        self.assertNotIn("terra_mage_first_wall", supported)
 
     def test_select_programmer_output_spec_rejects_scaffold_only_family(self):
         with self.assertRaises(UnsupportedProgrammerFamilyError):
             select_programmer_output_spec(
-                "Implement an NPC dialogue prompt.",
+                "Build a first wall for terra mage.",
                 "IMPLEMENTATION",
-                "feature-dialogue-prompt-v1",
-                "dialogue_prompt",
+                "terra-mage-first-wall-v003",
+                "terra_mage_first_wall",
             )
 
     def test_parse_required_flag_handles_markdown_emphasis(self):
@@ -110,6 +113,99 @@ class ProgrammerOutputSpecsTests(unittest.TestCase):
             "door toggle interaction when player presses e",
             "IMPLEMENTATION",
             "feature-door-toggle-v1",
+        )
+        with TemporaryDirectory() as temp_dir:
+            output_dir = Path(temp_dir)
+            file_paths = [str((output_dir / filename).resolve()) for filename in spec.file_contents]
+
+            for filename, content in spec.file_contents.items():
+                (output_dir / filename).write_text(content, encoding="utf-8")
+
+            passed, problems = validate_programmer_output_files(output_dir.resolve(), file_paths, spec)
+
+        self.assertTrue(passed, problems)
+
+    def test_select_programmer_output_spec_for_inventory_pickup_family(self):
+        request = (
+            "Implement and validate a real Unity interaction where the player presses E near an item "
+            "placeholder to collect it into a simple inventory list."
+        )
+
+        spec = select_programmer_output_spec(request, "IMPLEMENTATION", "feature-inventory-pickup-v1")
+
+        self.assertEqual(spec.key, "inventory_pickup")
+        self.assertIn("InventoryState.cs", spec.file_contents)
+        self.assertIn("PickupInteractable.cs", spec.file_contents)
+        self.assertEqual(spec.scene_setup_method, "AIInventoryPickupSceneSetup.SetupScene")
+        self.assertEqual(spec.scene_validation_method, "AIInventoryPickupSceneValidator.ValidateScene")
+
+    def test_validate_programmer_output_files_for_inventory_pickup_family(self):
+        spec = select_programmer_output_spec(
+            "inventory pickup with press e and simple inventory list",
+            "IMPLEMENTATION",
+            "feature-inventory-pickup-v1",
+        )
+        with TemporaryDirectory() as temp_dir:
+            output_dir = Path(temp_dir)
+            file_paths = [str((output_dir / filename).resolve()) for filename in spec.file_contents]
+
+            for filename, content in spec.file_contents.items():
+                (output_dir / filename).write_text(content, encoding="utf-8")
+
+            passed, problems = validate_programmer_output_files(output_dir.resolve(), file_paths, spec)
+
+        self.assertTrue(passed, problems)
+
+    def test_select_programmer_output_spec_for_quest_marker_family(self):
+        request = (
+            "Implement and validate a real Unity objective marker that points the player toward a target "
+            "placeholder and updates when the target is reached."
+        )
+
+        spec = select_programmer_output_spec(request, "IMPLEMENTATION", "feature-quest-marker-v1")
+
+        self.assertEqual(spec.key, "quest_marker")
+        self.assertIn("QuestMarkerObjective.cs", spec.file_contents)
+        self.assertIn("QuestMarkerTracker.cs", spec.file_contents)
+        self.assertEqual(spec.scene_setup_method, "AIQuestMarkerSceneSetup.SetupScene")
+        self.assertEqual(spec.scene_validation_method, "AIQuestMarkerSceneValidator.ValidateScene")
+
+    def test_validate_programmer_output_files_for_quest_marker_family(self):
+        spec = select_programmer_output_spec(
+            "quest marker objective that updates when the target is reached",
+            "IMPLEMENTATION",
+            "feature-quest-marker-v1",
+        )
+        with TemporaryDirectory() as temp_dir:
+            output_dir = Path(temp_dir)
+            file_paths = [str((output_dir / filename).resolve()) for filename in spec.file_contents]
+
+            for filename, content in spec.file_contents.items():
+                (output_dir / filename).write_text(content, encoding="utf-8")
+
+            passed, problems = validate_programmer_output_files(output_dir.resolve(), file_paths, spec)
+
+        self.assertTrue(passed, problems)
+
+    def test_select_programmer_output_spec_for_dialogue_prompt_family(self):
+        request = (
+            "Implement and validate a real Unity interaction where the player approaches an NPC placeholder, "
+            "presses E, and sees a short dialogue prompt with one continue action."
+        )
+
+        spec = select_programmer_output_spec(request, "IMPLEMENTATION", "feature-dialogue-prompt-v1")
+
+        self.assertEqual(spec.key, "dialogue_prompt")
+        self.assertIn("DialoguePromptState.cs", spec.file_contents)
+        self.assertIn("DialoguePromptInteractable.cs", spec.file_contents)
+        self.assertEqual(spec.scene_setup_method, "AIDialoguePromptSceneSetup.SetupScene")
+        self.assertEqual(spec.scene_validation_method, "AIDialoguePromptSceneValidator.ValidateScene")
+
+    def test_validate_programmer_output_files_for_dialogue_prompt_family(self):
+        spec = select_programmer_output_spec(
+            "npc dialogue prompt with one continue action when pressing e",
+            "IMPLEMENTATION",
+            "feature-dialogue-prompt-v1",
         )
         with TemporaryDirectory() as temp_dir:
             output_dir = Path(temp_dir)

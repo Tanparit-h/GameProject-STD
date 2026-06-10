@@ -39,7 +39,7 @@ class OfficeCliTests(unittest.TestCase):
                 self.assertEqual(main(), 0)
 
     def test_task_command_returns_nonzero_for_blocked_family(self):
-        with patch("sys.argv", ["office", "task", "feature-dialogue-prompt-v1"]):
+        with patch("sys.argv", ["office", "task", "terra-mage-first-wall-v003"]):
             with redirect_stdout(StringIO()):
                 self.assertEqual(main(), 1)
 

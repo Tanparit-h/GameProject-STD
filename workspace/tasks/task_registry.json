@@ -14,17 +14,17 @@
     {
       "id": "feature-dialogue-prompt-v1",
       "file": "dialogue_prompt_v1.json",
-      "status": "family_scaffold_required"
+      "status": "release_gate_clean"
     },
     {
       "id": "feature-inventory-pickup-v1",
       "file": "inventory_pickup_v1.json",
-      "status": "family_scaffold_required"
+      "status": "release_gate_clean"
     },
     {
       "id": "feature-quest-marker-v1",
       "file": "quest_marker_v1.json",
-      "status": "family_scaffold_required"
+      "status": "release_gate_clean"
     },
     {
       "id": "terra-mage-first-wall-v003",
@@ -39,12 +39,12 @@
     {
       "id": "terra-mage-third-person-aim-v005",
       "file": "terra_mage_third_person_aim_v005.json",
-      "status": "implementation_requested"
+      "status": "release_gate_clean"
     },
     {
       "id": "terra-mage-weapon-wheel-v006",
       "file": "terra_mage_weapon_wheel_v006.json",
-      "status": "implementation_requested"
+      "status": "release_gate_clean"
     },
     {
       "id": "terra-mage-weapon-combat-profiles-v007",

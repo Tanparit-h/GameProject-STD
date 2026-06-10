@@ -28,11 +28,23 @@ class TaskRunnerTests(unittest.TestCase):
         self.assertIn("TASK_RUNNER_DRY_RUN", output)
         self.assertIn("feature-door-toggle-v1", output)
 
-    def test_run_task_blocks_scaffold_only_family(self):
+    def test_run_task_dry_run_for_supported_inventory_family(self):
+        output = run_task("feature-inventory-pickup-v1", dry_run=True)
+
+        self.assertIn("TASK_RUNNER_DRY_RUN", output)
+        self.assertIn("feature-inventory-pickup-v1", output)
+
+    def test_run_task_dry_run_for_supported_dialogue_family(self):
         output = run_task("feature-dialogue-prompt-v1", dry_run=True)
 
+        self.assertIn("TASK_RUNNER_DRY_RUN", output)
+        self.assertIn("feature-dialogue-prompt-v1", output)
+
+    def test_run_task_blocks_scaffold_only_family(self):
+        output = run_task("terra-mage-first-wall-v003", dry_run=True)
+
         self.assertIn("TASK_RUNNER_BLOCKED", output)
-        self.assertIn("dialogue_prompt", output)
+        self.assertIn("terra_mage_first_wall", output)
 
 
 if __name__ == "__main__":
