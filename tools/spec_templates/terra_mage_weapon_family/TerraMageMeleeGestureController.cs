@@ -157,17 +157,7 @@ namespace TerraMageTD
 
             dragging = false;
             Vector2 delta = mousePosition - dragStart;
-            if (delta.magnitude < gestureThreshold)
-            {
-                return TerraMageMeleeGesture.None;
-            }
-
-            if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
-            {
-                return delta.x < 0f ? TerraMageMeleeGesture.LeftSwing : TerraMageMeleeGesture.RightSwing;
-            }
-
-            return delta.y > 0f ? TerraMageMeleeGesture.Overhead : TerraMageMeleeGesture.Punch;
+            return TerraMagePlayerMechanics.ClassifyMeleeGesture(delta, gestureThreshold);
         }
 
         public bool PerformQuickAttack()
@@ -199,8 +189,8 @@ namespace TerraMageTD
 
         private bool TryFindMeleeHit(out RaycastHit bestHit)
         {
-            Vector3 origin = transform.position + Vector3.up * 0.18f;
-            Vector3 direction = aimCamera != null ? aimCamera.transform.forward : transform.forward;
+            Vector3 origin = TerraMagePlayerMechanics.BuildMeleeOrigin(transform, 0.18f);
+            Vector3 direction = TerraMagePlayerMechanics.ResolveAimDirection(aimCamera, transform);
             int hitCount = Physics.SphereCastNonAlloc(
                 origin,
                 Mathf.Max(0.01f, meleeHitRadius),
@@ -270,7 +260,7 @@ namespace TerraMageTD
             pendingMeleeGesture = gesture;
             TerraMageWeaponDefinition weapon = GetCurrentWeapon();
             pendingMeleeWeaponName = weapon.DisplayName;
-            pendingMeleeDamage = baseMeleeDamage + (weapon.MeleeReach * 2f);
+            pendingMeleeDamage = TerraMagePlayerMechanics.CalculateMeleeDamage(baseMeleeDamage, weapon);
         }
 
         private void UpdateWeaponSwing()
@@ -319,7 +309,8 @@ namespace TerraMageTD
             TerraMageDamageable damageable = hit.collider.GetComponentInParent<TerraMageDamageable>();
             if (damageable != null)
             {
-                Vector3 impulse = aimCamera != null ? aimCamera.transform.forward * pendingMeleeDamage : transform.forward * pendingMeleeDamage;
+                Vector3 impulse =
+                    TerraMagePlayerMechanics.ResolveAimDirection(aimCamera, transform) * pendingMeleeDamage;
                 damageable.ApplyDamage(pendingMeleeDamage, hit.point, impulse, pendingMeleeWeaponName);
             }
 

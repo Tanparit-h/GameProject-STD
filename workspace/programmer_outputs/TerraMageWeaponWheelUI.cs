@@ -93,9 +93,15 @@ namespace TerraMageTD
         public void HideImmediately()
         {
             isOpen = false;
-            hoverSlotIndex = loadout != null ? loadout.SelectedSlotIndex : 0;
+            SyncHoverWithSelection();
             SetWheelVisible(false);
             UpdateVisualState();
+        }
+
+        public void SyncHoverWithSelection()
+        {
+            hoverSlotIndex = loadout != null ? loadout.SelectedSlotIndex : 0;
+            selectionVector = Vector2.zero;
         }
 
         public void RebuildImmediately()
@@ -244,7 +250,7 @@ namespace TerraMageTD
         {
             if (!isOpen && loadout != null)
             {
-                hoverSlotIndex = loadout.SelectedSlotIndex;
+                SyncHoverWithSelection();
             }
 
             UpdateVisualState();

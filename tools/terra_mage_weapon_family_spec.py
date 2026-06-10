@@ -51,6 +51,7 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
             "TerraMageFollowCamera.cs": _read_template("TerraMageFollowCamera.cs"),
             "TerraMageInput.cs": _read_template("TerraMageInput.cs"),
             "TerraMageMeleeGestureController.cs": _read_template("TerraMageMeleeGestureController.cs"),
+            "TerraMagePlayerMechanics.cs": _read_template("TerraMagePlayerMechanics.cs"),
             "TerraMageProjectile.cs": _read_template("TerraMageProjectile.cs"),
             "TerraMageTinyMageController.cs": _read_template("TerraMageTinyMageController.cs"),
             "TerraMageWeaponDefinition.cs": _read_template("TerraMageWeaponDefinition.cs"),
@@ -70,7 +71,8 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
         required_snippets={
             "TerraMageTinyMageController.cs": [
                 "SetCameraPivot",
-                "ProjectOnPlane",
+                "TerraMagePlayerMechanics.BuildCameraRelativeMove",
+                "TerraMagePlayerMechanics.CalculateJumpVelocity",
                 "jumpBufferTimer",
                 "coyoteTimer",
             ],
@@ -84,6 +86,8 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
                 "TerraMageWeaponAttackMode",
                 "CurrentPullRange",
                 "SpawnProjectile",
+                "TerraMagePlayerMechanics.ResolveThrowForce",
+                "TerraMagePlayerMechanics.ApplyProjectileTint",
                 "TerraMageProjectile",
                 "UsePrimaryAction",
                 "weaponWheelUI",
@@ -130,6 +134,8 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
                 "CurrentSwingDuration",
                 "EnsureWeaponSwingRoot",
                 "GetAnimatedWeaponRoot",
+                "TerraMagePlayerMechanics.ClassifyMeleeGesture",
+                "TerraMagePlayerMechanics.CalculateMeleeDamage",
                 "meleeHitNormalizedTime",
                 "PerformQuickAttack",
                 "CurrentMeleeReach",
@@ -141,6 +147,16 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
                 "TryFindMeleeHit",
                 "UpdateWeaponSwing",
                 "weaponWheelUI",
+            ],
+            "TerraMagePlayerMechanics.cs": [
+                "BuildCameraRelativeMove",
+                "CalculateJumpVelocity",
+                "ClassifyMeleeGesture",
+                "CalculateMeleeDamage",
+                "ResolvePullRange",
+                "ResolveThrowForce",
+                "ApplyProjectileTint",
+                "ProjectOnPlane",
             ],
             "TerraMageProjectile.cs": [
                 "GetVelocity",
@@ -169,6 +185,7 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
                 "MouseDelta",
                 "OpenWheelKey",
                 "RebuildImmediately",
+                "SyncHoverWithSelection",
                 "VisualSegmentCount",
             ],
             "TerraMageFirstSceneSetup.cs": [
@@ -179,6 +196,7 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
             ],
             "TerraMageFirstSceneValidator.cs": [
                 "TerraMageDamageable",
+                "TerraMagePlayerMechanics",
                 "TerraMageProjectile",
                 "TerraMageWeaponLoadout",
                 "TerraMageWeaponWheelUI.CalculateSegmentSweep(2)",

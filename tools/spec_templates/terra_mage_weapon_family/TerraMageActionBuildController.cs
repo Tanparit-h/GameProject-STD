@@ -36,10 +36,10 @@ namespace TerraMageTD
                     return 0f;
                 }
 
-                return weapon.RangedPullRange > 0f ? weapon.RangedPullRange : defaultPullRange;
+                return TerraMagePlayerMechanics.ResolvePullRange(weapon, defaultPullRange);
             }
         }
-        public float CurrentThrowForce => GetCurrentWeapon().SupportsRanged ? GetCurrentWeapon().RangedThrowForce : 0f;
+        public float CurrentThrowForce => TerraMagePlayerMechanics.ResolveThrowForce(GetCurrentWeapon(), 0f);
 
         private void Awake()
         {
@@ -166,9 +166,8 @@ namespace TerraMageTD
                 return;
             }
 
-            float multiplier = GetCurrentWeapon().SupportsRanged
-                ? GetCurrentWeapon().RangedCompressMultiplier
-                : defaultCompressMultiplier;
+            float multiplier =
+                TerraMagePlayerMechanics.ResolveCompressMultiplier(GetCurrentWeapon(), defaultCompressMultiplier);
             heldPayload = TerraMageMaterialSystem.Compress(heldPayload, multiplier);
             Debug.Log($"Terra Mage compressed payload into {heldPayload.Kind} with {GetCurrentWeapon().DisplayName}");
         }
@@ -180,7 +179,7 @@ namespace TerraMageTD
                 return;
             }
 
-            float heat = GetCurrentWeapon().SupportsRanged ? GetCurrentWeapon().RangedHeatPerUse : defaultHeatPerUse;
+            float heat = TerraMagePlayerMechanics.ResolveHeatPerUse(GetCurrentWeapon(), defaultHeatPerUse);
             heldPayload = TerraMageMaterialSystem.Heat(heldPayload, heat);
             Debug.Log($"Terra Mage heated payload into {heldPayload.Kind} with {GetCurrentWeapon().DisplayName}");
         }
@@ -195,8 +194,8 @@ namespace TerraMageTD
             TerraMageWeaponDefinition weapon = GetCurrentWeapon();
             TerraMageMaterialPayload payload = hasPayload
                 ? heldPayload
-                : TerraMageMaterialSystem.Compress(TerraMageMaterialSystem.CreateLooseEarth(aimCamera.transform.position), 1.6f);
-            float throwForce = GetCurrentWeapon().SupportsRanged ? GetCurrentWeapon().RangedThrowForce : defaultThrowForce;
+                : TerraMagePlayerMechanics.CreateDefaultRangedPayload(aimCamera.transform.position);
+            float throwForce = TerraMagePlayerMechanics.ResolveThrowForce(weapon, defaultThrowForce);
             Vector3 velocity = aimCamera.transform.forward * throwForce;
             float damage = TerraMageMaterialSystem.CalculateImpactDamage(payload, velocity, 1f);
             SpawnProjectile(payload, velocity, damage, weapon.DisplayName);
@@ -207,12 +206,12 @@ namespace TerraMageTD
 
         private void SpawnProjectile(TerraMageMaterialPayload payload, Vector3 velocity, float damage, string sourceName)
         {
-            Vector3 spawnPosition = aimCamera.transform.position + aimCamera.transform.forward * projectileSpawnOffset;
+            Vector3 spawnPosition = TerraMagePlayerMechanics.CalculateProjectileSpawnPosition(aimCamera, projectileSpawnOffset);
             GameObject projectileObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             projectileObject.name = $"TerraMage_Projectile_{payload.Kind}";
             projectileObject.transform.position = spawnPosition;
             projectileObject.transform.localScale = Vector3.one * Mathf.Max(0.04f, projectileScale);
-            TintProjectile(projectileObject, payload);
+            TerraMagePlayerMechanics.ApplyProjectileTint(projectileObject, payload);
 
             Rigidbody body = projectileObject.AddComponent<Rigidbody>();
             body.mass = Mathf.Max(0.1f, payload.Mass);
@@ -220,29 +219,6 @@ namespace TerraMageTD
 
             TerraMageProjectile projectile = projectileObject.AddComponent<TerraMageProjectile>();
             projectile.Launch(velocity, damage, sourceName);
-        }
-
-        private static void TintProjectile(GameObject projectileObject, TerraMageMaterialPayload payload)
-        {
-            Color tint = payload.Kind switch
-            {
-                TerraMageMaterialKind.MoltenGlass => new Color(1f, 0.42f, 0.15f, 1f),
-                TerraMageMaterialKind.Glass => new Color(0.72f, 0.95f, 1f, 1f),
-                TerraMageMaterialKind.Stone => new Color(0.45f, 0.48f, 0.52f, 1f),
-                TerraMageMaterialKind.PackedEarth => new Color(0.48f, 0.34f, 0.18f, 1f),
-                _ => new Color(0.62f, 0.48f, 0.28f, 1f),
-            };
-
-            foreach (Renderer rendererComponent in projectileObject.GetComponentsInChildren<Renderer>())
-            {
-                foreach (Material material in rendererComponent.materials)
-                {
-                    if (material != null && material.HasProperty("_Color"))
-                    {
-                        material.color = tint;
-                    }
-                }
-            }
         }
 
         private void DebugRangedAimTarget()

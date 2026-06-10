@@ -43,39 +43,23 @@ namespace TerraMageTD
 
         private void UpdateJumpInput()
         {
-            if (TerraMageInput.GetKeyDown(KeyCode.Space))
-            {
-                jumpBufferTimer = jumpBufferTime;
-                return;
-            }
-
-            jumpBufferTimer = Mathf.Max(0f, jumpBufferTimer - Time.deltaTime);
+            jumpBufferTimer = TerraMagePlayerMechanics.UpdateJumpBuffer(
+                jumpBufferTimer,
+                TerraMageInput.GetKeyDown(KeyCode.Space),
+                jumpBufferTime,
+                Time.deltaTime);
         }
 
         private void Move()
         {
             float horizontal = TerraMageInput.GetAxisRaw("Horizontal");
             float vertical = TerraMageInput.GetAxisRaw("Vertical");
-            Vector3 input = new Vector3(horizontal, 0f, vertical);
-            input = Vector3.ClampMagnitude(input, 1f);
-
-            Transform basis = cameraPivot != null ? cameraPivot : transform;
-            Vector3 forward = Vector3.ProjectOnPlane(basis.forward, Vector3.up).normalized;
-            Vector3 right = Vector3.ProjectOnPlane(basis.right, Vector3.up).normalized;
-
-            if (forward.sqrMagnitude < 0.001f)
-            {
-                forward = transform.forward;
-            }
-
-            if (right.sqrMagnitude < 0.001f)
-            {
-                right = transform.right;
-            }
-
-            Vector3 move = right * input.x + forward * input.z;
+            Vector3 move = TerraMagePlayerMechanics.BuildCameraRelativeMove(
+                new Vector2(horizontal, vertical),
+                cameraPivot,
+                transform);
             bool running = TerraMageInput.GetKey(KeyCode.LeftShift) || TerraMageInput.GetKey(KeyCode.RightShift);
-            float speed = running ? runSpeed : walkSpeed;
+            float speed = TerraMagePlayerMechanics.ResolveMoveSpeed(running, walkSpeed, runSpeed);
             characterController.Move(move * speed * Time.deltaTime);
 
             if (move.sqrMagnitude > 0.001f)
@@ -90,23 +74,20 @@ namespace TerraMageTD
 
         private void JumpAndGravity()
         {
-            if (characterController.isGrounded)
-            {
-                coyoteTimer = coyoteTime;
-            }
-            else
-            {
-                coyoteTimer = Mathf.Max(0f, coyoteTimer - Time.deltaTime);
-            }
+            coyoteTimer = TerraMagePlayerMechanics.UpdateCoyoteTimer(
+                coyoteTimer,
+                characterController.isGrounded,
+                coyoteTime,
+                Time.deltaTime);
 
             if (characterController.isGrounded && verticalVelocity.y < 0f)
             {
                 verticalVelocity.y = groundedStickVelocity;
             }
 
-            if (jumpBufferTimer > 0f && coyoteTimer > 0f)
+            if (TerraMagePlayerMechanics.CanUseBufferedJump(jumpBufferTimer, coyoteTimer))
             {
-                verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+                verticalVelocity.y = TerraMagePlayerMechanics.CalculateJumpVelocity(jumpHeight, gravity);
                 jumpBufferTimer = 0f;
                 coyoteTimer = 0f;
             }

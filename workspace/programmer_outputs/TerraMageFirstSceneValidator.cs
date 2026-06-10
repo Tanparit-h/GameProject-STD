@@ -40,6 +40,11 @@ public static class TerraMageFirstSceneValidator
             throw new InvalidOperationException("Terra Mage combat damage and projectile classes must be available.");
         }
 
+        if (!typeof(TerraMagePlayerMechanics).IsAbstract || !typeof(TerraMagePlayerMechanics).IsSealed)
+        {
+            throw new InvalidOperationException("Terra Mage player mechanics must be available as a global static class.");
+        }
+
         RequireObject("TerraMage_MockBody");
         RequireObject("TerraMage_MockHood");
         RequireObject("TerraMage_MockStaff");
@@ -178,6 +183,7 @@ public static class TerraMageFirstSceneValidator
         }
 
         weaponLoadout.SelectSlot(1);
+        weaponWheelUI.SyncHoverWithSelection();
         if (weaponLoadout.CurrentWeapon.DisplayName != "Shard Sling")
         {
             throw new InvalidOperationException("Demo loadout must include a ranged Shard Sling profile.");
