@@ -71,6 +71,19 @@ def is_interaction_vertical_slice_request(feature_request: str, task_id: str = "
     return has_interaction and has_player and has_validation
 
 
+def is_door_toggle_interaction_request(feature_request: str, task_id: str = "") -> bool:
+    normalized_request = _normalize(feature_request)
+    normalized_task_id = _normalize(task_id)
+
+    if normalized_task_id == "feature-door-toggle-v1":
+        return True
+
+    has_door = "door" in normalized_request
+    has_toggle = "toggle" in normalized_request or "open and closed" in normalized_request
+    has_interaction = "interact" in normalized_request or "press e" in normalized_request
+    return has_door and has_toggle and has_interaction
+
+
 def default_interact_system() -> str:
     return _clean(
         """
@@ -133,7 +146,7 @@ def default_interact_system() -> str:
 
             private void OnTriggerEnter(Collider other)
             {
-                var interactable = other.GetComponent<InteractableObject>();
+                var interactable = other.GetComponentInParent<InteractableObject>();
                 if (interactable != null && !objectsInRange.Contains(interactable))
                 {
                     objectsInRange.Add(interactable);
@@ -142,7 +155,7 @@ def default_interact_system() -> str:
 
             private void OnTriggerExit(Collider other)
             {
-                var interactable = other.GetComponent<InteractableObject>();
+                var interactable = other.GetComponentInParent<InteractableObject>();
                 if (interactable != null)
                 {
                     objectsInRange.Remove(interactable);
@@ -166,15 +179,139 @@ def default_interactable_object() -> str:
             public string DisplayName => displayName;
             public bool CanInteract => canInteract;
 
-            public void Interact()
+            public void Configure(string newDisplayName, bool newCanInteract = true)
+            {
+                if (!string.IsNullOrWhiteSpace(newDisplayName))
+                {
+                    displayName = newDisplayName;
+                }
+
+                canInteract = newCanInteract;
+            }
+
+            protected bool TryBeginInteract()
             {
                 if (!canInteract)
                 {
                     Debug.Log($"{displayName} is currently unavailable.");
+                    return false;
+                }
+
+                return true;
+            }
+
+            public virtual void Interact()
+            {
+                if (!TryBeginInteract())
+                {
                     return;
                 }
 
-                Debug.Log($"Interaction triggered for {displayName}.");
+                Debug.Log($"Interaction triggered for {DisplayName}.");
+            }
+        }
+        """
+    )
+
+
+def door_toggle_interactable() -> str:
+    return _clean(
+        """
+        using UnityEngine;
+
+        [DisallowMultipleComponent]
+        public sealed class DoorToggleInteractable : InteractableObject
+        {
+            [SerializeField] private Transform doorHinge;
+            [SerializeField] private float openAngle = 92f;
+            [SerializeField] private bool startsOpen;
+            [SerializeField] private Vector3 closedLocalEuler;
+
+            private bool configured;
+            private bool isOpen;
+
+            public Transform DoorHinge => doorHinge;
+            public float OpenAngle => openAngle;
+            public bool IsOpen => isOpen;
+            public Vector3 ClosedLocalEuler => closedLocalEuler;
+            public Vector3 OpenLocalEuler => closedLocalEuler + new Vector3(0f, openAngle, 0f);
+
+            private void Awake()
+            {
+                EnsureConfigured();
+            }
+
+            private void OnValidate()
+            {
+                if (doorHinge == null)
+                {
+                    doorHinge = transform;
+                }
+
+                if (!configured)
+                {
+                    closedLocalEuler = doorHinge.localEulerAngles;
+                }
+            }
+
+            public void ConfigureDoor(Transform hinge, string doorName, float targetOpenAngle, bool openInitially = false)
+            {
+                doorHinge = hinge != null ? hinge : transform;
+                closedLocalEuler = doorHinge.localEulerAngles;
+                openAngle = Mathf.Clamp(targetOpenAngle, 15f, 170f);
+                startsOpen = openInitially;
+                configured = true;
+                isOpen = startsOpen;
+                Configure(doorName, true);
+                ApplyStateImmediate();
+            }
+
+            public override void Interact()
+            {
+                EnsureConfigured();
+                if (!TryBeginInteract())
+                {
+                    return;
+                }
+
+                isOpen = !isOpen;
+                ApplyStateImmediate();
+                Debug.Log($"Door toggled {DisplayName}: {(isOpen ? "open" : "closed")}.");
+            }
+
+            public void SetOpen(bool open)
+            {
+                EnsureConfigured();
+                isOpen = open;
+                ApplyStateImmediate();
+            }
+
+            private void EnsureConfigured()
+            {
+                if (doorHinge == null)
+                {
+                    doorHinge = transform;
+                }
+
+                if (configured)
+                {
+                    return;
+                }
+
+                closedLocalEuler = doorHinge.localEulerAngles;
+                configured = true;
+                isOpen = startsOpen;
+                ApplyStateImmediate();
+            }
+
+            private void ApplyStateImmediate()
+            {
+                if (doorHinge == null)
+                {
+                    return;
+                }
+
+                doorHinge.localRotation = Quaternion.Euler(isOpen ? OpenLocalEuler : ClosedLocalEuler);
             }
         }
         """
@@ -357,6 +494,372 @@ def default_interaction_report() -> str:
         - Setup method: `AIPrototypeSceneSetup.SetupSampleScene`
         - Validation method: `AIPrototypeSceneValidator.ValidateSampleScene`
         """
+    )
+
+
+def door_toggle_scene_setup() -> str:
+    return _clean(
+        """
+        using UnityEditor;
+        using UnityEditor.SceneManagement;
+        using UnityEngine;
+
+        public static class AIDoorToggleSceneSetup
+        {
+            private const string ScenePath = "Assets/Scenes/DoorToggleScene.unity";
+
+            public static void SetupScene()
+            {
+                if (TryValidateExistingScene())
+                {
+                    Debug.Log("AIDoorToggleSceneSetup skipped rebuild because scene already matches spec.");
+                    return;
+                }
+
+                var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                CreateGround();
+                CreatePlayer();
+                CreateDoor();
+                CreateLight();
+
+                EditorSceneManager.MarkSceneDirty(scene);
+                EditorSceneManager.SaveScene(scene, ScenePath);
+                Debug.Log("AIDoorToggleSceneSetup complete.");
+            }
+
+            private static bool TryValidateExistingScene()
+            {
+                if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
+                {
+                    return false;
+                }
+
+                try
+                {
+                    AIDoorToggleSceneValidator.ValidateScene();
+                    return true;
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.Log($"AIDoorToggleSceneSetup rebuilding scene: {ex.Message}");
+                    return false;
+                }
+            }
+
+            private static void CreateGround()
+            {
+                var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                ground.name = "AIDoor_Ground";
+                ground.transform.position = new Vector3(0f, -0.05f, 0f);
+                ground.transform.localScale = new Vector3(12f, 0.1f, 12f);
+                Tint(ground, new Color(0.28f, 0.32f, 0.35f));
+            }
+
+            private static void CreatePlayer()
+            {
+                var player = new GameObject("AIDoor_Player");
+                player.transform.position = new Vector3(0f, 1f, -2.2f);
+
+                var trigger = player.AddComponent<SphereCollider>();
+                trigger.isTrigger = true;
+                trigger.radius = 2.5f;
+
+                var body = player.AddComponent<Rigidbody>();
+                body.isKinematic = true;
+                body.useGravity = false;
+
+                player.AddComponent<InteractSystem>();
+
+                var marker = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                marker.name = "AIDoor_PlayerMarker";
+                marker.transform.SetParent(player.transform, false);
+                marker.transform.localPosition = new Vector3(0f, 0f, 0f);
+                marker.transform.localScale = new Vector3(0.6f, 1f, 0.6f);
+                Tint(marker, new Color(0.2f, 0.65f, 0.95f));
+            }
+
+            private static void CreateDoor()
+            {
+                var root = new GameObject("AIDoor_ToggleDoor");
+                root.transform.position = new Vector3(0f, 1f, 0f);
+
+                var frameLeft = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                frameLeft.name = "AIDoor_FrameLeft";
+                frameLeft.transform.SetParent(root.transform, false);
+                frameLeft.transform.localPosition = new Vector3(-0.55f, 0f, 0f);
+                frameLeft.transform.localScale = new Vector3(0.1f, 2.2f, 0.22f);
+
+                var frameRight = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                frameRight.name = "AIDoor_FrameRight";
+                frameRight.transform.SetParent(root.transform, false);
+                frameRight.transform.localPosition = new Vector3(0.55f, 0f, 0f);
+                frameRight.transform.localScale = new Vector3(0.1f, 2.2f, 0.22f);
+
+                var frameTop = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                frameTop.name = "AIDoor_FrameTop";
+                frameTop.transform.SetParent(root.transform, false);
+                frameTop.transform.localPosition = new Vector3(0f, 1.05f, 0f);
+                frameTop.transform.localScale = new Vector3(1.2f, 0.1f, 0.22f);
+
+                Tint(frameLeft, new Color(0.35f, 0.25f, 0.18f));
+                Tint(frameRight, new Color(0.35f, 0.25f, 0.18f));
+                Tint(frameTop, new Color(0.35f, 0.25f, 0.18f));
+
+                var hinge = new GameObject("AIDoor_DoorLeafHinge");
+                hinge.transform.SetParent(root.transform, false);
+                hinge.transform.localPosition = new Vector3(-0.45f, 0f, 0f);
+
+                var doorLeaf = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                doorLeaf.name = "AIDoor_DoorLeaf";
+                doorLeaf.transform.SetParent(hinge.transform, false);
+                doorLeaf.transform.localPosition = new Vector3(0.45f, 0f, 0f);
+                doorLeaf.transform.localScale = new Vector3(0.9f, 2f, 0.12f);
+                Tint(doorLeaf, new Color(0.72f, 0.54f, 0.33f));
+
+                var toggle = doorLeaf.AddComponent<DoorToggleInteractable>();
+                toggle.ConfigureDoor(hinge.transform, "Prototype Door", 92f, false);
+            }
+
+            private static void CreateLight()
+            {
+                var lightObject = new GameObject("AIDoor_Light");
+                lightObject.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+                var light = lightObject.AddComponent<Light>();
+                light.type = LightType.Directional;
+                light.intensity = 1.15f;
+            }
+
+            private static void Tint(GameObject targetObject, Color tint)
+            {
+                foreach (var renderer in targetObject.GetComponentsInChildren<Renderer>())
+                {
+                    var sourceMaterials = renderer.sharedMaterials;
+                    var tintedMaterials = new Material[sourceMaterials.Length];
+
+                    for (int i = 0; i < sourceMaterials.Length; i++)
+                    {
+                        var sourceMaterial = sourceMaterials[i];
+                        if (sourceMaterial == null)
+                        {
+                            continue;
+                        }
+
+                        var tintedMaterial = new Material(sourceMaterial);
+                        if (tintedMaterial.HasProperty("_Color"))
+                        {
+                            tintedMaterial.color = tint;
+                        }
+
+                        tintedMaterials[i] = tintedMaterial;
+                    }
+
+                    renderer.sharedMaterials = tintedMaterials;
+                }
+            }
+        }
+        """
+    )
+
+
+def door_toggle_scene_validator() -> str:
+    return _clean(
+        """
+        using System;
+        using UnityEditor.SceneManagement;
+        using UnityEngine;
+
+        public static class AIDoorToggleSceneValidator
+        {
+            private const string ScenePath = "Assets/Scenes/DoorToggleScene.unity";
+
+            public static void ValidateScene()
+            {
+                EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+
+                var player = RequireObject("AIDoor_Player");
+                RequireComponent<InteractSystem>(player, "AIDoor_Player");
+
+                var trigger = RequireComponent<SphereCollider>(player, "AIDoor_Player");
+                if (!trigger.isTrigger)
+                {
+                    throw new InvalidOperationException("AIDoor_Player SphereCollider must be a trigger.");
+                }
+
+                var body = RequireComponent<Rigidbody>(player, "AIDoor_Player");
+                if (!body.isKinematic)
+                {
+                    throw new InvalidOperationException("AIDoor_Player Rigidbody must be kinematic.");
+                }
+
+                RequireObject("AIDoor_Ground");
+                RequireObject("AIDoor_ToggleDoor");
+                RequireObject("AIDoor_FrameLeft");
+                RequireObject("AIDoor_FrameRight");
+                RequireObject("AIDoor_FrameTop");
+                RequireObject("AIDoor_PlayerMarker");
+
+                var hingeObject = RequireObject("AIDoor_DoorLeafHinge");
+                var doorLeaf = RequireObject("AIDoor_DoorLeaf");
+                var toggle = RequireComponent<DoorToggleInteractable>(doorLeaf, "AIDoor_DoorLeaf");
+                RequireComponent<Collider>(doorLeaf, "AIDoor_DoorLeaf");
+
+                if (toggle.DoorHinge != hingeObject.transform)
+                {
+                    throw new InvalidOperationException("Door toggle interactable must reference the hinge transform.");
+                }
+
+                if (toggle.OpenAngle < 45f)
+                {
+                    throw new InvalidOperationException("Door must open with a meaningful swing angle.");
+                }
+
+                if (toggle.DisplayName != "Prototype Door")
+                {
+                    throw new InvalidOperationException("Door prompt should describe the prototype door.");
+                }
+
+                AssertLocalYaw(toggle.DoorHinge, toggle.ClosedLocalEuler.y, "Door must start closed.");
+                if (toggle.IsOpen)
+                {
+                    throw new InvalidOperationException("Door must start in the closed state.");
+                }
+
+                toggle.Interact();
+                if (!toggle.IsOpen)
+                {
+                    throw new InvalidOperationException("First interaction must open the door.");
+                }
+
+                AssertLocalYaw(toggle.DoorHinge, toggle.OpenLocalEuler.y, "Open interaction must rotate the door leaf.");
+
+                toggle.Interact();
+                if (toggle.IsOpen)
+                {
+                    throw new InvalidOperationException("Second interaction must close the door.");
+                }
+
+                AssertLocalYaw(toggle.DoorHinge, toggle.ClosedLocalEuler.y, "Second interaction must restore the closed rotation.");
+
+                Debug.Log("AIDoorToggleSceneValidator passed.");
+            }
+
+            private static void AssertLocalYaw(Transform target, float expectedY, string message)
+            {
+                float actualY = target.localEulerAngles.y;
+                if (Mathf.Abs(Mathf.DeltaAngle(actualY, expectedY)) > 0.01f)
+                {
+                    throw new InvalidOperationException(message);
+                }
+            }
+
+            private static GameObject RequireObject(string objectName)
+            {
+                var found = GameObject.Find(objectName);
+                if (found == null)
+                {
+                    throw new InvalidOperationException($"Required scene object is missing: {objectName}");
+                }
+
+                return found;
+            }
+
+            private static T RequireComponent<T>(GameObject target, string objectName) where T : Component
+            {
+                var component = target.GetComponent<T>();
+                if (component == null)
+                {
+                    throw new InvalidOperationException($"{objectName} is missing required component {typeof(T).Name}.");
+                }
+
+                return component;
+            }
+        }
+        """
+    )
+
+
+def door_toggle_report() -> str:
+    return _clean(
+        """
+        # Door Toggle Interaction - Implementation Report
+
+        ## Goal
+
+        Deliver a real Unity door interaction where the player presses `E` near a prototype door to toggle between closed and open states.
+
+        ## Implemented Programmer Outputs
+
+        - `InteractSystem.cs`
+        - `InteractableObject.cs`
+        - `DoorToggleInteractable.cs`
+        - `AIDoorToggleSceneSetup.cs`
+        - `AIDoorToggleSceneValidator.cs`
+
+        ## Behavior Summary
+
+        - Reuse the shared player interaction trigger and nearest-target selection flow.
+        - Detect the prototype door through `InteractSystem`.
+        - Toggle the hinged door leaf open and closed on repeated `E` presses.
+        - Validate that the scene starts closed, opens on first interaction, and closes on second interaction.
+
+        ## Validation Target
+
+        - Scene: `Assets/Scenes/DoorToggleScene.unity`
+        - Setup method: `AIDoorToggleSceneSetup.SetupScene`
+        - Validation method: `AIDoorToggleSceneValidator.ValidateScene`
+        """
+    )
+
+
+def door_toggle_programmer_output_spec() -> ProgrammerOutputSpec:
+    return ProgrammerOutputSpec(
+        key="door_toggle_interaction",
+        file_contents={
+            "InteractSystem.cs": default_interact_system(),
+            "InteractableObject.cs": default_interactable_object(),
+            "DoorToggleInteractable.cs": door_toggle_interactable(),
+            "AIDoorToggleSceneSetup.cs": door_toggle_scene_setup(),
+            "AIDoorToggleSceneValidator.cs": door_toggle_scene_validator(),
+            "DoorToggle_ImplementationReport.md": door_toggle_report(),
+        },
+        required_snippets={
+            "InteractSystem.cs": [
+                "FindClosestInteractable",
+                "GetComponentInParent<InteractableObject>()",
+                "UpdatePromptFeedback",
+                "Input.GetKeyDown",
+            ],
+            "InteractableObject.cs": [
+                "public virtual void Interact()",
+                "TryBeginInteract",
+                "Configure(",
+            ],
+            "DoorToggleInteractable.cs": [
+                "ConfigureDoor",
+                "ApplyStateImmediate",
+                "isOpen = !isOpen",
+                "Door toggled",
+            ],
+            "AIDoorToggleSceneSetup.cs": [
+                "TryValidateExistingScene",
+                "AIDoor_DoorLeaf",
+                "DoorToggleInteractable",
+                "AIDoorToggleSceneSetup complete.",
+            ],
+            "AIDoorToggleSceneValidator.cs": [
+                "ValidateScene",
+                "First interaction must open the door.",
+                "Second interaction must close the door.",
+                "AIDoorToggleSceneValidator passed.",
+            ],
+            "DoorToggle_ImplementationReport.md": [
+                "prototype door",
+                "toggle between closed and open states",
+                "AIDoorToggleSceneValidator.ValidateScene",
+            ],
+        },
+        scene_setup_method="AIDoorToggleSceneSetup.SetupScene",
+        scene_validation_method="AIDoorToggleSceneValidator.ValidateScene",
     )
 
 
@@ -1773,10 +2276,10 @@ def programmer_family_definitions() -> dict[str, ProgrammerFamilyDefinition]:
         "door_toggle_interaction": ProgrammerFamilyDefinition(
             key="door_toggle_interaction",
             title="Door Toggle Interaction",
-            support_level="scaffold_only",
-            description="Planned deterministic family for door toggle interaction work.",
-            detector=lambda *_: False,
-            spec_builder=None,
+            support_level="supported",
+            description="Prototype door interaction with deterministic scene setup and validation.",
+            detector=is_door_toggle_interaction_request,
+            spec_builder=door_toggle_programmer_output_spec,
         ),
         "dialogue_prompt": ProgrammerFamilyDefinition(
             key="dialogue_prompt",

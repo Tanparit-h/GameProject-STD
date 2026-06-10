@@ -22,11 +22,17 @@ class TaskRunnerTests(unittest.TestCase):
         self.assertIn("TASK_RUNNER_DRY_RUN", output)
         self.assertIn("feature-interaction-v1", output)
 
-    def test_run_task_blocks_scaffold_only_family(self):
+    def test_run_task_dry_run_for_supported_door_family(self):
         output = run_task("feature-door-toggle-v1", dry_run=True)
 
+        self.assertIn("TASK_RUNNER_DRY_RUN", output)
+        self.assertIn("feature-door-toggle-v1", output)
+
+    def test_run_task_blocks_scaffold_only_family(self):
+        output = run_task("feature-dialogue-prompt-v1", dry_run=True)
+
         self.assertIn("TASK_RUNNER_BLOCKED", output)
-        self.assertIn("door_toggle_interaction", output)
+        self.assertIn("dialogue_prompt", output)
 
 
 if __name__ == "__main__":

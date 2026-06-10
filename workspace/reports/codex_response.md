@@ -14,31 +14,18 @@ IMPLEMENTATION
 
 ## Gate Summary
 
-- Creator gate: SKIPPED
+- Creator gate: CLEAN_PASS
 - Programmer gate: CLEAN_PASS
 - Unity gate: CLEAN_PASS
 
 ## Output Files
 
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageTinyMageController.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFollowCamera.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimSystem.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTarget.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetMotion.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetVisibility.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMaterialSystem.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageActionBuildController.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageDamageable.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageInput.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMeleeGestureController.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMagePlayerMechanics.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageProjectile.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponDefinition.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponLoadout.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponWheelUI.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneSetup.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneValidator.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMage_WeaponWheelCombat_ImplementationReport.md
+- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\InteractSystem.cs
+- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\InteractableObject.cs
+- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\DoorToggleInteractable.cs
+- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\AIDoorToggleSceneSetup.cs
+- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\AIDoorToggleSceneValidator.cs
+- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\DoorToggle_ImplementationReport.md
 
 ## Codex Next Action
 

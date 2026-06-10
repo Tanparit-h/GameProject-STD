@@ -2,12 +2,12 @@
 
 ## Codex Order
 
-Update Terra Mage first scene setup and validation for the real Unity project so weapon wheel and weapon-based combat can be verified in scene. Include a demo loadout with fewer than 10 active entries so dynamic wheel segmentation can be checked. Validate that slot 0 is bare hands, active wheel segments expand to fill the full circle based on actual assigned item count, Tab opens the weapon wheel, and selected weapons change melee/range behavior in the Terra Mage scene.
+Implement and validate a real Unity interaction where the player presses E near a door to toggle open and closed states. Include any required placeholder assets, implementation scripts, scene setup, scene validation, QA output, and reports.
 
 ## Metadata
 
-- task_id: terra-mage-weapon-wheel-scene-validation-v008
-- task_family: terra_mage_weapon_family
+- task_id: feature-door-toggle-v1
+- task_family: door_toggle_interaction
 - phase: IMPLEMENTATION
 
 ## Runtime Contract

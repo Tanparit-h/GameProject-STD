@@ -2,17 +2,17 @@
 
 ## Feature Request
 
-Update Terra Mage first scene setup and validation for the real Unity project so weapon wheel and weapon-based combat can be verified in scene. Include a demo loadout with fewer than 10 active entries so dynamic wheel segmentation can be checked. Validate that slot 0 is bare hands, active wheel segments expand to fill the full circle based on actual assigned item count, Tab opens the weapon wheel, and selected weapons change melee/range behavior in the Terra Mage scene.
+Implement and validate a real Unity interaction where the player presses E near a door to toggle open and closed states. Include any required placeholder assets, implementation scripts, scene setup, scene validation, QA output, and reports.
 
 ---
 
 ## Task Metadata
 
-Task id: terra-mage-weapon-wheel-scene-validation-v008
+Task id: feature-door-toggle-v1
 
-Task file: workspace\tasks\terra_mage_weapon_wheel_scene_validation_v008.json
+Task file: workspace\tasks\door_toggle_v1.json
 
-Task family: terra_mage_weapon_family
+Task family: door_toggle_interaction
 
 ---
 
@@ -36,15 +36,47 @@ D:\AIStudio\ai-game-studio\workspace\generated_specs\creator_pattern.md
 
 ## Creator Output
 
-Creator skipped: request does not require asset generation.
+Creator generated a Blender script from the Codex pattern and prepared it for export. Pattern: D:\AIStudio\ai-game-studio\workspace\generated_specs\creator_pattern.md
 
 ## Creator Evidence Report
 
-Creator reviewer skipped: no creator work requested.
+1. ผลตรวจ: ผ่าน
+2. สิ่งที่ตรวจ:
+- creator evidence gate
+- Blender script path
+- export validation
+3. ปัญหาที่บล็อกงาน:
+- ไม่มี
+4. Requirement ที่ขาด:
+- ไม่มี
+5. Edge case ที่พบ:
+- ไม่มี
+6. สิ่งที่ต้องแก้:
+- ไม่มี
+7. คำแนะนำ:
+- Creator reviewer gate clean
+
+---
+
+{
+  "passed": true,
+  "export_dir": "D:\\AIStudio\\ai-game-studio\\workspace\\creator_outputs\\exports",
+  "blender_log": "D:\\AIStudio\\ai-game-studio\\workspace\\logs\\blender_creator_run.log",
+  "exported_files": [
+    "D:\\AIStudio\\ai-game-studio\\workspace\\creator_outputs\\exports\\ai_office_placeholder_asset.glb",
+    "D:\\AIStudio\\ai-game-studio\\workspace\\creator_outputs\\exports\\door_placeholder.glb",
+    "D:\\AIStudio\\ai-game-studio\\workspace\\creator_outputs\\exports\\interactable_objects.glb",
+    "D:\\AIStudio\\ai-game-studio\\workspace\\creator_outputs\\exports\\interactable_placeholders.glb",
+    "D:\\AIStudio\\ai-game-studio\\workspace\\creator_outputs\\exports\\interactables_prototype.glb",
+    "D:\\AIStudio\\ai-game-studio\\workspace\\creator_outputs\\exports\\interactive_objects.glb"
+  ],
+  "error_markers": [],
+  "small_files": []
+}
 
 ## Creator Gate Status
 
-SKIPPED
+CLEAN_PASS
 
 ---
 
@@ -58,32 +90,19 @@ Programmer generated deterministic implementation files from the Codex pattern. 
 
 ## Programmer Output File Paths
 
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageTinyMageController.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFollowCamera.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimSystem.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTarget.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetMotion.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetVisibility.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMaterialSystem.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageActionBuildController.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageDamageable.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageInput.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMeleeGestureController.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMagePlayerMechanics.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageProjectile.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponDefinition.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponLoadout.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponWheelUI.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneSetup.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneValidator.cs
-D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMage_WeaponWheelCombat_ImplementationReport.md
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\InteractSystem.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\InteractableObject.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\DoorToggleInteractable.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\AIDoorToggleSceneSetup.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\AIDoorToggleSceneValidator.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\DoorToggle_ImplementationReport.md
 
 ## Programmer Evidence Report
 
 1. ผลตรวจ: ผ่าน
 2. สิ่งที่ตรวจ:
 - DETERMINISTIC_PROGRAMMER_GATE
-- spec: terra_mage_weapon_family
+- spec: door_toggle_interaction
 - workspace/programmer_outputs
 3. ปัญหาที่บล็อกงาน:
 - ไม่มี
@@ -114,8 +133,11 @@ D:\AIStudio\ai-game-studio\game_project\STDProject
 
 UNITY_COPY_PLAN
 Dry run: False
+COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\AIDoorToggleSceneSetup.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\Editor\AIDoorToggleSceneSetup.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\AIDoorToggleSceneValidator.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\Editor\AIDoorToggleSceneValidator.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\AIPrototypeSceneSetup.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\Editor\AIPrototypeSceneSetup.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\AIPrototypeSceneValidator.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\Editor\AIPrototypeSceneValidator.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\DoorToggleInteractable.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\DoorToggleInteractable.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\InteractableObject.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\InteractableObject.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\InteractSystem.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\InteractSystem.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageActionBuildController.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageActionBuildController.cs
@@ -155,7 +177,7 @@ Exit code: 0
 Log path: D:\AIStudio\ai-game-studio\workspace\logs\unity_graph_scene_setup.log
 Passed: True
 Error markers: none
-Success markers: Tundra build success, TerraMageFirstSceneValidator passed., return code 0
+Success markers: Tundra build success, AIDoorToggleSceneValidator passed., return code 0
 STDERR tail:
 
 
@@ -166,7 +188,7 @@ Exit code: 0
 Log path: D:\AIStudio\ai-game-studio\workspace\logs\unity_graph_scene_validation.log
 Passed: True
 Error markers: none
-Success markers: Tundra build success, TerraMageFirstSceneValidator passed., return code 0
+Success markers: Tundra build success, AIDoorToggleSceneValidator passed., return code 0
 STDERR tail:
 
 

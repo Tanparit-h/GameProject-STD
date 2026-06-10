@@ -30,6 +30,7 @@ UNITY_ERROR_MARKERS = [
 UNITY_SUCCESS_MARKERS = [
     "Tundra build success",
     "AIPrototypeSceneValidator passed.",
+    "AIDoorToggleSceneValidator passed.",
     "TerraMageFirstSceneValidator passed.",
     "Exit code: 0",
     "return code 0",
@@ -100,8 +101,11 @@ def get_programmer_script_target(project: Path, source: Path) -> Path | None:
     script_map = {
         "InteractSystem.cs": project / "Assets" / "Scripts" / "AIPrototype" / "InteractSystem.cs",
         "InteractableObject.cs": project / "Assets" / "Scripts" / "AIPrototype" / "InteractableObject.cs",
+        "DoorToggleInteractable.cs": project / "Assets" / "Scripts" / "AIPrototype" / "DoorToggleInteractable.cs",
         "AIPrototypeSceneSetup.cs": project / "Assets" / "Scripts" / "AIPrototype" / "Editor" / "AIPrototypeSceneSetup.cs",
         "AIPrototypeSceneValidator.cs": project / "Assets" / "Scripts" / "AIPrototype" / "Editor" / "AIPrototypeSceneValidator.cs",
+        "AIDoorToggleSceneSetup.cs": project / "Assets" / "Scripts" / "AIPrototype" / "Editor" / "AIDoorToggleSceneSetup.cs",
+        "AIDoorToggleSceneValidator.cs": project / "Assets" / "Scripts" / "AIPrototype" / "Editor" / "AIDoorToggleSceneValidator.cs",
     }
 
     mapped = script_map.get(source.name)

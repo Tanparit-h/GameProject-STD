@@ -57,7 +57,7 @@ public class InteractSystem : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        var interactable = other.GetComponent<InteractableObject>();
+        var interactable = other.GetComponentInParent<InteractableObject>();
         if (interactable != null && !objectsInRange.Contains(interactable))
         {
             objectsInRange.Add(interactable);
@@ -66,7 +66,7 @@ public class InteractSystem : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        var interactable = other.GetComponent<InteractableObject>();
+        var interactable = other.GetComponentInParent<InteractableObject>();
         if (interactable != null)
         {
             objectsInRange.Remove(interactable);

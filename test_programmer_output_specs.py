@@ -31,17 +31,18 @@ class ProgrammerOutputSpecsTests(unittest.TestCase):
         supported = get_supported_programmer_family_keys()
 
         self.assertIn("interaction_vertical_slice", supported)
+        self.assertIn("door_toggle_interaction", supported)
         self.assertIn("terra_mage_third_person_aim", supported)
         self.assertIn("terra_mage_weapon_family", supported)
-        self.assertNotIn("door_toggle_interaction", supported)
+        self.assertNotIn("dialogue_prompt", supported)
 
     def test_select_programmer_output_spec_rejects_scaffold_only_family(self):
         with self.assertRaises(UnsupportedProgrammerFamilyError):
             select_programmer_output_spec(
-                "Implement a door toggle interaction.",
+                "Implement an NPC dialogue prompt.",
                 "IMPLEMENTATION",
-                "feature-door-toggle-v1",
-                "door_toggle_interaction",
+                "feature-dialogue-prompt-v1",
+                "dialogue_prompt",
             )
 
     def test_parse_required_flag_handles_markdown_emphasis(self):
@@ -79,6 +80,36 @@ class ProgrammerOutputSpecsTests(unittest.TestCase):
             "terra mage third-person aim helper",
             "IMPLEMENTATION",
             "terra-mage-third-person-aim-v005",
+        )
+        with TemporaryDirectory() as temp_dir:
+            output_dir = Path(temp_dir)
+            file_paths = [str((output_dir / filename).resolve()) for filename in spec.file_contents]
+
+            for filename, content in spec.file_contents.items():
+                (output_dir / filename).write_text(content, encoding="utf-8")
+
+            passed, problems = validate_programmer_output_files(output_dir.resolve(), file_paths, spec)
+
+        self.assertTrue(passed, problems)
+
+    def test_select_programmer_output_spec_for_door_toggle_family(self):
+        request = (
+            "Implement and validate a real Unity interaction where the player presses E near a door "
+            "to toggle open and closed states."
+        )
+
+        spec = select_programmer_output_spec(request, "IMPLEMENTATION", "feature-door-toggle-v1")
+
+        self.assertEqual(spec.key, "door_toggle_interaction")
+        self.assertIn("DoorToggleInteractable.cs", spec.file_contents)
+        self.assertEqual(spec.scene_setup_method, "AIDoorToggleSceneSetup.SetupScene")
+        self.assertEqual(spec.scene_validation_method, "AIDoorToggleSceneValidator.ValidateScene")
+
+    def test_validate_programmer_output_files_for_door_toggle_family(self):
+        spec = select_programmer_output_spec(
+            "door toggle interaction when player presses e",
+            "IMPLEMENTATION",
+            "feature-door-toggle-v1",
         )
         with TemporaryDirectory() as temp_dir:
             output_dir = Path(temp_dir)
