@@ -8,13 +8,13 @@ The AI Game Studio is release-gate clean for one implemented Unity vertical slic
 
 | Capability | Status | Evidence |
 | --- | --- | --- |
-| Role workflow | Working | `app/main_graph.py`, `workspace/reports/latest_report.md` |
+| Office v2 role workflow | Working | `app/main_graph.py`, `workspace/reports/latest_report.md` |
 | Local LLM role execution | Working | `autogen_teams/role_runner.py`, smoke scripts |
 | Creator Blender export | Working | `tools/blender_tool.py`, `workspace/creator_outputs/exports/*.glb` |
 | Programmer draft files | Working | `workspace/programmer_outputs/*.cs`, implementation plan |
 | Unity implementation stage | Working | `tools/unity_tool.py`, release gate |
 | Unity scene validation | Working | `AIPrototypeSceneValidator.ValidateSampleScene`, release gate |
-| Deterministic QA guards | Partial | Programmer, Unity, Creator export, task registry |
+| Deterministic reviewer guards | Partial | Programmer, Unity, Creator export, task registry |
 | Task registry | Working | `workspace/tasks/task_registry.json` |
 | Task runner | Working | `tools/task_runner.py` |
 | Approval records | Working | `workspace/approvals/approval_log.jsonl` |

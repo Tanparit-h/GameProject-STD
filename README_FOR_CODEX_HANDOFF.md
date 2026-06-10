@@ -45,3 +45,11 @@ $env:AI_STUDIO_PHASE='IMPLEMENTATION'
 $env:AI_STUDIO_TASK_FILE='workspace/tasks/interaction_vertical_slice.json'
 .\.venv\Scripts\python.exe -m app.main_graph
 ```
+
+Current Office runtime:
+
+```text
+Creator -> Programmer -> Unity -> Codex final review
+```
+
+Manager, Designer, and standalone QA runtime roles are removed from the active graph. Codex creates role-specific script patterns under `workspace/generated_specs/`, each active role performs its own self-review, and Codex reviews code/evidence after Unity completes.

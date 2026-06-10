@@ -4,7 +4,9 @@
 
 The current system is a release-gate-clean AI Game Studio prototype with:
 
-- Role workflow through Manager, Designer, Creator, Programmer, QA, and Unity stages
+- Thin Office v2 workflow through Creator, Programmer, and Unity stages
+- Codex-generated role patterns under `workspace/generated_specs/`
+- Per-role self-review gates before Codex final review
 - Task registry and task runner
 - Approval log
 - Static dashboard generator

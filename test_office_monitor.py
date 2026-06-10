@@ -20,18 +20,18 @@ class OfficeMonitorTests(unittest.TestCase):
             env_preview={},
         )
 
-        apply_output_line(job, "[1/11] Manager analyzing user input...")
-        self.assertEqual(job.role_states["manager"]["state"], "running")
+        apply_output_line(job, "[1/4] Creator receiving Codex pattern and generating assets if needed...")
+        self.assertEqual(job.role_states["creator"]["state"], "running")
 
-        apply_output_line(job, "[2/11] Designer creating tasks, QA target, and routing decision...")
-        self.assertEqual(job.role_states["manager"]["state"], "completed")
-        self.assertEqual(job.role_states["designer"]["state"], "running")
-
-        apply_output_line(job, "[7/11] Programmer creating implementation outputs... retry=0")
-        self.assertEqual(job.role_states["designer"]["state"], "completed")
+        apply_output_line(job, "[2/4] Programmer receiving Codex pattern and generating implementation files...")
+        self.assertEqual(job.role_states["creator"]["state"], "completed")
         self.assertEqual(job.role_states["programmer"]["state"], "running")
 
-        apply_output_line(job, "[11/11] Writing report...")
+        apply_output_line(job, "[3/4] Unity applying approved outputs and running validation...")
+        self.assertEqual(job.role_states["programmer"]["state"], "completed")
+        self.assertEqual(job.role_states["unity"]["state"], "running")
+
+        apply_output_line(job, "[4/4] Writing Codex handoff report...")
         apply_output_line(job, "ROLE_GRAPH_OK | Report written: workspace/reports/latest_report.md")
         self.assertEqual(job.role_states["final"]["state"], "completed")
         self.assertEqual(job.final_status, "ROLE_GRAPH_OK")

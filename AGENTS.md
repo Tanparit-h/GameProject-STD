@@ -28,37 +28,25 @@ Meaning:
 - Unity batchmode validation, scene setup, and scene validation are part of the normal workflow.
 - QA decisions must be based on real files, logs, and deterministic evidence.
 
-## Roles
+## Runtime Roles
 
-### Manager
-
-Receives user input, analyzes goals/requirements/constraints, and prepares input for Designer.
-
-### Designer
-
-Analyzes Manager output and creates:
-
-- Routing decision
-- Creator task
-- Programmer task
-- Creator QA target
-- Programmer QA target
-- Acceptance criteria
-- Edge cases
-- Out of scope
-
-Designer must always include:
+The active Office graph has only these runtime roles:
 
 ```text
-0. Routing decision
-- Creator required: yes/no
-- Programmer required: yes/no
-- Reason: ...
+Creator -> Programmer -> Unity
 ```
+
+Codex receives the user order, writes role-specific script patterns under:
+
+```text
+workspace/generated_specs/
+```
+
+Those patterns replace the old Manager/Designer routing layer. Each active role performs its own reviewer pass before handing off to the next role. Codex reviews code, diffs, logs, and gameplay logic after Unity completes.
 
 ### Creator
 
-Creates asset spec, image prompt, Blender Python script, and exports assets.
+Reads the Codex Creator pattern, creates asset spec, image prompt, Blender Python script, and exports assets when needed.
 
 Creator output should stay under:
 
@@ -69,9 +57,15 @@ workspace/creator_outputs/exports/
 
 Creator must not write into Unity directly.
 
+Creator must self-review:
+
+- Blender script stays under `workspace/creator_outputs/`.
+- Exports stay under `workspace/creator_outputs/exports/`.
+- Blender/error evidence is deterministic.
+
 ### Programmer
 
-Creates real implementation files, setup/validation support files, and implementation reports under:
+Reads the Codex Programmer pattern, then creates real implementation files, setup/validation support files, and implementation reports under:
 
 ```text
 workspace/programmer_outputs/
@@ -79,13 +73,21 @@ workspace/programmer_outputs/
 
 Programmer should not emit draft-only placeholders when the task requests real implementation.
 
-### QA
+Programmer must self-review:
 
-Checks Creator, Programmer, or Unity output against evidence and Designer QA targets.
+- Output files stay under `workspace/programmer_outputs/`.
+- Required deterministic family/spec files exist.
+- Implementation is not draft-only when phase is `IMPLEMENTATION`.
 
-QA must respond in Thai only.
+### Unity
 
-If Blender run result contains `Traceback`, `Error`, `Exception`, `KeyError`, `AttributeError`, `TypeError`, or no exported files, QA must mark it as fail.
+Applies approved Creator/Programmer outputs into `game_project\STDProject`, then runs batchmode validation, scene setup, and scene validation.
+
+Unity must self-review:
+
+- Copy plan only touches allowed Unity `Assets/` targets.
+- Unity cache folders are never written by Office.
+- Batchmode and scene validation evidence is captured in `workspace/logs/`.
 
 ## Safety Rules
 

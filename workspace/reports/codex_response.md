@@ -4,6 +4,10 @@
 
 ROLE_GRAPH_OK
 
+## Runtime
+
+AI_OFFICE_V2_CREATOR_PROGRAMMER_UNITY
+
 ## Phase
 
 IMPLEMENTATION
@@ -13,12 +17,6 @@ IMPLEMENTATION
 - Creator gate: SKIPPED
 - Programmer gate: CLEAN_PASS
 - Unity gate: CLEAN_PASS
-
-## Approval Summary
-
-- Creator approval: SKIPPED
-- Programmer approval: AUTO_APPROVED_BY_QA
-- Unity approval: AUTO_APPROVED_BY_QA
 
 ## Output Files
 
@@ -44,4 +42,4 @@ IMPLEMENTATION
 
 ## Codex Next Action
 
-Read `workspace/reports/latest_report.md` only if detailed role output is needed. Otherwise use this response as the complete Office AI handoff after evidence gate review.
+Review generated code, Unity diffs, logs, and gameplay logic before commit.

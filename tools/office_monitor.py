@@ -30,11 +30,8 @@ DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8765
 
 ROLE_LABELS = {
-    "manager": "Manager",
-    "designer": "Designer",
     "creator": "Creator",
     "programmer": "Programmer",
-    "qa": "QA",
     "unity": "Unity",
     "final": "Final",
 }
@@ -139,46 +136,34 @@ def apply_output_line(job: OfficeJob, line: str) -> None:
 
     job.output_lines.append(line)
 
-    if line.startswith("[1/11] Manager"):
-        set_role_activity(job, "manager", "running", "Analyzing user input")
+    if line.startswith("[1/4] Creator receiving"):
+        set_role_activity(job, "creator", "running", "Generating assets from Codex pattern")
         return
-    if line.startswith("[2/11] Designer"):
-        set_role_activity(job, "designer", "running", "Creating routing and task package")
-        return
-    if "Skipping Creator" in line:
-        set_role_activity(job, "creator", "skipped", "Designer skipped creator")
-        return
-    if line.startswith("[3/11] Creator"):
-        set_role_activity(job, "creator", "running", "Preparing creator output")
-        return
-    if line.startswith("[4/11] Running Blender script"):
-        set_role_activity(job, "creator", "running", "Running Blender export")
+    if line.startswith("[1/4] Creator reviewer"):
+        set_role_activity(job, "creator", "running", "Running creator self-review")
         return
     if "creator evidence gate" in line.lower() or "qa checking creator" in line.lower():
-        set_role_activity(job, "qa", "running", "Checking creator evidence")
+        set_role_activity(job, "creator", "running", "Checking creator evidence")
         return
-    if line.startswith("[7/11] Programmer"):
-        set_role_activity(job, "programmer", "running", "Building implementation outputs")
+    if line.startswith("[2/4] Programmer receiving"):
+        set_role_activity(job, "programmer", "running", "Generating implementation files")
+        return
+    if line.startswith("[2/4] Programmer reviewer"):
+        set_role_activity(job, "programmer", "running", "Running programmer self-review")
         return
     if "programmer evidence gate" in line.lower() or "qa checking programmer" in line.lower():
-        set_role_activity(job, "qa", "running", "Checking programmer evidence")
+        set_role_activity(job, "programmer", "running", "Checking programmer evidence")
         return
-    if "Preparing Unity implementation stage" in line:
-        set_role_activity(job, "unity", "running", "Applying Unity copy plan")
+    if line.startswith("[3/4] Unity applying"):
+        set_role_activity(job, "unity", "running", "Applying outputs and running Unity validation")
         return
-    if "Running or skipping Unity batchmode validation" in line:
-        set_role_activity(job, "unity", "running", "Running batchmode validation")
-        return
-    if "Running or skipping Unity scene setup" in line:
-        set_role_activity(job, "unity", "running", "Running scene setup")
-        return
-    if "Running or skipping Unity scene validation" in line:
-        set_role_activity(job, "unity", "running", "Running scene validation")
+    if line.startswith("[3/4] Unity reviewer"):
+        set_role_activity(job, "unity", "running", "Running Unity self-review")
         return
     if "running unity evidence gate" in line.lower() or "qa checking unity automation stage" in line.lower():
-        set_role_activity(job, "qa", "running", "Checking Unity evidence")
+        set_role_activity(job, "unity", "running", "Checking Unity evidence")
         return
-    if line.startswith("[11/11] Writing report"):
+    if line.startswith("[4/4] Writing Codex handoff report"):
         set_role_activity(job, "final", "running", "Writing final report")
         return
     if line.startswith("Creator required:"):

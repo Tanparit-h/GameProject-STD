@@ -1,8 +1,14 @@
-# AI Game Studio Office User Manual
+# AI Game Studio Office v2 User Manual
 
 ## Purpose
 
-AI Game Studio Office coordinates role agents, local asset generation, programmer drafts, Unity implementation, validation, reports, and release gates for game feature work.
+AI Game Studio Office v2 is a thin production workflow with only three active runtime roles:
+
+- Creator
+- Programmer
+- Unity
+
+Codex receives the user order, creates role-specific script patterns, dispatches generation to Creator or Programmer, imports approved outputs into Unity, then performs the final code/evidence review after the Office run.
 
 ## Core Commands
 
@@ -82,6 +88,21 @@ Current statuses:
 - `backlog`: task exists but has not been planned yet
 - `prototype_planned`: task has completed PROTOTYPE_PLAN
 - `release_gate_clean`: task has an implemented vertical slice that passes release gate
+
+## Runtime Flow
+
+```text
+Codex order
+-> Creator pattern and optional asset generation
+-> Creator self-review
+-> Programmer pattern and implementation generation
+-> Programmer self-review
+-> Unity copy/setup/validation
+-> Unity self-review
+-> Codex final review
+```
+
+Manager, Designer, and standalone QA runtime roles have been removed from the active graph. Their old responsibilities now live in Codex pattern generation and per-role self-review gates.
 
 ## Approval Records
 
