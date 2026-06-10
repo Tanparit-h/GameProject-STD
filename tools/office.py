@@ -6,14 +6,14 @@ from tools.family_scaffold import scaffold_programmer_family
 from tools.dashboard import write_dashboard
 from tools.office_monitor import DEFAULT_HOST, DEFAULT_PORT, serve_monitor
 from tools.programmer_output_specs import list_programmer_family_definitions
-from tools.report_index import collect_status, write_report_index
+from tools.report_index import refresh_report_index
 from tools.release_notes import write_release_notes
 from tools.task_registry import list_tasks
 from tools.task_runner import run_task
 
 
 def print_status() -> int:
-    status = collect_status()
+    status, _ = refresh_report_index()
     for key in [
         "root_head",
         "root_status",
@@ -78,7 +78,7 @@ def main() -> int:
     if args.command == "status":
         return print_status()
     if args.command == "dashboard":
-        index_path = write_report_index(collect_status())
+        _, index_path = refresh_report_index()
         dashboard_path = write_dashboard()
         print(f"Report index written: {index_path}")
         print(f"Dashboard written: {dashboard_path}")

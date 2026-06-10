@@ -186,6 +186,8 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
                 "ConfigureDemoLoadout",
                 "AssignWeapon",
                 "ActiveSlotCount",
+                "bare_hands",
+                "IsSlotLocked",
                 "shard_sling",
             ],
             "TerraMageWeaponWheelUI.cs": [
@@ -204,10 +206,14 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
                 "ConfigureDemoLoadout",
                 "TerraMage_WeaponWheelCanvas",
                 "Hold Tab - release to equip",
+                "TryValidateExistingScene",
+                "skipped rebuild because scene already matches spec",
             ],
             "TerraMageFirstSceneValidator.cs": [
                 "TerraMageDamageable",
                 "TerraMagePlayerMechanics",
+                "Bare Hands",
+                "IsSlotLocked(0)",
                 "JumpDelay",
                 "LedgeGrab",
                 "TerraMageProjectile",
@@ -218,7 +224,7 @@ def build_terra_mage_weapon_family_spec(spec_factory, base_file_contents: dict[s
             ],
             "TerraMage_WeaponWheelCombat_ImplementationReport.md": [
                 "weapon wheel",
-                "Stone Gauntlet",
+                "Bare Hands",
                 "Tab",
                 "scene validation",
             ],

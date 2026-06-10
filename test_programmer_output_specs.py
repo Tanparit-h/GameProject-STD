@@ -115,6 +115,38 @@ class ProgrammerOutputSpecsTests(unittest.TestCase):
         self.assertEqual(spec.scene_setup_method, "TerraMageFirstSceneSetup.SetupFirstScene")
         self.assertEqual(spec.scene_validation_method, "TerraMageFirstSceneValidator.ValidateFirstScene")
 
+    def test_terra_mage_weapon_family_uses_locked_bare_hands_slot_zero(self):
+        spec = select_programmer_output_spec(
+            "terra mage weapon wheel with slot 0 locked to bare hands",
+            "IMPLEMENTATION",
+            "terra-mage-weapon-wheel-scene-validation-v008",
+        )
+
+        loadout = spec.file_contents["TerraMageWeaponLoadout.cs"]
+        validator = spec.file_contents["TerraMageFirstSceneValidator.cs"]
+        report = spec.file_contents["TerraMage_WeaponWheelCombat_ImplementationReport.md"]
+
+        self.assertIn("CreateBareHands()", loadout)
+        self.assertIn('return slotIndex == 0;', loadout)
+        self.assertIn('weapon.WeaponId != "bare_hands"', loadout)
+        self.assertIn('assignedWeapons[0].WeaponId == "bare_hands"', loadout)
+        self.assertIn('DisplayName != "Bare Hands"', validator)
+        self.assertIn("IsSlotLocked(0)", validator)
+        self.assertIn("Slot 0 is locked to `Bare Hands`.", report)
+
+    def test_terra_mage_weapon_family_scene_setup_is_idempotent(self):
+        spec = select_programmer_output_spec(
+            "terra mage weapon wheel scene setup validation",
+            "IMPLEMENTATION",
+            "terra-mage-weapon-wheel-scene-validation-v008",
+        )
+
+        scene_setup = spec.file_contents["TerraMageFirstSceneSetup.cs"]
+
+        self.assertIn("TryValidateExistingScene()", scene_setup)
+        self.assertIn("skipped rebuild because scene already matches spec", scene_setup)
+        self.assertIn("TerraMageFirstSceneValidator.ValidateFirstScene()", scene_setup)
+
     def test_validate_programmer_output_files_for_terra_mage_weapon_family(self):
         spec = select_programmer_output_spec(
             "terra mage weapon wheel with tab and bare hands slot",

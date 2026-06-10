@@ -139,13 +139,18 @@ public static class TerraMageFirstSceneValidator
 
         if (weaponLoadout.ActiveSlotCount != 2)
         {
-            throw new InvalidOperationException("Demo loadout must include exactly one melee weapon and one ranged weapon.");
+            throw new InvalidOperationException("Demo loadout must include bare hands plus one ranged weapon.");
         }
 
-        var meleeWeapon = weaponLoadout.GetWeapon(0);
-        if (meleeWeapon == null || meleeWeapon.DisplayName != "Stone Gauntlet")
+        var bareHands = weaponLoadout.GetWeapon(0);
+        if (bareHands == null || bareHands.DisplayName != "Bare Hands")
         {
-            throw new InvalidOperationException("Slot 0 must be the Stone Gauntlet melee weapon.");
+            throw new InvalidOperationException("Slot 0 must stay locked to Bare Hands.");
+        }
+
+        if (!weaponLoadout.IsSlotLocked(0))
+        {
+            throw new InvalidOperationException("Slot 0 must remain locked.");
         }
 
         var rangedWeapon = weaponLoadout.GetWeapon(1);
@@ -182,14 +187,19 @@ public static class TerraMageFirstSceneValidator
         }
 
         weaponLoadout.SelectSlot(0);
+        if (weaponLoadout.CurrentWeapon.DisplayName != "Bare Hands")
+        {
+            throw new InvalidOperationException("Selecting slot 0 must equip Bare Hands.");
+        }
+
         if (actionBuildController.CurrentAttackMode != TerraMageWeaponAttackMode.Melee)
         {
-            throw new InvalidOperationException("Assigned melee weapons must keep melee attack mode.");
+            throw new InvalidOperationException("Bare Hands must keep melee attack mode.");
         }
 
         if (meleeGestureController.CurrentMeleeReach <= 0f)
         {
-            throw new InvalidOperationException("Melee weapon selection must expose melee reach.");
+            throw new InvalidOperationException("Bare Hands selection must expose melee reach.");
         }
 
         weaponLoadout.SelectSlot(1);

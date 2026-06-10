@@ -11,6 +11,20 @@ class OfficeCliTests(unittest.TestCase):
         with redirect_stdout(StringIO()):
             self.assertEqual(print_status(), 0)
 
+    def test_print_status_refreshes_report_index(self):
+        status = {
+            "root_head": "root",
+            "root_status": "clean",
+            "unity_head": "unity",
+            "unity_status": "clean",
+            "latest_report_clean": True,
+            "approval_count": 2,
+        }
+        with patch("tools.office.refresh_report_index", return_value=(status, None)) as mocked_refresh:
+            with redirect_stdout(StringIO()):
+                self.assertEqual(print_status(), 0)
+        mocked_refresh.assert_called_once_with()
+
     def test_print_tasks_runs(self):
         with redirect_stdout(StringIO()):
             self.assertEqual(print_tasks(), 0)

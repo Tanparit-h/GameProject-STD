@@ -155,7 +155,7 @@ Exit code: 0
 Log path: D:\AIStudio\ai-game-studio\workspace\logs\unity_graph_scene_setup.log
 Passed: True
 Error markers: none
-Success markers: Tundra build success, return code 0
+Success markers: Tundra build success, TerraMageFirstSceneValidator passed., return code 0
 STDERR tail:
 
 

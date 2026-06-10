@@ -1,4 +1,5 @@
 using TerraMageTD;
+using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +10,12 @@ public static class TerraMageFirstSceneSetup
 
     public static void SetupFirstScene()
     {
+        if (TryValidateExistingScene())
+        {
+            Debug.Log("TerraMageFirstSceneSetup skipped rebuild because scene already matches spec.");
+            return;
+        }
+
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
         CreateGround();
@@ -24,6 +31,25 @@ public static class TerraMageFirstSceneSetup
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene, ScenePath);
         Debug.Log("TerraMageFirstSceneSetup complete.");
+    }
+
+    private static bool TryValidateExistingScene()
+    {
+        if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
+        {
+            return false;
+        }
+
+        try
+        {
+            TerraMageFirstSceneValidator.ValidateFirstScene();
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.Log($"TerraMageFirstSceneSetup rebuilding scene: {ex.Message}");
+            return false;
+        }
     }
 
     private static void CreateGround()

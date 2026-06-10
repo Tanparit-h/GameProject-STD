@@ -22,6 +22,14 @@ def extract_report_section(text: str, heading: str) -> str:
     return match.group(1).strip()
 
 
+def extract_first_report_section(text: str, headings: list[str]) -> str:
+    for heading in headings:
+        section = extract_report_section(text, heading)
+        if section:
+            return section
+    return ""
+
+
 def parse_latest_report_summary(text: str) -> dict[str, object]:
     def metadata_value(label: str) -> str:
         match = re.search(rf"{re.escape(label)}:\s*(.+)", text)
@@ -31,16 +39,28 @@ def parse_latest_report_summary(text: str) -> dict[str, object]:
         "task_id": metadata_value("Task id"),
         "task_file": metadata_value("Task file"),
         "task_family": metadata_value("Task family"),
-        "phase": extract_report_section(text, "Phase"),
+        "phase": extract_first_report_section(text, ["Phase"]),
         "creator_required": metadata_value("Creator required"),
         "programmer_required": metadata_value("Programmer required"),
-        "creator_gate_status": extract_report_section(text, "4.1 Creator Gate Status"),
-        "creator_approval_status": extract_report_section(text, "5. Creator Approval Status"),
-        "programmer_gate_status": extract_report_section(text, "7.1 Programmer Gate Status"),
-        "programmer_approval_status": extract_report_section(text, "8. Programmer Approval Status"),
-        "unity_gate_status": extract_report_section(text, "9.6 Unity Gate Status"),
-        "unity_approval_status": extract_report_section(text, "9.7 Unity Approval Status"),
-        "final_status": extract_report_section(text, "Final Status"),
+        "creator_gate_status": extract_first_report_section(text, ["Creator Gate Status", "4.1 Creator Gate Status"]),
+        "creator_approval_status": extract_first_report_section(
+            text,
+            ["Creator Approval Status", "5. Creator Approval Status"],
+        ),
+        "programmer_gate_status": extract_first_report_section(
+            text,
+            ["Programmer Gate Status", "7.1 Programmer Gate Status"],
+        ),
+        "programmer_approval_status": extract_first_report_section(
+            text,
+            ["Programmer Approval Status", "8. Programmer Approval Status"],
+        ),
+        "unity_gate_status": extract_first_report_section(text, ["Unity Gate Status", "9.6 Unity Gate Status"]),
+        "unity_approval_status": extract_first_report_section(
+            text,
+            ["Unity Approval Status", "9.7 Unity Approval Status"],
+        ),
+        "final_status": extract_first_report_section(text, ["Final Status"]),
     }
 
 
@@ -99,7 +119,7 @@ def write_report_index(status: dict[str, object]) -> Path:
     index_path = REPORTS_DIR / "index.md"
     status_path = REPORTS_DIR / "status.json"
 
-    status_path.write_text(json.dumps(status, indent=2), encoding="utf-8")
+    status_path.write_text(json.dumps(status, indent=2, ensure_ascii=False), encoding="utf-8")
 
     reports = "\n".join(f"- `{name}`" for name in status["reports"])
     tasks = "\n".join(
@@ -150,8 +170,14 @@ Run:
     return index_path
 
 
+def refresh_report_index() -> tuple[dict[str, object], Path]:
+    status = collect_status()
+    index_path = write_report_index(status)
+    return status, index_path
+
+
 def main() -> int:
-    index_path = write_report_index(collect_status())
+    _, index_path = refresh_report_index()
     print(f"Report index written: {index_path}")
     return 0
 

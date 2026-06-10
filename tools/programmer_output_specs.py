@@ -1229,6 +1229,12 @@ def terra_mage_first_scene_setup() -> str:
 
             public static void SetupFirstScene()
             {
+                if (TryValidateExistingScene())
+                {
+                    Debug.Log("TerraMageFirstSceneSetup skipped rebuild because scene already matches spec.");
+                    return;
+                }
+
                 var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
                 CreateGround();
@@ -1242,6 +1248,25 @@ def terra_mage_first_scene_setup() -> str:
                 EditorSceneManager.MarkSceneDirty(scene);
                 EditorSceneManager.SaveScene(scene, ScenePath);
                 Debug.Log("TerraMageFirstSceneSetup complete.");
+            }
+
+            private static bool TryValidateExistingScene()
+            {
+                if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
+                {
+                    return false;
+                }
+
+                try
+                {
+                    TerraMageFirstSceneValidator.ValidateFirstScene();
+                    return true;
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.Log($"TerraMageFirstSceneSetup rebuilding scene: {ex.Message}");
+                    return false;
+                }
             }
 
             private static void CreateGround()
@@ -1682,6 +1707,7 @@ def terra_mage_third_person_aim_spec() -> ProgrammerOutputSpec:
                 "TerraMage_DisappearingTarget",
                 "TerraMage_BlinkingTarget",
                 "SetAimMarker",
+                "TryValidateExistingScene",
             ],
             "TerraMageFirstSceneValidator.cs": [
                 "TerraMageAimSystem",

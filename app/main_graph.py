@@ -18,6 +18,7 @@ from tools.programmer_output_specs import (
     select_programmer_output_spec,
     validate_programmer_output_files as validate_programmer_output_spec_files,
 )
+from tools.report_index import refresh_report_index
 from tools.unity_tool import (
     apply_copy_plan,
     get_unity_project_path,
@@ -558,6 +559,7 @@ AI_OFFICE_V2_CREATOR_PROGRAMMER_UNITY
 Review generated code, Unity diffs, logs, and gameplay logic before commit.
 """
     (reports_dir / "codex_response.md").write_text(codex_response, encoding="utf-8")
+    refresh_report_index()
     state["final_status"] = f"{final_status} | Report written: {report_path}"
     return state
 
@@ -602,6 +604,7 @@ Task family: {task_family or "none"}
 """
     (reports_dir / "latest_report.md").write_text(report, encoding="utf-8")
     (reports_dir / "codex_response.md").write_text(report, encoding="utf-8")
+    refresh_report_index()
 
 
 def build_graph():

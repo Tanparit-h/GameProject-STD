@@ -66,6 +66,53 @@ class ReportIndexTests(unittest.TestCase):
         self.assertEqual(status["latest_report_summary"]["task_family"], "interaction_vertical_slice")
         self.assertEqual(status["latest_report_summary"]["final_status"], "ROLE_GRAPH_OK")
 
+    def test_collect_status_parses_current_report_headings(self):
+        report = (
+            "# AI Office v2 Report\n\n"
+            "## Task Metadata\n\n"
+            "Task id: terra-mage-weapon-wheel-scene-validation-v008\n\n"
+            "Task file: workspace\\\\tasks\\\\terra_mage_weapon_wheel_scene_validation_v008.json\n\n"
+            "Task family: terra_mage_weapon_family\n\n"
+            "---\n\n"
+            "## Phase\n\nIMPLEMENTATION\n\n"
+            "---\n\n"
+            "## Creator Gate Status\n\nSKIPPED\n\n"
+            "---\n\n"
+            "## Programmer Gate Status\n\nCLEAN_PASS\n\n"
+            "---\n\n"
+            "## Unity Evidence Report\n\n"
+            "DETERMINISTIC_UNITY_GATE\n"
+            "Validation passed: True\n"
+            "Scene setup passed: True\n"
+            "Scene validation passed: True\n\n"
+            "## 9.6 Unity Gate Status\n\nCLEAN_PASS\n\n"
+            "---\n\n"
+            "## Final Status\n\nROLE_GRAPH_OK\n"
+        )
+        original_exists = Path.exists
+        original_read_text = Path.read_text
+
+        def fake_exists(path):
+            if str(path) == "mock_current_report.md":
+                return True
+            return original_exists(path)
+
+        def fake_read_text(path, *args, **kwargs):
+            if str(path) == "mock_current_report.md":
+                return report
+            return original_read_text(path, *args, **kwargs)
+
+        with patch.object(report_index, "LATEST_REPORT", Path("mock_current_report.md")):
+            with patch("pathlib.Path.exists", fake_exists), patch("pathlib.Path.read_text", fake_read_text):
+                status = collect_status()
+
+        summary = status["latest_report_summary"]
+        self.assertEqual(summary["task_id"], "terra-mage-weapon-wheel-scene-validation-v008")
+        self.assertEqual(summary["creator_gate_status"], "SKIPPED")
+        self.assertEqual(summary["programmer_gate_status"], "CLEAN_PASS")
+        self.assertEqual(summary["unity_gate_status"], "CLEAN_PASS")
+        self.assertEqual(summary["final_status"], "ROLE_GRAPH_OK")
+
 
 if __name__ == "__main__":
     unittest.main()
