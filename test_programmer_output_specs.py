@@ -35,17 +35,19 @@ class ProgrammerOutputSpecsTests(unittest.TestCase):
         self.assertIn("inventory_pickup", supported)
         self.assertIn("quest_marker", supported)
         self.assertIn("dialogue_prompt", supported)
+        self.assertIn("terra_mage_first_wall", supported)
+        self.assertIn("terra_mage_first_scene", supported)
         self.assertIn("terra_mage_third_person_aim", supported)
         self.assertIn("terra_mage_weapon_family", supported)
-        self.assertNotIn("terra_mage_first_wall", supported)
+        self.assertNotIn("missing_family", supported)
 
     def test_select_programmer_output_spec_rejects_scaffold_only_family(self):
         with self.assertRaises(UnsupportedProgrammerFamilyError):
             select_programmer_output_spec(
-                "Build a first wall for terra mage.",
+                "Build an unsupported family.",
                 "IMPLEMENTATION",
-                "terra-mage-first-wall-v003",
-                "terra_mage_first_wall",
+                "fake-task-id",
+                "missing_family",
             )
 
     def test_parse_required_flag_handles_markdown_emphasis(self):
@@ -206,6 +208,78 @@ class ProgrammerOutputSpecsTests(unittest.TestCase):
             "npc dialogue prompt with one continue action when pressing e",
             "IMPLEMENTATION",
             "feature-dialogue-prompt-v1",
+        )
+        with TemporaryDirectory() as temp_dir:
+            output_dir = Path(temp_dir)
+            file_paths = [str((output_dir / filename).resolve()) for filename in spec.file_contents]
+
+            for filename, content in spec.file_contents.items():
+                (output_dir / filename).write_text(content, encoding="utf-8")
+
+            passed, problems = validate_programmer_output_files(output_dir.resolve(), file_paths, spec)
+
+        self.assertTrue(passed, problems)
+
+    def test_select_programmer_output_spec_for_terra_mage_first_scene_family(self):
+        request = (
+            "Create the first playable Terra Mage scene and a mock tiny mage character that can walk, run, "
+            "and jump inside the scene."
+        )
+
+        spec = select_programmer_output_spec(
+            request,
+            "IMPLEMENTATION",
+            "terra-mage-first-scene-v004",
+            "terra_mage_first_scene",
+        )
+
+        self.assertEqual(spec.key, "terra_mage_first_scene")
+        self.assertIn("TerraMageInput.cs", spec.file_contents)
+        self.assertIn("TerraMageFirstSceneValidator.cs", spec.file_contents)
+        self.assertIn("TerraMage_FirstScene_v004_ImplementationReport.md", spec.file_contents)
+
+    def test_validate_programmer_output_files_for_terra_mage_first_scene_family(self):
+        spec = select_programmer_output_spec(
+            "terra mage first playable scene with mock character",
+            "IMPLEMENTATION",
+            "terra-mage-first-scene-v004",
+            "terra_mage_first_scene",
+        )
+        with TemporaryDirectory() as temp_dir:
+            output_dir = Path(temp_dir)
+            file_paths = [str((output_dir / filename).resolve()) for filename in spec.file_contents]
+
+            for filename, content in spec.file_contents.items():
+                (output_dir / filename).write_text(content, encoding="utf-8")
+
+            passed, problems = validate_programmer_output_files(output_dir.resolve(), file_paths, spec)
+
+        self.assertTrue(passed, problems)
+
+    def test_select_programmer_output_spec_for_terra_mage_first_wall_family(self):
+        request = (
+            "Implement the first real Terra Mage sandbox foundation with action-build fusion and weapon wheel "
+            "melee range profiles."
+        )
+
+        spec = select_programmer_output_spec(
+            request,
+            "IMPLEMENTATION",
+            "terra-mage-first-wall-v003",
+            "terra_mage_first_wall",
+        )
+
+        self.assertEqual(spec.key, "terra_mage_first_wall")
+        self.assertIn("TerraMage_FirstWall_v003_ImplementationReport.md", spec.file_contents)
+        self.assertIn("TerraMage_FirstWall_AssetRequestNotes.md", spec.file_contents)
+        self.assertIn("TerraMageWeaponWheelUI.cs", spec.file_contents)
+
+    def test_validate_programmer_output_files_for_terra_mage_first_wall_family(self):
+        spec = select_programmer_output_spec(
+            "terra mage first wall sandbox foundation",
+            "IMPLEMENTATION",
+            "terra-mage-first-wall-v003",
+            "terra_mage_first_wall",
         )
         with TemporaryDirectory() as temp_dir:
             output_dir = Path(temp_dir)

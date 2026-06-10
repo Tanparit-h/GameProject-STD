@@ -123,6 +123,34 @@ def is_dialogue_prompt_request(feature_request: str, task_id: str = "") -> bool:
     return has_dialogue and has_prompt and has_interaction
 
 
+def is_terra_mage_first_wall_request(feature_request: str, task_id: str = "") -> bool:
+    normalized_request = _normalize(feature_request)
+    normalized_task_id = _normalize(task_id)
+
+    if normalized_task_id == "terra-mage-first-wall-v003":
+        return True
+
+    return (
+        "terra mage" in normalized_request
+        and "first wall" in normalized_request
+        and ("sandbox" in normalized_request or "action build" in normalized_request or "weapon wheel" in normalized_request)
+    )
+
+
+def is_terra_mage_first_scene_request(feature_request: str, task_id: str = "") -> bool:
+    normalized_request = _normalize(feature_request)
+    normalized_task_id = _normalize(task_id)
+
+    if normalized_task_id == "terra-mage-first-scene-v004":
+        return True
+
+    return (
+        "terra mage" in normalized_request
+        and ("first scene" in normalized_request or "playable scene" in normalized_request)
+        and ("walk" in normalized_request or "run" in normalized_request or "jump" in normalized_request)
+    )
+
+
 def default_interact_system() -> str:
     return _clean(
         """
@@ -3661,6 +3689,160 @@ def terra_mage_weapon_family_spec() -> ProgrammerOutputSpec:
     )
 
 
+def terra_mage_first_scene_report() -> str:
+    return _clean(
+        """
+        # Terra Mage First Scene v0.0.4 - Implementation Report
+
+        ## Goal
+
+        Deliver the first playable Terra Mage scene with a mock tiny mage character that can walk, run, and jump inside a real Unity scene.
+
+        ## Implemented Programmer Outputs
+
+        - `TerraMageInput.cs`
+        - `TerraMagePlayerMechanics.cs`
+        - `TerraMageTinyMageController.cs`
+        - `TerraMageFollowCamera.cs`
+        - `TerraMageFirstSceneSetup.cs`
+        - `TerraMageFirstSceneValidator.cs`
+
+        ## Foundation Summary
+
+        - Primitive mock art only for the tiny mage and scene landmarks.
+        - Real playable scene setup and validation in Unity batchmode.
+        - Guardrail validation that gameplay scripts use `TerraMageInput`.
+        - Guardrail validation that doubled rename identifiers such as `TerraMageTerraMageInput` fail QA.
+
+        ## Validation Target
+
+        - Scene: `Assets/Scenes/TerraMage_FirstScene.unity`
+        - Setup method: `TerraMageFirstSceneSetup.SetupFirstScene`
+        - Validation method: `TerraMageFirstSceneValidator.ValidateFirstScene`
+        """
+    )
+
+
+def terra_mage_first_wall_report() -> str:
+    return _clean(
+        """
+        # Terra Mage First Wall v0.0.3 - Implementation Report
+
+        ## Goal
+
+        Deliver the first real Terra Mage sandbox foundation slice with action-build fusion, material pull/compress/throw/heat, mouse-drag melee support, and weapon-driven range profiles inside validated Unity scripts.
+
+        ## Implemented Programmer Outputs
+
+        - `TerraMageInput.cs`
+        - `TerraMageMaterialSystem.cs`
+        - `TerraMageActionBuildController.cs`
+        - `TerraMageMeleeGestureController.cs`
+        - `TerraMageWeaponDefinition.cs`
+        - `TerraMageWeaponLoadout.cs`
+        - `TerraMageWeaponWheelUI.cs`
+        - `TerraMageFirstSceneSetup.cs`
+        - `TerraMageFirstSceneValidator.cs`
+        - `TerraMage_FirstWall_AssetRequestNotes.md`
+
+        ## Foundation Summary
+
+        - Tiny mage sandbox foundation remains programmer-led.
+        - Weapon wheel keeps `Bare Hands` in slot 0 and drives melee or ranged behavior.
+        - Action-build flow supports pull, compress, heat, and throw interactions.
+        - Asset requests stay as programmer-authored notes until specific Creator work is needed.
+
+        ## Validation Target
+
+        - Scene: `Assets/Scenes/TerraMage_FirstScene.unity`
+        - Setup method: `TerraMageFirstSceneSetup.SetupFirstScene`
+        - Validation method: `TerraMageFirstSceneValidator.ValidateFirstScene`
+        """
+    )
+
+
+def terra_mage_first_wall_asset_request_notes() -> str:
+    return _clean(
+        """
+        # Terra Mage First Wall v0.0.3 - Asset Request Notes
+
+        Creator work remains secondary for this slice.
+
+        Requested later, only if programmer validation stays green:
+
+        - Tiny mage silhouette pass for body, hood, and staff replacements.
+        - Material pickup silhouettes for loose earth, compressed shard, and heated payload variants.
+        - Clean radial art pass for the Terra Mage weapon wheel ring and slot icons.
+        - Simple impact and swipe VFX placeholders matched to melee and projectile timings.
+        """
+    )
+
+
+def _copy_required_snippets(required_snippets: dict[str, list[str]]) -> dict[str, list[str]]:
+    return {filename: list(snippets) for filename, snippets in required_snippets.items()}
+
+
+def terra_mage_first_scene_spec() -> ProgrammerOutputSpec:
+    base_spec = terra_mage_weapon_family_spec()
+    file_contents = dict(base_spec.file_contents)
+    file_contents.pop("TerraMage_WeaponWheelCombat_ImplementationReport.md", None)
+    file_contents["TerraMage_FirstScene_v004_ImplementationReport.md"] = terra_mage_first_scene_report()
+
+    required_snippets = _copy_required_snippets(base_spec.required_snippets)
+    required_snippets.pop("TerraMage_WeaponWheelCombat_ImplementationReport.md", None)
+    required_snippets["TerraMageFirstSceneValidator.cs"] = required_snippets.get("TerraMageFirstSceneValidator.cs", []) + [
+        "ValidateInputGuardrails",
+        "TerraMageTerraMageInput",
+        "must not call UnityEngine.Input directly",
+    ]
+    required_snippets["TerraMage_FirstScene_v004_ImplementationReport.md"] = [
+        "first playable Terra Mage scene",
+        "TerraMageInput",
+        "TerraMageTerraMageInput",
+    ]
+
+    return ProgrammerOutputSpec(
+        key="terra_mage_first_scene",
+        file_contents=file_contents,
+        required_snippets=required_snippets,
+        scene_setup_method=base_spec.scene_setup_method,
+        scene_validation_method=base_spec.scene_validation_method,
+    )
+
+
+def terra_mage_first_wall_spec() -> ProgrammerOutputSpec:
+    base_spec = terra_mage_weapon_family_spec()
+    file_contents = dict(base_spec.file_contents)
+    file_contents.pop("TerraMage_WeaponWheelCombat_ImplementationReport.md", None)
+    file_contents["TerraMage_FirstWall_v003_ImplementationReport.md"] = terra_mage_first_wall_report()
+    file_contents["TerraMage_FirstWall_AssetRequestNotes.md"] = terra_mage_first_wall_asset_request_notes()
+
+    required_snippets = _copy_required_snippets(base_spec.required_snippets)
+    required_snippets.pop("TerraMage_WeaponWheelCombat_ImplementationReport.md", None)
+    required_snippets["TerraMageFirstSceneValidator.cs"] = required_snippets.get("TerraMageFirstSceneValidator.cs", []) + [
+        "ValidateInputGuardrails",
+        "TerraMageTerraMageInput",
+    ]
+    required_snippets["TerraMage_FirstWall_v003_ImplementationReport.md"] = [
+        "action-build fusion",
+        "weapon-driven range profiles",
+        "TerraMage_FirstWall_AssetRequestNotes.md",
+    ]
+    required_snippets["TerraMage_FirstWall_AssetRequestNotes.md"] = [
+        "Creator work remains secondary",
+        "weapon wheel ring",
+        "projectile timings",
+    ]
+
+    return ProgrammerOutputSpec(
+        key="terra_mage_first_wall",
+        file_contents=file_contents,
+        required_snippets=required_snippets,
+        scene_setup_method=base_spec.scene_setup_method,
+        scene_validation_method=base_spec.scene_validation_method,
+    )
+
+
 def programmer_family_definitions() -> dict[str, ProgrammerFamilyDefinition]:
     return {
         "interaction_vertical_slice": ProgrammerFamilyDefinition(
@@ -3722,18 +3904,18 @@ def programmer_family_definitions() -> dict[str, ProgrammerFamilyDefinition]:
         "terra_mage_first_wall": ProgrammerFamilyDefinition(
             key="terra_mage_first_wall",
             title="Terra Mage First Wall",
-            support_level="scaffold_only",
-            description="Planned deterministic family for early Terra Mage sandbox foundation work.",
-            detector=lambda *_: False,
-            spec_builder=None,
+            support_level="supported",
+            description="Early Terra Mage sandbox foundation with programmer-led combat and asset request notes.",
+            detector=is_terra_mage_first_wall_request,
+            spec_builder=terra_mage_first_wall_spec,
         ),
         "terra_mage_first_scene": ProgrammerFamilyDefinition(
             key="terra_mage_first_scene",
             title="Terra Mage First Scene",
-            support_level="scaffold_only",
-            description="Planned deterministic family for the first Terra Mage playable scene foundation.",
-            detector=lambda *_: False,
-            spec_builder=None,
+            support_level="supported",
+            description="First playable Terra Mage scene foundation with guardrail validation.",
+            detector=is_terra_mage_first_scene_request,
+            spec_builder=terra_mage_first_scene_spec,
         ),
     }
 

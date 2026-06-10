@@ -14,7 +14,7 @@ IMPLEMENTATION
 
 ## Gate Summary
 
-- Creator gate: SKIPPED
+- Creator gate: CLEAN_PASS
 - Programmer gate: CLEAN_PASS
 - Unity gate: CLEAN_PASS
 
@@ -38,7 +38,8 @@ IMPLEMENTATION
 - D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponWheelUI.cs
 - D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneSetup.cs
 - D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneValidator.cs
-- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMage_WeaponWheelCombat_ImplementationReport.md
+- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMage_FirstWall_v003_ImplementationReport.md
+- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMage_FirstWall_AssetRequestNotes.md
 
 ## Codex Next Action
 

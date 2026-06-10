@@ -1,4 +1,6 @@
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from tools.task_runner import build_task_command, find_task_file, run_task
 
@@ -41,10 +43,14 @@ class TaskRunnerTests(unittest.TestCase):
         self.assertIn("feature-dialogue-prompt-v1", output)
 
     def test_run_task_blocks_scaffold_only_family(self):
-        output = run_task("terra-mage-first-wall-v003", dry_run=True)
+        blocked_definition = SimpleNamespace(support_level="scaffold_only")
+        with patch("tools.task_runner.build_task_command", return_value=(["python"], {})):
+            with patch("tools.task_runner.load_task_data", return_value={"family": "blocked_family"}):
+                with patch("tools.task_runner.get_programmer_family_definition", return_value=blocked_definition):
+                    output = run_task("blocked-task", dry_run=True)
 
         self.assertIn("TASK_RUNNER_BLOCKED", output)
-        self.assertIn("terra_mage_first_wall", output)
+        self.assertIn("blocked_family", output)
 
 
 if __name__ == "__main__":

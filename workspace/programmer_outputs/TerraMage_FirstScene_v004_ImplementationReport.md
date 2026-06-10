@@ -1,34 +1,27 @@
-﻿# Terra Mage First Scene v0.0.4 - Implementation Report
+# Terra Mage First Scene v0.0.4 - Implementation Report
 
 ## Goal
 
-Create the first Unity scene where a mock tiny mage can walk, run, and jump.
+Deliver the first playable Terra Mage scene with a mock tiny mage character that can walk, run, and jump inside a real Unity scene.
 
 ## Implemented Programmer Outputs
 
+- `TerraMageInput.cs`
+- `TerraMagePlayerMechanics.cs`
 - `TerraMageTinyMageController.cs`
 - `TerraMageFollowCamera.cs`
-- `TerraMage_FirstScene_ProgrammerAssetRequest_v004.md`
+- `TerraMageFirstSceneSetup.cs`
+- `TerraMageFirstSceneValidator.cs`
 
-## Unity Setup Target
+## Foundation Summary
+
+- Primitive mock art only for the tiny mage and scene landmarks.
+- Real playable scene setup and validation in Unity batchmode.
+- Guardrail validation that gameplay scripts use `TerraMageInput`.
+- Guardrail validation that doubled rename identifiers such as `TerraMageTerraMageInput` fail QA.
+
+## Validation Target
 
 - Scene: `Assets/Scenes/TerraMage_FirstScene.unity`
-- Player object: `TerraMage_Player`
-- Required components:
-  - `CharacterController`
-  - `TerraMageTinyMageController`
-  - `TerraMageActionBuildController`
-  - `TerraMageMeleeGestureController`
-- Camera object:
-  - `TerraMage_Camera`
-  - `TerraMageFollowCamera`
-
-## Controls
-
-- WASD: walk.
-- Shift: run.
-- Space: jump.
-
-## Art Rule
-
-Blender/Creator work is not started for this step. Programmer requested primitive mock art only.
+- Setup method: `TerraMageFirstSceneSetup.SetupFirstScene`
+- Validation method: `TerraMageFirstSceneValidator.ValidateFirstScene`

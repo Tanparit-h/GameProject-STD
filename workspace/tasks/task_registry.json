@@ -29,12 +29,12 @@
     {
       "id": "terra-mage-first-wall-v003",
       "file": "terra_mage_first_wall_v003.json",
-      "status": "family_scaffold_required"
+      "status": "release_gate_clean"
     },
     {
       "id": "terra-mage-first-scene-v004",
       "file": "terra_mage_first_scene_v004.json",
-      "status": "family_scaffold_required"
+      "status": "release_gate_clean"
     },
     {
       "id": "terra-mage-third-person-aim-v005",
@@ -49,12 +49,12 @@
     {
       "id": "terra-mage-weapon-combat-profiles-v007",
       "file": "terra_mage_weapon_combat_profiles_v007.json",
-      "status": "implementation_requested"
+      "status": "release_gate_clean"
     },
     {
       "id": "terra-mage-weapon-wheel-scene-validation-v008",
       "file": "terra_mage_weapon_wheel_scene_validation_v008.json",
-      "status": "implementation_requested"
+      "status": "release_gate_clean"
     }
   ]
 }

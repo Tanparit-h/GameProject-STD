@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Text.RegularExpressions;
 using TerraMageTD;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -6,10 +8,19 @@ using UnityEngine;
 public static class TerraMageFirstSceneValidator
 {
     private const string ScenePath = "Assets/Scenes/TerraMage_FirstScene.unity";
+    private static readonly string[] RequiredTerraMageInputScripts =
+    {
+        "TerraMageTinyMageController.cs",
+        "TerraMageFollowCamera.cs",
+        "TerraMageActionBuildController.cs",
+        "TerraMageMeleeGestureController.cs",
+        "TerraMageWeaponWheelUI.cs",
+    };
 
     public static void ValidateFirstScene()
     {
         EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+        ValidateInputGuardrails();
 
         var player = RequireObject("TerraMage_Player");
         var characterController = RequireComponent<CharacterController>(player, "TerraMage_Player");
@@ -225,6 +236,51 @@ public static class TerraMageFirstSceneValidator
         }
 
         Debug.Log("TerraMageFirstSceneValidator passed.");
+    }
+
+    private static void ValidateInputGuardrails()
+    {
+        string scriptsRoot = Path.GetFullPath(Path.Combine(Application.dataPath, "Scripts", "AIPrototype", "TerraMageTD"));
+        if (!Directory.Exists(scriptsRoot))
+        {
+            throw new InvalidOperationException($"Terra Mage gameplay script directory is missing: {scriptsRoot}");
+        }
+
+        foreach (string scriptName in RequiredTerraMageInputScripts)
+        {
+            string scriptPath = Path.Combine(scriptsRoot, scriptName);
+            if (!File.Exists(scriptPath))
+            {
+                throw new InvalidOperationException($"Required Terra Mage gameplay script is missing: {scriptName}");
+            }
+
+            string scriptText = File.ReadAllText(scriptPath);
+            if (!scriptText.Contains("TerraMageInput"))
+            {
+                throw new InvalidOperationException($"{scriptName} must use TerraMageInput.");
+            }
+        }
+
+        foreach (string scriptPath in Directory.GetFiles(scriptsRoot, "*.cs", SearchOption.TopDirectoryOnly))
+        {
+            string scriptName = Path.GetFileName(scriptPath);
+            string scriptText = File.ReadAllText(scriptPath);
+
+            if (scriptText.Contains("TerraMageTerraMageInput") || scriptText.Contains("TerraMageTerraMage"))
+            {
+                throw new InvalidOperationException($"{scriptName} contains doubled rename identifiers such as TerraMageTerraMageInput.");
+            }
+
+            if (string.Equals(scriptName, "TerraMageInput.cs", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            if (scriptText.Contains("UnityEngine.Input") || Regex.IsMatch(scriptText, @"(?<![A-Za-z0-9_])Input\."))
+            {
+                throw new InvalidOperationException($"{scriptName} must not call UnityEngine.Input directly.");
+            }
+        }
     }
 
     private static GameObject RequireAimTarget(string objectName)
