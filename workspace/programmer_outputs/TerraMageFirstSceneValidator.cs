@@ -29,6 +29,11 @@ public static class TerraMageFirstSceneValidator
             throw new InvalidOperationException("TerraMageTinyMageController must be linked to the third-person camera.");
         }
 
+        if (Mathf.Abs(tinyMageController.JumpDelay - 0.2f) > 0.01f)
+        {
+            throw new InvalidOperationException("TerraMageTinyMageController must use a short 0.2 second jump wind-up.");
+        }
+
         if (actionBuildController.AimCamera == null)
         {
             throw new InvalidOperationException("TerraMageActionBuildController must have an aim camera reference.");
@@ -43,6 +48,11 @@ public static class TerraMageFirstSceneValidator
         if (!typeof(TerraMagePlayerMechanics).IsAbstract || !typeof(TerraMagePlayerMechanics).IsSealed)
         {
             throw new InvalidOperationException("Terra Mage player mechanics must be available as a global static class.");
+        }
+
+        if (typeof(TerraMagePlayerMechanics.LedgeGrab).GetProperty("HangPosition") == null)
+        {
+            throw new InvalidOperationException("Terra Mage parkour must expose reusable ledge grab data.");
         }
 
         RequireObject("TerraMage_MockBody");

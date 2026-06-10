@@ -2,15 +2,17 @@
 
 ## Feature Request
 
-Implement a weapon wheel for the real Terra Mage Unity project. Open the wheel when holding Tab. Maximum total slots is 10. Slot 0 must always be locked to bare hands and bare hands must be able to punch. The player must be able to assign weapons into the remaining wheel slots. If the wheel has fewer than 10 assigned entries, do not leave empty arc gaps. Instead, divide the full circle evenly across only the active assigned entries. Example: bare hands only plus 1 assigned weapon = 2 equal left/right halves. Bare hands plus 2 assigned weapons = 3 equal segments. Continue scaling this way up to 10 total active slots. Integrate this as real implementation, not prototype only.
+Update Terra Mage first scene setup and validation for the real Unity project so weapon wheel and weapon-based combat can be verified in scene. Include a demo loadout with fewer than 10 active entries so dynamic wheel segmentation can be checked. Validate that slot 0 is bare hands, active wheel segments expand to fill the full circle based on actual assigned item count, Tab opens the weapon wheel, and selected weapons change melee/range behavior in the Terra Mage scene.
 
 ---
 
 ## Task Metadata
 
-Task id: terra-mage-weapon-wheel-v006
+Task id: terra-mage-weapon-wheel-scene-validation-v008
 
-Task file: workspace\tasks\terra_mage_weapon_wheel_v006.json
+Task file: workspace\tasks\terra_mage_weapon_wheel_scene_validation_v008.json
+
+Task family: terra_mage_weapon_family
 
 ---
 
@@ -23,47 +25,41 @@ IMPLEMENTATION
 ## 1. Manager Output
 
 1. **User goal**  
-   Implement a weapon wheel UI for Terra Mage Unity project that allows players to select weapons from a circular interface. The wheel must open when holding Tab, have up to 10 slots (with Slot 0 locked to bare hands), and dynamically adjust segment spacing based on active weapon assignments.
+   ปรับปรุงการตั้งค่าและตรวจสอบการทำงานของ Scene แรกใน Terra Mage เพื่อให้สามารถทดสอบระบบ Weapon Wheel และการต่อสู้แบบใช้อาวุธได้ใน Unity Project จริง โดยมีการสร้าง Loadout ตัวอย่างที่มีจำนวนอิเทมน้อยกว่า 10 เพื่อตรวจสอบการแบ่งส่วนของ Wheel แบบไดนามิก และตรวจสอบพฤติกรรมการต่อสู้เมื่อเลือกอาวุธ
 
 2. **Requirements**  
-   - Open weapon wheel on Tab key press.  
-   - Max 10 total slots (Slot 0 is always bare hands).  
-   - Slot 0 must be locked and always active (bare hands can punch).  
-   - Players can assign weapons to remaining slots (Slots 1–9).  
-   - If fewer than 10 entries are active, divide the circle evenly among active slots (no empty gaps).  
-   - Segments must scale dynamically (e.g., 2 entries = 2 equal halves, 3 entries = 3 equal segments, etc.).  
-   - Integrate as a real implementation, not a prototype.  
+   - ปรับ Scene แรกให้รองรับการทดสอบ Weapon Wheel และการต่อสู้แบบใช้อาวุธ  
+   - สร้าง Demo Loadout ที่มีจำนวนอิเทมน้อยกว่า 10 เพื่อตรวจสอบการแบ่งส่วนของ Wheel แบบไดนามิก  
+   - ตรวจสอบว่า Slot 0 เป็น Bare Hands (ไม่มีอาวุธ)  
+   - ตรวจสอบว่า Segment ของ Wheel ขยายตัวเพื่อเติมเต็มวงกลมตามจำนวนอิเทมที่กำหนด  
+   - ตรวจสอบว่าการกด Tab ทำให้เปิด Weapon Wheel ได้  
+   - ตรวจสอบว่าการเลือกอาวุธใน Wheel จะเปลี่ยนพฤติกรรมการต่อสู้ (Melee/Range) ใน Scene ทันที  
 
 3. **Constraints**  
-   - Maximum total slots: 10.  
-   - Slot 0 is fixed and cannot be removed.  
-   - No empty gaps in the wheel when active entries < 10.  
-   - Segments must be evenly spaced based on active entries.  
-   - Wheel must be functional and integrated into the existing Unity project.  
+   - Demo Loadout ต้องมีจำนวนอิเทมน้อยกว่า 10 ตัว  
+   - ห้ามใช้ Asset หรือ Code ที่ซับซ้อนเกินไป  
+   - ต้องตรวจสอบเฉพาะฟีเจอร์ที่ระบุใน User Input เท่านั้น  
 
 4. **Assumptions**  
-   - The wheel will be part of the main UI and accessible via Tab key.  
-   - The existing project has systems for weapon assignment and input handling.  
-   - The wheel’s segment spacing will be calculated dynamically based on active entries.  
+   - Unity Project ที่มีอยู่มีโครงสร้างพื้นฐานสำหรับ Terra Mage ที่สมบูรณ์  
+   - ระบบ Weapon Wheel และการต่อสู้แบบใช้อาวุธมีการพัฒนาขั้นต้นแล้ว  
+   - ระบบการแบ่งส่วนของ Wheel ใช้ระบบ Dynamic Segmentation ที่ยังไม่ได้ทดสอบใน Scene จริง  
 
 5. **Questions or risks**  
-   - How to handle Tab key input when other UI elements are active?  
-   - What if the player assigns more than 10 weapons? (Assume the system enforces max 10 slots.)  
-   - How to ensure the wheel’s segments are visually balanced and responsive to dynamic entry changes?  
+   - ระบบ Dynamic Segmentation จะทำงานได้ตามที่คาดหรือไม่เมื่อจำนวนอิเทมเปลี่ยนแปลง?  
+   - การเปลี่ยนพฤติกรรมการต่อสู้เมื่อเลือกอาวุธจะส่งผลต่อระบบอื่นใน Scene หรือไม่?  
+   - การกด Tab ทำให้เปิด Weapon Wheel ได้ในทุกสถานะของ Scene หรือไม่?  
 
 6. **Input package for Designer**  
-   - **UI Structure**: Circular wheel with 10 slots (Slot 0 locked, others assignable).  
-   - **Interaction**: Open on Tab key, allow weapon assignment to slots 1–9.  
-   - **Visual Rules**:  
-     - Segments scale dynamically based on active entries (no empty gaps).  
-     - Slot 0 is always visible and fixed in position.  
-   - **Dynamic Behavior**:  
-     - When fewer than 10 entries are active, divide the circle evenly among active slots.  
-     - Example: 2 entries (bare hands + 1 weapon) = 2 equal halves.  
-   - **Constraints**: No empty gaps, max 10 slots, Slot 0 locked.  
+   - **Scene Setup**: ปรับ Scene แรกให้รองรับการทดสอบ Weapon Wheel และการต่อสู้แบบใช้อาวุธ  
+   - **Demo Loadout**: สร้าง Loadout ตัวอย่างที่มีอิเทมน้อยกว่า 10 ตัว (เช่น 3-5 ตัว)  
+   - **Slot 0**: ตั้งค่าให้ Slot 0 เป็น Bare Hands ทันทีที่ Scene โหลด  
+   - **Dynamic Segmentation**: ตรวจสอบว่า Segment ขยายตัวตามจำนวนอิเทมที่กำหนด (ตัวอย่าง: 3 อิเทม = 3 Segment, 5 อิเทม = 5 Segment)  
+   - **Tab Interaction**: สร้าง Event ที่เมื่อผู้ใช้กด Tab จะเปิด Weapon Wheel ทันที  
+   - **Combat Behavior**: ตรวจสอบว่าเมื่อเลือกอาวุธใน Wheel จะเปลี่ยนพฤติกรรมการต่อสู้ (Melee/Range) ใน Scene ทันที (ไม่ต้องรอ Update)  
 
 ---  
-**Note**: Designer should focus on layout, interaction flow, and visual rules. Avoid detailed code or asset creation.
+**หมายเหตุ**: ห้ามออกแบบ UI/UX หรือเขียน Code ที่ซับซ้อนเกินไป ให้เน้นการตรวจสอบฟีเจอร์ที่ระบุใน User Input เท่านั้น
 
 ---
 
@@ -72,53 +68,51 @@ IMPLEMENTATION
 0. Routing decision  
 - Creator required: no  
 - Programmer required: yes  
-- Reason: The task involves real implementation of a weapon wheel system with dynamic UI logic, input handling, and Unity integration. No art, 3D models, or visual assets are required.  
+- Reason: งานต้องการการพัฒนาระบบใน Unity (เช่น สร้าง script สำหรับ Weapon Wheel, ตรวจสอบ behavior ของ combat, จัดการ event สำหรับ Tab key) ซึ่งเป็นงานที่ Programmer ต้องทำ ไม่มีการสร้าง asset หรือ UI/UX ที่ซับซ้อน  
 
 1. Design summary  
-- Create a circular weapon wheel UI with 10 slots (Slot 0 locked for bare hands).  
-- Ensure dynamic segment spacing based on active weapon assignments (no empty gaps).  
-- Implement Tab key input to open/close the wheel.  
-- Lock Slot 0 to bare hands and ensure it’s always active for punching.  
-- Allow players to assign weapons to Slots 1–9.  
+- ปรับ Scene แรกของ Terra Mage ให้รองรับการทดสอบ Weapon Wheel และระบบการต่อสู้แบบใช้อาวุธ  
+- สร้าง Demo Loadout ที่มีอิเทมน้อยกว่า 10 ตัว (เช่น 3-5 ตัว) เพื่อตรวจสอบการแบ่งส่วนของ Wheel แบบไดนามิก  
+- ตั้งค่า Slot 0 เป็น Bare Hands ทันทีที่ Scene โหลด  
+- ตรวจสอบให้ Segment ของ Wheel ขยายตัวตามจำนวนอิเทมที่กำหนด  
+- สร้าง Event ที่เมื่อผู้ใช้กด Tab จะเปิด Weapon Wheel ได้  
+- ตรวจสอบให้การเลือกอาวุธใน Wheel เปลี่ยนพฤติกรรมการต่อสู้ (Melee/Range) ทันที  
 
 2. Creator task  
-- **Not required** (no visual assets, icons, or 3D models needed).  
+- ไม่มีงานที่ Creator ต้องทำ (ไม่มีการสร้าง asset, UI/UX, หรือ visual mockup ที่ซับซ้อน)  
 
 3. Programmer task  
-- Implement the weapon wheel UI as a Unity Canvas with a circular layout.  
-- Use a script to calculate segment angles dynamically based on active weapon slots (e.g., 2 entries = 180° per segment, 3 entries = 120°, etc.).  
-- Lock Slot 0 to bare hands and ensure it’s always active.  
-- Integrate Tab key input to toggle the wheel’s visibility.  
-- Add logic to prevent exceeding 10 total slots and handle edge cases (e.g., empty slots).  
-- Connect the wheel to the existing weapon assignment system.  
+- ปรับ Scene แรกให้รองรับการทดสอบ Weapon Wheel และระบบการต่อสู้แบบใช้อาวุธ  
+- สร้าง Demo Loadout ที่มีอิเทมน้อยกว่า 10 ตัว (เช่น 3-5 ตัว) และจัดการให้ Slot 0 เป็น Bare Hands ทันทีที่ Scene โหลด  
+- สร้างระบบ Dynamic Segmentation สำหรับ Weapon Wheel ที่ขยายตัวตามจำนวนอิเทมที่กำหนด  
+- สร้าง Event ที่เมื่อผู้ใช้กด Tab จะเปิด Weapon Wheel ได้  
+- ปรับระบบการต่อสู้ให้เปลี่ยนพฤติกรรม (Melee/Range) ทันทีเมื่อเลือกอาวุธใน Wheel  
 
 4. Creator QA target  
-- **Not applicable** (no visual assets to validate).  
+- ไม่มี QA target สำหรับ Creator  
 
 5. Programmer QA target  
-- Verify the wheel opens on Tab key press and closes when released.  
-- Confirm segments scale correctly (e.g., 2 entries = 2 equal halves, 3 entries = 3 equal segments).  
-- Ensure Slot 0 is always visible and functional for bare hands.  
-- Test edge cases (e.g., 1 weapon + bare hands = 2 segments, 10 slots filled).  
+- ตรวจสอบว่า Weapon Wheel แสดง Segment ที่ถูกต้องตามจำนวนอิเทมที่กำหนด (เช่น 3 อิเทม = 3 Segment)  
+- ตรวจสอบว่า Tab key ทำให้เปิด Weapon Wheel ได้ในทุกสถานะของ Scene  
+- ตรวจสอบว่าการเลือกอาวุธใน Wheel เปลี่ยนพฤติกรรมการต่อสู้ (Melee/Range) ทันที  
+- ตรวจสอบว่า Slot 0 เป็น Bare Hands ทันทีที่ Scene โหลด  
 
 6. Acceptance criteria  
-- The weapon wheel opens on Tab key press and closes when released.  
-- Slot 0 is locked and always active for bare hands.  
-- Segments dynamically adjust to active weapon slots (no empty gaps).  
-- Players can assign weapons to Slots 1–9.  
-- The wheel integrates with existing weapon systems and input handling.  
+- Scene แรกรองรับการทดสอบ Weapon Wheel และระบบการต่อสู้แบบใช้อาวุธ  
+- Demo Loadout มีอิเทมน้อยกว่า 10 ตัว และ Slot 0 เป็น Bare Hands  
+- Segment ของ Wheel ขยายตัวตามจำนวนอิเทมที่กำหนด  
+- Tab key ทำให้เปิด Weapon Wheel ได้  
+- การเลือกอาวุธใน Wheel เปลี่ยนพฤติกรรมการต่อสู้ (Melee/Range) ทันที  
 
 7. Edge cases to verify  
-- What happens if the player assigns more than 10 weapons? (System should enforce max 10 slots.)  
-- How does the wheel behave when only Slot 0 is active? (Should display a single segment for bare hands.)  
-- Does the wheel update in real-time when weapon assignments change?  
-- How does the wheel handle rapid Tab key presses (e.g., toggling multiple times)?  
+- ตรวจสอบว่าระบบ Dynamic Segmentation ทำงานได้ถูกต้องเมื่อจำนวนอิเทมเปลี่ยนแปลง (เช่น จาก 3 ไป 5 ตัว)  
+- ตรวจสอบว่าการเปลี่ยนพฤติกรรมการต่อสู้ไม่ส่งผลต่อระบบอื่นใน Scene  
+- ตรวจสอบว่า Tab key ทำงานได้ในสถานะที่ไม่ใช่การต่อสู้ (เช่น สถานะ idle)  
 
 8. Out of scope for current phase  
-- Creating visual assets (icons, 3D models, animations).  
-- Implementing placeholder assets or mockups.  
-- Designing non-UI-related systems (e.g., weapon physics, animation states).  
-- Adding sound effects or UI transitions beyond basic functionality.
+- การออกแบบ UI/UX ที่ซับซ้อน  
+- การสร้าง Asset หรือ 3D model ที่ไม่เกี่ยวข้องกับฟีเจอร์ที่ระบุ  
+- การทดสอบระบบอื่นที่ไม่เกี่ยวข้องกับ Weapon Wheel หรือ combat behavior
 
 ---
 
@@ -181,45 +175,68 @@ Creator was skipped because no asset/model/picture task was required.
 ## 6. Programmer Output
 
 1. Implementation target  
-สร้างระบบ Weapon Wheel ที่เปิดเมื่อผู้เล่นกด Tab พร้อมการจัดวางส่วนต่างๆ แบบวงกลม โดย Slot 0 ถูกล็อกสำหรับ Bare Hands และสามารถโจมตีได้เสมอ ระบบจะปรับระยะห่างของแต่ละส่วนตามจำนวนส่วนที่ใช้งานจริง (ไม่มีช่องว่างว่าง)  
+ปรับ Scene แรกของ Terra Mage ให้รองรับ Weapon Wheel และระบบการต่อสู้แบบใช้อาวุธ รวมถึงการตรวจสอบพฤติกรรมการเลือกอาวุธและระบบ Dynamic Segmentation ตามข้อกำหนดของ Designer QA  
 
 2. Files to create/update  
-- `Assets/Scripts/WeaponWheelManager.cs` (จัดการตรรกะและ UI)  
-- `Assets/Canvas/WeaponWheelUI.prefab` (UI วงกลมพร้อมส่วนต่างๆ)  
-- `Assets/Canvas/SlotPrefab.prefab` (Prefab สำหรับแต่ละส่วน)  
+- `Assets/Scripts/WeaponWheelManager.cs` (จัดการการสร้าง Segment และการเปลี่ยนพฤติกรรมการต่อสู้)  
+- `Assets/Scripts/LoadoutManager.cs` (จัดการ Demo Loadout และการกำหนด Slot 0 เป็น Bare Hands)  
+- `Assets/Scripts/CombatSystem.cs` (ตรวจสอบการเปลี่ยนพฤติกรรม Melee/Range ตามอาวุธที่เลือก)  
+- `Assets/Scripts/WeaponWheelUI.cs` (จัดการ UI ของ Weapon Wheel และการตอบสนองต่อ Tab key)  
+- `Assets/Config/WeaponLoadoutConfig.cs` (กำหนดข้อมูล Demo Loadout ที่มีอิเทมน้อยกว่า 10 ตัว)  
 
 3. Code or implementation summary  
 - **WeaponWheelManager.cs**:  
-  - ใช้ `RectTransform` สำหรับการจัดตำแหน่งส่วนต่างๆ แบบวงกลม  
-  - คำนวณมุมของแต่ละส่วนโดยใช้สูตร `360 / activeSlots`  
-  - ตรวจสอบว่า Slot 0 ถูกใช้งานเสมอ และไม่สามารถลบออกได้  
-  - จัดการการกด Tab เพื่อเปิด/ปิด UI พร้อมป้องกันการซ้ำซ้อน  
-- **UI Logic**:  
-  - สร้าง UI Circle ที่มี 10 ส่วน (Slot 0-9) แต่ Slot 0 ถูกล็อก  
-  - ปรับตำแหน่งแต่ละส่วนโดยใช้ `Mathf.Cos` และ `Mathf.Sin` สำหรับการคำนวณตำแหน่งในวงกลม  
+  - สร้าง Segment แบบไดนามิกตามจำนวนอิเทมที่กำหนด (ใช้ `Mathf.PI * 2 / itemCount`)  
+  - ตรวจสอบว่า Segment ขยายตัวให้ครอบคลุมวงกลม 100%  
+  - จัดการการเปลี่ยนพฤติกรรมการต่อสู้เมื่อเลือกอาวุธ (เชื่อมโยงกับ `CombatSystem`)  
+
+- **LoadoutManager.cs**:  
+  - กำหนด Demo Loadout ที่มี 3 อิเทม (เช่น อาวุธระยะใกล้, ระยะกลาง, ระยะไกล)  
+  - ตั้งค่า Slot 0 เป็น Bare Hands ทันทีที่ Scene โหลด  
+
+- **CombatSystem.cs**:  
+  - ตรวจสอบว่าเมื่อเลือกอาวุธใน Wheel จะเปลี่ยนพฤติกรรมการต่อสู้ (Melee/Range) ทันที  
+  - ป้องกันการส่งผลต่อระบบอื่นใน Scene (เช่น ระบบการเคลื่อนไหว)  
+
+- **WeaponWheelUI.cs**:  
+  - จัดการการเปิด/ปิด Weapon Wheel เมื่อกด Tab key  
+  - ปรับตำแหน่งและขนาด Segment ตามจำนวนอิเทม  
+
+- **WeaponLoadoutConfig.cs**:  
+  - กำหนดข้อมูลอิเทมที่ใช้ใน Demo Loadout (เช่น ชื่อ, ประเภท, รูปแบบ)  
 
 4. Unity setup steps  
-1. สร้าง Canvas ใหม่ใน Unity แล้วเพิ่ม `WeaponWheelUI.prefab`  
-2. สร้าง SlotPrefab 10 ตัวใน Canvas พร้อมตั้งค่า `RectTransform` ให้อยู่ในตำแหน่งเริ่มต้น  
-3. ตั้งค่า `WeaponWheelManager.cs` ให้เป็น Component ของ Canvas หรือ GameObject ที่เกี่ยวข้อง  
-4. ตั้งค่า Input Manager ให้ Tab key ทำงานกับ `WeaponWheelManager`  
+- สร้าง Canvas สำหรับ Weapon Wheel:  
+  - สร้าง Circle Image ขนาด 200x200 หน่วย  
+  - สร้าง GameObject สำหรับ Segment (Prefab) จำนวน 10 ตัว  
+  - ตั้งค่า Canvas ให้เป็น Overlay ที่แสดงเมื่อกด Tab  
+- ติดตั้ง Script:  
+  - ติดตั้ง `WeaponWheelManager.cs` ที่ GameObject หลัก  
+  - ติดตั้ง `LoadoutManager.cs` ที่ GameObject หลัก  
+  - ติดตั้ง `CombatSystem.cs` ที่ GameObject หลัก  
+  - ติดตั้ง `WeaponWheelUI.cs` ที่ Canvas  
+- ตั้งค่า Input Manager:  
+  - เพิ่ม Event สำหรับ Tab key ที่เปิด/ปิด Weapon Wheel  
 
 5. Asset integration steps  
-- ไม่ต้องใช้ Asset ใดๆ เนื่องจากเป็น UI ที่สร้างด้วย Unity ทั้งหมด  
-- ใช้ `UI Image` สำหรับแต่ละส่วน (Slot) และตั้งค่าสี/รูปแบบตามความต้องการ  
+- นำไฟล์ `WeaponLoadoutConfig.cs` ไปวางในโฟลเดอร์ `Config`  
+- นำ Prefab ของ Segment ไปวางในโฟลเดอร์ `Prefabs`  
+- ตรวจสอบว่าอิเทมใน Demo Loadout มีรูปแบบและประเภทที่ถูกต้อง (Melee/Range)  
 
 6. Validation plan  
-- ทดสอบการกด Tab เพื่อเปิด/ปิด UI ที่ถูกต้อง  
-- ตรวจสอบว่าเมื่อมี 2 ส่วน (Bare Hands + 1 อาวุธ) แบ่งวงกลมเป็น 2 ส่วนเท่ากัน (180°/ส่วน)  
-- ทดสอบเมื่อมี 3 ส่วน (Bare Hands + 2 อาวุธ) แบ่งเป็น 3 ส่วน (120°/ส่วน)  
-- ตรวจสอบว่า Slot 0 ไม่สามารถลบออกได้ และยังคงทำงานเสมอ  
-- ทดสอบการเพิ่ม/ลบอาวุธใน Slot 1-9 และตรวจสอบว่า UI ปรับตำแหน่งทันที  
+- ตรวจสอบว่า Segment ขยายตัวตามจำนวนอิเทม (เช่น 3 อิเทม = 3 Segment)  
+- ตรวจสอบว่า Tab key เปิด/ปิด Weapon Wheel ได้ในทุกสถานะของ Scene  
+- ตรวจสอบว่าการเลือกอาวุธใน Wheel เปลี่ยนพฤติกรรมการต่อสู้ (Melee/Range) ทันที  
+- ตรวจสอบว่า Slot 0 เป็น Bare Hands ทันทีที่ Scene โหลด  
+- ตรวจสอบว่า Dynamic Segmentation ทำงานได้ถูกต้องเมื่อจำนวนอิเทมเปลี่ยนแปลง (เช่น จาก 3 ไป 5 ตัว)  
 
 7. Risks  
-- **การคำนวณมุมไม่ถูกต้อง**: ต้องตรวจสอบสูตรการคำนวณตำแหน่งในวงกลมให้แม่นยำ  
-- **การอัปเดต UI ล่าช้า**: ต้องใช้ `Update` หรือ `Coroutine` เพื่อให้ UI ปรับตำแหน่งทันทีเมื่อมีการเปลี่ยนแปลง  
-- **การซ้ำซ้อนการเปิด/ปิด UI**: ต้องใช้ `isOpening` หรือ `isClosing` เพื่อป้องกันการเปิดหลายครั้งในเวลาเดียวกัน  
-- **การจำกัดจำนวนส่วน**: ต้องตรวจสอบว่าไม่เกิน 10 ส่วน และลบส่วนที่เกินออกเมื่อผู้ใช้พยายามเพิ่มมากกว่านั้น
+- ความผิดพลาดในการคำนวณ Segment ที่ทำให้ Segment ไม่ครอบคลุมวงกลม  
+- การเปลี่ยนพฤติกรรมการต่อสู้อาจส่งผลต่อระบบอื่นใน Scene (เช่น ระบบการเคลื่อนไหว)  
+- การจัดการ Input ที่ไม่ถูกต้องทำให้ Tab key ไม่ทำงาน  
+- จำนวนอิเทมใน Demo Loadout มากกว่า 10 ตัว ทำให้ Dynamic Segmentation ไม่ทำงานตามคาด  
+
+**หมายเหตุ**: ไฟล์ทั้งหมดจะถูกสร้างใน `workspace/programmer_outputs/` และคัดลอกเข้า Unity ภายใต้โฟลเดอร์ `Assets/Scripts` และ `Assets/Config` ตามโครงสร้างที่กำหนด
 
 ---
 
@@ -233,7 +250,11 @@ D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetMotion
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetVisibility.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMaterialSystem.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageActionBuildController.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageDamageable.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageInput.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMeleeGestureController.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMagePlayerMechanics.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageProjectile.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponDefinition.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponLoadout.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponWheelUI.cs
@@ -277,7 +298,11 @@ D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetMotion
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetVisibility.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMaterialSystem.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageActionBuildController.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageDamageable.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageInput.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMeleeGestureController.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMagePlayerMechanics.cs
+D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageProjectile.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponDefinition.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponLoadout.cs
 D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponWheelUI.cs
@@ -321,16 +346,24 @@ D:\AIStudio\ai-game-studio\game_project\STDProject
 
 UNITY_COPY_PLAN
 Dry run: False
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\AIPrototypeSceneSetup.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\Editor\AIPrototypeSceneSetup.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\AIPrototypeSceneValidator.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\Editor\AIPrototypeSceneValidator.cs
+COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\InteractableObject.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\InteractableObject.cs
+COPY: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\InteractSystem.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\InteractSystem.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageActionBuildController.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageActionBuildController.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimSystem.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageAimSystem.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTarget.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageAimTarget.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetMotion.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageAimTargetMotion.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetVisibility.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageAimTargetVisibility.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageDamageable.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageDamageable.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneSetup.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\Editor\TerraMageFirstSceneSetup.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFirstSceneValidator.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\Editor\TerraMageFirstSceneValidator.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageFollowCamera.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageFollowCamera.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageInput.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageInput.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMaterialSystem.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageMaterialSystem.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMeleeGestureController.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageMeleeGestureController.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMagePlayerMechanics.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMagePlayerMechanics.cs
+UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageProjectile.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageProjectile.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageTinyMageController.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageTinyMageController.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponDefinition.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageWeaponDefinition.cs
 UNCHANGED: D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponLoadout.cs -> D:\AIStudio\ai-game-studio\game_project\STDProject\Assets\Scripts\AIPrototype\TerraMageTD\TerraMageWeaponLoadout.cs

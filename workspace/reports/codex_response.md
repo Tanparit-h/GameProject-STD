@@ -30,7 +30,11 @@ IMPLEMENTATION
 - D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageAimTargetVisibility.cs
 - D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMaterialSystem.cs
 - D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageActionBuildController.cs
+- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageDamageable.cs
+- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageInput.cs
 - D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageMeleeGestureController.cs
+- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMagePlayerMechanics.cs
+- D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageProjectile.cs
 - D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponDefinition.cs
 - D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponLoadout.cs
 - D:\AIStudio\ai-game-studio\workspace\programmer_outputs\TerraMageWeaponWheelUI.cs

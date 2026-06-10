@@ -37,7 +37,7 @@ Extend Terra Mage with a weapon wheel that switches between two demo weapons, th
 
 - Melee attacks animate first, then apply damage during the middle of the swing.
 - Ranged attacks launch a physical `Shard Sling` projectile from the center crosshair.
-- Shared player rules live in global `TerraMagePlayerMechanics` helpers for movement, jump, melee, and ranged projectile reuse.
+- Shared player rules live in global `TerraMagePlayerMechanics` helpers for movement, jump delay, parkour ledge grabs, melee, and ranged projectile reuse.
 - Aim targets receive `TerraMageDamageable` for health, hit flash, and knockback feedback.
 - scene validation checks damageable targets, projectile class availability, and melee/range behavior.
 
